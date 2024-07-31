@@ -107,6 +107,7 @@ $("#submitInfo").click(function(){
         url : "/jodiAll",
         data : {gameSession : gameSession, gameid : gameid, sDate : sDate, eDate : eDate },
         success : function(data){
+            console.log(data);
             if(data.status == 1 ){
                 let bidAmount = data.bidSum;
                 let winAmount = data.winSum;

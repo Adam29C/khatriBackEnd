@@ -478,6 +478,11 @@
         let status = response.status;
         if (status === 1) {
           let data = response.data;
+
+          console.log("====================================");
+          console.log("data", data.userData1.name);
+          console.log("====================================");
+
           document.getElementById("nameeee").innerHTML =
             "Name : " + data.userData1.username ;
           document.getElementById("balance").innerHTML =

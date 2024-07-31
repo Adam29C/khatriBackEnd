@@ -115,10 +115,10 @@
   </div>
   <div class="container-fluid" id="signleDigitDiv" style="display: none">
     <div class="row">
-      <div class="col-xl-12 col-md-12">
+      <div class="col-xl-6 col-md-6">
         <div class="card-box">
           <h3>Single Digits</h3>
-          <div class="col-xl-6 col-md-6">
+          <div class="col-xl-12 col-md-12">
             <div class="table-responsive" data-pattern="priority-columns">
               <table
                 id="datatable3"
@@ -157,7 +157,7 @@
                   <tr>
                     <th>Digits</th>
                     <th>Cutting</th>
-                    <th>Total</th>
+                    <!-- <th>Total</th> -->
                   </tr>
                   <tr>
                     <th id="mingle" colspan="3"></th>
@@ -223,7 +223,7 @@
         if (body.status === 0) {
           $("#signleDigitDiv").css("display", "none");
           $("#panaDiv").css("display", "none");
-          toastr["warning"](body.message, "Indo Game");
+          toastr["warning"](body.message, "Khatri Games");
           $("#totalCal").html(" ");
         } else {
           $("#signleDigitDiv").css("display", "block");
@@ -258,6 +258,8 @@
               FinalLoss = (loss / divideBy).toFixed();
               total = total + parseInt(FinalLoss);
             }
+
+            // console.log(FinalLoss, key, j);
             digitHtml +=
               "<tr>\
                                      <td>" +
@@ -542,23 +544,23 @@
               totalSum +
               '">' +
               finalCal +
-              '</td>\
-                                     <td id="td2_' +
-              m +
-              '"></td></tr>';
+              "</td></tr>";
             m++;
           });
           $("#panaTab").html(panaHtml);
           $("#datatable4").DataTable({
-            pageLength: 250,
+            pageLength: 20,
             order: [[1, "desc"]],
+            drawCallback: function(settings) {
+              calculateTotal();
+            }
           });
           $("#single").html(providerName + " (" + session + ")");
           $("#mingle").html(providerName + " (" + session + "-Pana)");
 
-          setTimeout(() => {
-            calculateTotal();
-          }, 1000);
+          // setTimeout(() => {
+          //   calculateTotal();
+          // }, 1000);
 
           let totalRow =
             '<tr class="total-row"><td><b>Total = </b></td><td><b>' +
@@ -579,6 +581,7 @@
     $("#datatable3 tbody tr").each(function () {
       if (column_num >= j) {
         my_td = $(this).children("td");
+        console.log("my_td", my_td);
         var second_col = my_td.eq(1);
         sum += parseInt(second_col.text());
       } else {
@@ -590,8 +593,8 @@
   });
 
   $("#datatable4 tbody").on("click", "tr", function () {
-
     var j = parseInt(0);
+    console.log(this);
     var column_num = parseInt($(this).index());
     var sum = 0;
     var my_td = "";
@@ -609,15 +612,34 @@
     my_td.eq(2).html(sum);
   });
 
-  function calculateTotal() {
-    $("#datatable4 tbody tr").each(function () {
-      const my_td = $(this).children("td");
-      my_td.click();
-    });
+  // function calculateTotal() {
+  //   $("#datatable4 tbody tr").each(function () {
+  //     const my_td = $(this).children("td");
+  //     my_td.click();
+  //   });
 
-    $("#datatable3 tbody tr").each(function () {
-      const my_td = $(this).children("td");
-      my_td.click();
-    });
+  //   $("#datatable3 tbody tr").each(function () {
+  //     const my_td = $(this).children("td");
+  //     // console.log("555", my_td);
+  //     my_td.click();
+  //   });
+  // }
+
+  function calculateTotal() {
+    let table = $("#datatable4").DataTable();
+    let total = 0;
+    table
+      .rows({ page: "current" })
+      .every(function (rowIdx, tableLoop, rowLoop) {
+        let data = this.data();
+        // let cell = $(data[1]); // assuming data[1] contains the HTML for the cell
+        // let cellValue = parseFloat(cell.text()) || 0; // extracting the text and converting to number
+        total += parseFloat(data[1])
+        console.log("total", total);
+      });
+
+    $("#sumTotal").html(
+      "<tr><td><b>Page Total = </b></td><td><b>" + total + "</b></td></tr>"
+    );
   }
 </script>

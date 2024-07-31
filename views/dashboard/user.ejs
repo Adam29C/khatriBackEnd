@@ -132,6 +132,9 @@
     function deleteUserByAdmin(){
         const id = $("#userid1").val();
         const reason1 = $("#reason1").val();
+
+        
+        console.log(id, reason1)
         fetch('/userList/deleteUserByAdmin', {
                 method: 'POST', 
                 body: JSON.stringify({ id: id, reason:reason1 }),
