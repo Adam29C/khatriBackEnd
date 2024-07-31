@@ -147,6 +147,7 @@ router.post("/getCutting", async (req, res) => {
           },
         ]);
       } else {
+        console.log("!@#12")
         var data2 = await gameBids.aggregate([
           {
             $match: {

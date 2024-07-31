@@ -358,16 +358,38 @@ router.post("/getFinalCutting", async (req, res) => {
           // Common match stage for both queries
           const matchStage = {
             $match: {
+              providerId: new ObjectId(providerId), gameDate: date, gameTypeName: "Single Digit", gameSession: session
+            },
+          };
+          let finalArr = []
+          let finalData = await gameBids.find({ providerId: new ObjectId(providerId), gameDate: date, gameTypeName: "Single Digit", gameSession: session }, { bidDigit: 1, biddingPoints: 1 })
+          const map = new Map();
+          finalData.forEach(item => {
+            const { bidDigit, biddingPoints } = item;
+            if (map.has(bidDigit)) {
+              map.get(bidDigit).sumdigit += biddingPoints;
+              map.get(bidDigit).countBid += 1;
+            } else {
+              map.set(bidDigit, { _id:bidDigit, sumdigit:biddingPoints, countBid: 1 });
+            }
+          });
+          map.forEach(value => finalArr.push(value));
+          const matchStage1 = {
+            $match: {
               providerId: mongoose.Types.ObjectId(providerId),
               gameDate: date,
             },
           };
-          let finalData= await gameBids.find({providerId: new ObjectId(providerId),gameDate: date,gameTypeName: "Single Digit" })
           const [data1, data2, data3] = await Promise.all([
             gameBids.aggregate([
-              matchStage,
               {
-                $match: { bidDigit: { $in: SingDigit }, gameSession: "Close" },
+                $match: {
+                  providerId: mongoose.Types.ObjectId(providerId),
+                  gameDate: date,
+                },
+              },
+              {
+                $match: { bidDigit: { $in: SingDigit }, gameSession: session },
               },
               {
                 $group: {
@@ -478,7 +500,7 @@ router.post("/getFinalCutting", async (req, res) => {
             ]),
 
             gameBids.aggregate([
-              matchStage,
+              matchStage1,
               {
                 $match: { gameSession: "Open" },
               },
@@ -528,22 +550,23 @@ router.post("/getFinalCutting", async (req, res) => {
             }
           });
 
-          const combinedData = finalData.map((item1) => {
-            const matchingItem = data2.find((item2) => item2._id === item1._id);
+          const combinedData = finalArr.map((item1) => {
+            const matchingItem = data2.find((item2) => {
+              item2._id === item1._id});
             const matchingItemFromData3 = matchArr.find(
               (item3) => item3.id == parseInt(item1._id)
             );
-
             let sumDigitFromData3 = 0;
             if (matchingItemFromData3) {
               sumDigitFromData3 = matchingItemFromData3.sumdigit;
             }
-
             if (matchingItem) {
+              console.log("item1.sumdigit:", item1.sumdigit);
+              console.log("matchingItem.sumdigit:",matchingItem.sumdigit)
+              console.log("sumDigitFromData3:",sumDigitFromData3)
               return {
                 _id: item1._id,
-                biddingPoints:
-                  item1.sumdigit + matchingItem.sumdigit + sumDigitFromData3,
+                biddingPoints: item1.sumdigit + matchingItem.sumdigit + sumDigitFromData3,
                 countBid: item1.countBid + matchingItem.countBid,
                 date: item1.date,
                 gamePrice: item1.gamePrice,
@@ -577,6 +600,7 @@ router.post("/getFinalCutting", async (req, res) => {
         }
       })
       .catch(function (err) {
+        console.log(err)
         res.status(400).json({
           status: 0,
           message: "Something Went Wrong Contact Support",
@@ -584,6 +608,7 @@ router.post("/getFinalCutting", async (req, res) => {
         });
       });
   } catch (error) {
+    console.log(error)
     return res.status(400).json({
       status: 0,
       messag: "Something Went Wrong Contact Support",
