@@ -365,12 +365,15 @@
               id="report_type_daily"
               required
             >
-              <option value="0">Dhanlaxmi Kotk XLS</option>
+            <option value="0">Kotk XLS</option>
+            <option value="6">Cash free</option>
+
+              <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
               <option value="1">Tirupatie Kotk XLS</option>
-              <option value="2">Mahalaxmi Kotk XLS</option>
+              <option value="2">Mahalaxmi Kotk XLS</option> -->
               <!-- <option value="3">ICICI Debit Report</option> -->
-              <option value="3">R-TRADERS Report</option>
-              <option value="4">Trak Pay Report</option>
+              <!-- <option value="3">R-TRADERS Report</option>
+              <option value="4">Trak Pay Report</option> -->
             </select>
           </div>
         </div>
@@ -1200,6 +1203,7 @@
             arr.push(e._id);
           }
         });
+        console.log(arr);
         excel.generate("cashfree" + reportDate + "_Batch.xlsx");
       });
   }

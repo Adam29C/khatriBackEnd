@@ -103,6 +103,8 @@
 
   function getHeadLine() {
     const headline = $("#headeline").val();
+
+    console.log("headline", headline);
     $.ajax({
       type: "GET",
       url: "/appSettings/getHeadLine",
@@ -112,6 +114,7 @@
           document.getElementById("headeline").value = result.headline;
           document.getElementById("upiid").value = result.upiID;
           document.getElementById("dayCount").value = result.dayCount;
+          // console.log("result", result.headline);
         }
       },
     });
@@ -126,6 +129,7 @@
       url: "/appSettings/addHeadLine",
       data: { headline: headline },
       success: function (data) {
+        console.log("data", data);
         toastr["info"](data.message, "Khatri Bets Games");
         location.reload();
       },
