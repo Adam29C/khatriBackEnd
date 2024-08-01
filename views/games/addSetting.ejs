@@ -80,6 +80,9 @@
         const game1 = $("#timepicker").val();
         const gameDay = $("#gameDay").val();
         const gameid= $("#gameid").val();
+
+        console.log(game1, game4, game3, game4);
+
         fetch('/gamesSetting/insertSettings',{
             method: 'POST', 
             body: JSON.stringify({ status: status, game4: game4, game3: game3,game2: game2, game1: game1, gameDay : gameDay, gameid: gameid }),

@@ -356,6 +356,7 @@
           ],
         },
         success: function (data) {
+          console.log(data);
           $("#tabDiv").css("display", "block");
           let html;
           let TotalBid = 0;
@@ -566,6 +567,9 @@
                 "99",
               ];
               let jodiTable = "";
+
+              // console.log("jodiTable", jodiTable);
+
               panaArray.forEach(function (e) {
                 let Digit = e;
                 let bidCount = 0;
@@ -606,6 +610,9 @@
                   loss +
                   "</td></tr>";
               });
+
+              console.log("jodiTable", jodiTable);
+
               $("#singleTable").html(jodiTable);
               $("#datatable4").DataTable({
                 pageLength: 50,
@@ -614,6 +621,7 @@
           }
         },
         error: function (error) {
+          console.log("error" ,error)
           alert("Error Occured Please Try Again Later" );
         },
       });
@@ -800,6 +808,9 @@
             $("#datatable6").dataTable({
               pageLength: 50,
             });
+
+            console.log("singleArr[tabDigit]", allSingle);
+
             allSingle.forEach(function (e) {
               let tabDigit = e.Digit;
               let bidCount = "No Bids";

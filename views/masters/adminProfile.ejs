@@ -97,6 +97,7 @@
         const pass1 = $('#password1').val();
         const pass2 = $('#password2').val();
         const adminId = $('#adminId').val();
+        console.log(pass1, pass2, adminId);
         if(pass1 === pass2)
         {
             fetch("/employee/updatePaasword", {

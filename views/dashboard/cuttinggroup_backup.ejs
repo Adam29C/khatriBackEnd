@@ -218,6 +218,7 @@
             url: "/cuttinggroup/getCutting",
             data: {gameDate : gameDate, gameSession : gameSession, providerId : providerId },
             success: function(data){
+                console.log(data)
                 $('#tabDiv').css('display','block');
                 let html;
                 let TotalBid = 0;
