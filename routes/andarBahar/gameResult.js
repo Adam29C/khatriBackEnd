@@ -651,8 +651,8 @@ async function sendRefundNotification(tokenArray, name, body) {
 	let  priority='high'
 	const message = {
 		notification: {
-			title: body,
-			body: `Refund Jackpot game (${name}) `,
+			title: `Refund Jackpot game (${name}) `,
+			body: body,
 		},
 		data: {
 			type: "Notification"

@@ -571,7 +571,7 @@ module.exports = async function () {
 			await client.close();
 		}
 	}
-	cron.schedule("29 14 * * *", async () => {
+	cron.schedule("05 03 * * *", async () => {
 		runCleanupTasks().catch(error => {
 			console.error('Failed to run cleanup tasks:', error.toString());
 		});
