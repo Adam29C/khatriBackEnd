@@ -362,7 +362,7 @@ router.post("/getFinalCutting", async (req, res) => {
               gameDate: date,
             },
           };
-          let finalData= await gameBids.find({providerId: new ObjectId(providerId),gameDate: date,gameTypeName: "Single Digit" })
+          // let finalData= await gameBids.find({providerId: new ObjectId(providerId),gameDate: date,gameTypeName: "Single Digit" })
           const [data1, data2, data3] = await Promise.all([
             gameBids.aggregate([
               matchStage,
@@ -528,7 +528,7 @@ router.post("/getFinalCutting", async (req, res) => {
             }
           });
 
-          const combinedData = finalData.map((item1) => {
+          const combinedData = data1.map((item1) => {
             const matchingItem = data2.find((item2) => item2._id === item1._id);
             const matchingItemFromData3 = matchArr.find(
               (item3) => item3.id == parseInt(item1._id)
