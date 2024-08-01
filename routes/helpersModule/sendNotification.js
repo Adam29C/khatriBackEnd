@@ -113,27 +113,27 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
             switch (x) {
                 case '1':
                     token = await user.find({ banned: false, andarBaharNotification: true }, { firebaseId: 1, _id: 0 });
-                    title = winningDigit;
-                    body = name;
+                    title = name;
+                    body = winningDigit;
                     notificationType = "Result";
                     break;
                 case '2':
                     token = await user.find({ banned: false, starLineNotification: true }, { firebaseId: 1, _id: 0 });;
-                    title = winningDigit;
-                    body = name;
+                    title = name;
+                    body = winningDigit;
                     notificationType = "Result";
                     break;
                 case '3':
                     token = await user.find({ banned: false, gameNotification: true }, { firebaseId: 1, _id: 0 });;
-                    title = winningDigit;
-                    body = name;
+                    title = name;
+                    body = winningDigit;
                     notificationType = "Result";
 
                     break;
                 case '4':
                     token = await user.find({ banned: false, mainNotification: true }, { firebaseId: 1, _id: 0 });
-                    title = req.body.message;
-                    body = req.body.title;
+                    title = req.body.title;
+                    body = req.body.message;
                     notificationType = "Notification";
                     break;
             }

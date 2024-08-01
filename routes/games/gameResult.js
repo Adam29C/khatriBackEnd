@@ -989,8 +989,8 @@ async function sendRefundNotification(tokenArray, name, body) {
 	let  priority='high'
 	const message = {
 		notification: {
-			title: body,
-			body: `Refund For ${name}`,
+			title: `Refund For ${name}`,
+			body: body,
 		},
 		data: {
 			type: "Notification"
