@@ -392,7 +392,7 @@
                 <th>Report Approved By</th>
                 <th>Download Report(Bank Format)</th>
                 <th>Download Report(Excel Format)</th>
-                <th>Download RBL.xls Report</th>
+                <th>Download Report(TrakPay Format)</th>
               </tr>
             </thead>
             <tbody id="TodayReportData"></tbody>
@@ -543,7 +543,84 @@
     const reportDate = $("#datepicker-autoclose").val();
 
     if (reportType === 7 || reportType === "7") {
-      generateRport();
+      const req = {
+        reportDate: reportDate,
+        searchType: searchType,
+      };
+
+      fetch("/debitReport/rblxls", {
+        method: "POST",
+        body: JSON.stringify(req),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+      })
+        .then((res) => res.json())
+        .then((json) => {
+
+
+
+          const xlsData = json.Profile;
+          const reportDate = json.date;
+          var excel = $JExcel.new("Calibri light 10 #333333");
+          var headers = [
+            "Payment Type",
+            "Cust Ref Number",
+            "Source Account Number",
+            "Source Narration",
+            "Destination Account Number",
+            "Currency",
+            "Destination Narration",
+            "Destination Bank",
+            "Destination Bank IFS Code",
+            "Beneficiary Name",
+            "Email ",
+          ];
+
+          console.log("xlsData " ,xlsData);
+
+          var formatHeader = excel.addStyle({
+            border: "none,none,none,thin #333333",
+            font: "Calibri 12 #ffff B",
+          });
+
+          for (var i = 0; i < headers.length; i++) {
+            excel.set(0, i, 0, headers[i], formatHeader);
+            excel.set(0, i, undefined, "auto");
+          }
+
+
+
+          let a = 1;
+          let j = 0;
+          $.each(xlsData, function (key, e) {
+            excel.set(0, 0, a, e.paymentType);
+            j++;
+            excel.set(0, j, a, a);
+            j++;
+            excel.set(0, j, a, e.sourceAccountNumber);
+            j++;
+            excel.set(0, j, a, e.sourceNarration);
+            j++;
+            excel.set(0, j, a, e.destinationAcNumber);
+            j++;
+            excel.set(0, j, a, e.currency);
+            j++;
+            excel.set(0, j, a, e.destinationNarration);
+            j++;
+            excel.set(0, j, a, e.destinationBankName);
+            j++;
+            excel.set(0, j, a, e.destinationIfscCode);
+            j++;
+            excel.set(0, j, a, e.destinationAccName);
+            j++;
+            excel.set(0, j, a, e.email);
+            j++;
+            a++;
+          });
+          excel.generate("payout" + reportDate + "_Batch.xlsx");
+        });
     } else {
       if (parseInt(reportType) === 4) {
         return generateAllTrakPay(reportDate, searchType);
@@ -616,6 +693,9 @@
         });
     }
 
+    // ----------------- ganpat code ----------------
+
+    // ----------------- ganpat code ----------------
   }
 
   function todayAppReport() {
@@ -656,7 +736,7 @@
                     <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="GenerateReport(' +
             id +
             ')">Download Report</button></td>\
-                        <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateRport(' +
+                        <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="GenerateReportTrak(' +
             id +
             ')">Download Report</button></td>\
                     </tr>';
@@ -1228,87 +1308,6 @@
   });
 
   // ----------------- ganpat code ----------------
-
-  function generateRport(id) {
-
-    const searchType = $("#req_status").val();
-    // const reportType = $("#report_type").val();
-    const reportDate = $("#datepicker-autoclose").val();
-
-    const req = {
-      reportDate: reportDate,
-      searchType: searchType,
-    };
-
-    fetch("/debitReport/rblxls", {
-      method: "POST",
-      body: JSON.stringify(req),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "same-origin",
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        const xlsData = json.Profile;
-        const reportDate = json.date;
-        var excel = $JExcel.new("Calibri light 10 #333333");
-        var headers = [
-          "Payment Type",
-          "Cust Ref Number",
-          "Source Account Number",
-          "Source Narration",
-          "Destination Account Number",
-          "Currency",
-          "Destination Narration",
-          "Destination Bank",
-          "Destination Bank IFS Code",
-          "Beneficiary Name",
-          "Email ",
-        ];
-
-        console.log("xlsData ", xlsData);
-
-        var formatHeader = excel.addStyle({
-          border: "none,none,none,thin #333333",
-          font: "Calibri 12 #ffff B",
-        });
-
-        for (var i = 0; i < headers.length; i++) {
-          excel.set(0, i, 0, headers[i], formatHeader);
-          excel.set(0, i, undefined, "auto");
-        }
-
-        let a = 1;
-        $.each(xlsData, function (key, e) {
-          let j = 0;
-          excel.set(0, 0, a, e.paymentType);
-          j++;
-          excel.set(0, j, a, a);
-          j++;
-          excel.set(0, j, a, e.sourceAccountNumber);
-          j++;
-          excel.set(0, j, a, e.sourceNarration);
-          j++;
-          excel.set(0, j, a, e.destinationAcNumber);
-          j++;
-          excel.set(0, j, a, e.currency);
-          j++;
-          excel.set(0, j, a, e.destinationNarration);
-          j++;
-          excel.set(0, j, a, e.destinationBankName);
-          j++;
-          excel.set(0, j, a, e.destinationIfscCode);
-          j++;
-          excel.set(0, j, a, e.destinationAccName);
-          j++;
-          excel.set(0, j, a, e.email);
-          j++;
-          a++;
-        });
-        excel.generate("payout" + reportDate + "_Batch.xlsx");
-      });
-  }
 
   // ----------------- ganpat code ----------------
 </script>
