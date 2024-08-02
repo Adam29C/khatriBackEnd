@@ -469,7 +469,7 @@ router.post("/xlsDataDailyTrak", session, async (req, res) => {
 });
 
 
-router.post("/rblxls",session, async (req, res) => {
+router.post("/rblxls", async (req, res) => {
     try {
         const reqStatus = req.body.searchType;
         const reportDate = req.body.reportDate;
