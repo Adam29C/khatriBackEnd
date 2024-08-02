@@ -22,6 +22,15 @@ router.post("/addManualPayment", async (req, res) => {
         msg: "User Details Not Found",
       });
     }
+    let paymentManual= await manualPayment.findOne({userId,status:"pending"});
+    if(paymentManual){
+      return res.status(400).send({
+        statusCode: 400,
+        status: "Failure",
+        msg: "Your Request Already Pending",
+      });
+    }
+
     let baseUrl = "";
     if (base64Image) {
       const buffer = Buffer.from(base64Image, "base64");
