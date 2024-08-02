@@ -6,30 +6,26 @@ const profile = require("../../model/API/Profile");
 const session = require("../helpersModule/session");
 const permission = require("../helpersModule/permission");
 const dateTime = require("node-datetime");
-
-// code ko comment out krna hai
-// const abBids = require("../../model/AndarBahar/ABbids")
-// const chats = require("../../model/chat");
-// const foundRequest =require("../../model/API/FundRequest");
-// const gameBids=require("../../model/games/gameBids");
-// const gatewayPayments =require("../../model/onlineTransaction");
-// const ideasUser =require("../../model/UserSuggestion");
-// const manualPayments =require("../../model/manualPayment");
-// const revertPayments =require("../../model/revertPayment");
-// const starlineBids = require("../../model/starline/StarlineBids");
-// const  upiPayments =require("../../model/API/upiPayments");
-// const userProfiles= require("../../model/API/Profile");
-// const walletHistories = require("../../model/wallet_history")
-// const { MongoClient } = require("mongodb");
-// const { ObjectId } = require('mongodb');
-const moment =require("moment");
-// const uri = process.env.DB_CONNECT;
-// const client = new MongoClient(uri, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
-
-/////////
+const abBids = require("../../model/AndarBahar/ABbids")
+const chats = require("../../model/chat");
+const foundRequest = require("../../model/API/FundRequest");
+const gameBids = require("../../model/games/gameBids");
+const gatewayPayments = require("../../model/onlineTransaction");
+const ideasUser = require("../../model/UserSuggestion");
+const manualPayments = require("../../model/manualPayment");
+const revertPayments = require("../../model/revertPayment");
+const starlineBids = require("../../model/starline/StarlineBids");
+const upiPayments = require("../../model/API/upiPayments");
+const userProfiles = require("../../model/API/Profile");
+const walletHistories = require("../../model/wallet_history")
+const { MongoClient } = require("mongodb");
+const { ObjectId } = require('mongodb');
+const moment = require("moment");
+const uri = process.env.DB_CONNECT;
+const client = new MongoClient(uri, {
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+});
 
 router.get("/", session, permission, async (req, res) => {
 	try {
@@ -183,7 +179,7 @@ router.post("/userAjax", function (req, res) {
 							id +
 							')">Profile</button>',
 						block: btnBlock,
-						delete:'<span><button type="button"data-toggle="modal" data-target=".deleteModalConfirm"  onclick="reasonPop(' +id +', true)" class="btn btn-bordred-danger waves-effect width-xs waves-light btn-xs">Delete</button></span>'
+						delete: '<span><button type="button"data-toggle="modal" data-target=".deleteModalConfirm"  onclick="reasonPop(' + id + ', true)" class="btn btn-bordred-danger waves-effect width-xs waves-light btn-xs">Delete</button></span>'
 					};
 					tabelArray.push(dataJson);
 					i++;
@@ -321,19 +317,18 @@ router.post("/deleteUserByAdmin", session, async (req, res) => {
 		};
 
 		const formatted = moment().format("DD/MM/YYYY HH:mm:ss");
-		//   await abBids.deleteMany({ userId: id });
-		//   await chats.deleteOne({ users: { $in: [id] } });
-		//   await foundRequest.deleteMany({ userId: id });
-		//   await gameBids.deleteMany({ userId: id });
-		//   await gatewayPayments.deleteMany({ userId: id });
-		//   await ideasUser.deleteMany({ userid: id });
-		//   await manualPayments.deleteMany({ userId: id });
-		//   await revertPayments.deleteMany(filter);
-		//   await starlineBids.deleteMany(filter);
-		//   await upiPayments.deleteMany(filter);
-		//   await userProfiles.deleteOne(filter);
-		//   await walletHistories.deleteMany(filter)
-
+		await abBids.deleteMany({ userId: id });
+		await chats.deleteOne({ users: { $in: [id] } });
+		await foundRequest.deleteMany({ userId: id });
+		await gameBids.deleteMany({ userId: id });
+		await gatewayPayments.deleteMany({ userId: id });
+		await ideasUser.deleteMany({ userid: id });
+		await manualPayments.deleteMany({ userId: id });
+		await revertPayments.deleteMany(filter);
+		await starlineBids.deleteMany(filter);
+		await upiPayments.deleteMany(filter);
+		await userProfiles.deleteOne(filter);
+		await walletHistories.deleteMany(filter)
 
 		await client.connect();
 		const database = client.db("test");
