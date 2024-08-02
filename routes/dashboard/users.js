@@ -277,9 +277,9 @@ router.post("/deleteduserAjax", function (req, res) {
 						username: dataTab[index].username,
 						email: dataTab[index].email,
 						mobile: mobileNumber,
-						deviceName: dataTab[index].deviceName,
-						deviceId: dataTab[index].deviceId,
-						deleteRsn: dataTab[index].deleteRsn,
+						// deviceName: dataTab[index].deviceName,
+						// deviceId: dataTab[index].deviceId,
+						// deleteRsn: dataTab[index].deleteRsn,
 					};
 					tabelArray.push(dataJson);
 					i++;
