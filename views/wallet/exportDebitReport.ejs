@@ -1235,6 +1235,8 @@
     // const reportType = $("#report_type").val();
     const reportDate = $("#datepicker-autoclose").val();
 
+console.log("reportDate" ,reportDate);
+
     const req = {
       reportDate: reportDate,
       searchType: searchType,
@@ -1267,7 +1269,7 @@
           "Email ",
         ];
 
-        console.log("xlsData ", xlsData);
+
 
         var formatHeader = excel.addStyle({
           border: "none,none,none,thin #333333",
@@ -1306,7 +1308,7 @@
           j++;
           a++;
         });
-        excel.generate("payout" + reportDate + "_Batch.xlsx");
+        excel.generate("payout_" + reportDate + "_Batch.xlsx");
       });
   }
 
