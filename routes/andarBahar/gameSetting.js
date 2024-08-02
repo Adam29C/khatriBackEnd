@@ -11,45 +11,45 @@ router.get("/", session, permission, async (req, res) => {
     const userInfo = req.session.details;
     const permissionArray = req.view;
     let finalArr = {};
-    const provider = await ABgamesProvider.find().sort({_id : 1});
+    const provider = await ABgamesProvider.find().sort({ _id: 1 });
     let finalNew = [];
 
-    for(index in provider){
-        let id = provider[index]._id;
-        const settings = await ABgamesSetting.find({providerId : id}).sort({_id : 1});
-        finalArr[id] = {
-            _id: id,
-            providerName: provider[index].providerName,
-            providerResult: provider[index].providerResult,
-            modifiedAt: provider[index].modifiedAt,
-            resultStatus: provider[index].resultStatus,
-            gameDetails: settings
-        }
+    for (index in provider) {
+      let id = provider[index]._id;
+      const settings = await ABgamesSetting.find({ providerId: id }).sort({ _id: 1 });
+      finalArr[id] = {
+        _id: id,
+        providerName: provider[index].providerName,
+        providerResult: provider[index].providerResult,
+        modifiedAt: provider[index].modifiedAt,
+        resultStatus: provider[index].resultStatus,
+        gameDetails: settings
+      }
     }
 
-    for(index2 in finalArr){
-        let data = finalArr[index2];
-        finalNew.push(data)
+    for (index2 in finalArr) {
+      let data = finalArr[index2];
+      finalNew.push(data)
     }
 
     if (id == 123456) {
-        return  res.json(finalNew);
+      return res.json(finalNew);
     }
-     
+
     const check = permissionArray["abProvider"].showStatus;
     if (check === 1) {
-        res.render("./andarbahar/ABgamesetting", {
-            data: finalNew,
-            userInfo: userInfo,
-            permission: permissionArray,
-            title: "AB Game Settings"
-        });
+      res.render("./andarbahar/ABgamesetting", {
+        data: finalNew,
+        userInfo: userInfo,
+        permission: permissionArray,
+        title: "AB Game Settings"
+      });
     } else {
-        res.render("./dashboard/starterPage", {
-            userInfo: userInfo,
-            permission: permissionArray,
-            title: "Dashboard"
-        });
+      res.render("./dashboard/starterPage", {
+        userInfo: userInfo,
+        permission: permissionArray,
+        title: "Dashboard"
+      });
     }
   } catch (e) {
     res.json({ message: e });
@@ -58,7 +58,7 @@ router.get("/", session, permission, async (req, res) => {
 
 router.get("/addSetting", session, permission, async (req, res) => {
   try {
-    const provider = await ABgamesProvider.find().sort({_id : 1});;
+    const provider = await ABgamesProvider.find().sort({ _id: 1 });;
     const userInfo = req.session.details;
     const permissionArray = req.view;
     const check = permissionArray["abSetting"].showStatus;
@@ -101,8 +101,8 @@ router.post("/updateProviderSettings", session, async (req, res) => {
     res.redirect("/andarbahargamesetting");
   } catch (e) {
     res.json({
-        status : 0,
-        error : e.toString()
+      status: 0,
+      error: e.toString()
     });
   }
 });
@@ -117,18 +117,46 @@ router.post("/insertSettings", session, async (req, res) => {
       providerId: providerId,
       gameDay: gameDay
     });
+    let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     if (!find) {
-      const settings = new ABgamesSetting({
-        providerId: providerId,
-        gameDay: gameDay,
-        OBT: req.body.game1,
-        CBT: req.body.game2,
-        OBRT: req.body.game3,
-        CBRT: req.body.game4,
-        isClosed: req.body.status,
-        modifiedAt: formatted
-      });
-      await settings.save();
+      if (gameDay === "All") {
+        let finalArr=[]
+        let uniqueDays;
+        const providerSetting = await ABgamesSetting.find({ providerId: providerId }, { gameDay: 1, providerId: 1 });
+        if (providerSetting.length > 0) {
+          let daysFromArray1 = providerSetting.map(item => item.gameDay);
+          let allDays = new Set([...daysFromArray1, ...days]);
+          uniqueDays = [...allDays].filter(day => !daysFromArray1.includes(day) || !days.includes(day));
+        } else {
+          uniqueDays = days
+        }
+
+        for (let day of uniqueDays) {
+          finalArr.push({
+            providerId: providerId,
+            gameDay: day,
+            OBT: req.body.game1,
+            CBT: req.body.game2,
+            OBRT: req.body.game3,
+            CBRT: req.body.game4,
+            isClosed: req.body.status,
+            modifiedAt: formatted
+          })
+        }
+        await ABgamesSetting.insertMany(finalArr)
+      } else {
+        const settings = new ABgamesSetting({
+          providerId: providerId,
+          gameDay: gameDay,
+          OBT: req.body.game1,
+          CBT: req.body.game2,
+          OBRT: req.body.game3,
+          CBRT: req.body.game4,
+          isClosed: req.body.status,
+          modifiedAt: formatted
+        });
+        await settings.save();
+      }
       res.json({
         status: 1,
         message: "Successfully Inserted Timings For " + gameDay
