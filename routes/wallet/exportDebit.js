@@ -474,7 +474,6 @@ router.post("/rblxls", async (req, res) => {
         const reqStatus = req.body.searchType;
         const reportDate = req.body.reportDate;
         const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
-
         let query = {
             reqStatus: reqStatus,
             reqType: "Debit",
