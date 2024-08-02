@@ -22,10 +22,10 @@ router.get("/getManualPaymentList", async (req, res) => {
     });
     let finalArr = [];
     for (let manualDetails of manualPaymentList) {
-      let createDate = moment(manualDetails.createdAt).format(
+      let createDate = moment(manualDetails.createTime).format(
         "DD-MM-YYYY, h:mm:ss a"
       );
-      let updateDate = moment(manualDetails.updatedAt).format(
+      let updateDate = moment(manualDetails.updatedTime).format(
         "DD-MM-YYYY, h:mm:ss a"
       );
       finalArr.push({
