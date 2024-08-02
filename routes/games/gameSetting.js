@@ -55,46 +55,96 @@ router.post("/insertSettings", session, async (req, res) => {
 		const dt = dateTime.create();
 		const formatted = dt.format("Y-m-d H:M:S");
 		const providerId = req.body.gameid;
-		const gameDays = req.body.gameDay;
-		
-		let result;
-		let promiseArr = [];
-		for(let day of gameDays){
-
-			const find = await gamesSetting.findOne({
-				providerId: providerId,
-				gameDay: day,
-			});
-			if (!find) {
+		const gameDay = req.body.gameDay[0];
+		const find = await gamesSetting.findOne({
+			providerId: providerId,
+			gameDay: gameDay,
+		});
+		let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+		if (!find) {
+			if (gameDay === "All") {
+				let finalArr=[]
+				let uniqueDays;
+				const providerSetting = await gamesSetting.find({ providerId: providerId }, { gameDay: 1, providerId: 1 });
+				if (providerSetting.length > 0) {
+					let daysFromArray1 = providerSetting.map(item => item.gameDay);
+					let allDays = new Set([...daysFromArray1, ...days]);
+					uniqueDays = [...allDays].filter(day => !daysFromArray1.includes(day) || !days.includes(day));
+				} else {
+					uniqueDays = days
+				}
+				for (let day of uniqueDays) {
+					finalArr.push({
+						providerId: providerId,
+						gameDay: day,
+						OBT: req.body.game1,
+						CBT: req.body.game2,
+						OBRT: req.body.game3,
+						CBRT: req.body.game4,
+						isClosed: req.body.status,
+						modifiedAt: formatted
+					})
+				}
+				console.log(finalArr)
+				await gamesSetting.insertMany(finalArr)
+			} else {
 				const settings = new gamesSetting({
 					providerId: providerId,
-					gameDay: day,
-					OBT: req.body.game1.toString(),
-					CBT: req.body.game2.toString(),
-					OBRT: req.body.game3.toString(),
-					CBRT: req.body.game4.toString(),
+					gameDay: gameDay,
+					OBT: req.body.game1,
+					CBT: req.body.game2,
+					OBRT: req.body.game3,
+					CBRT: req.body.game4,
 					isClosed: req.body.status,
-					modifiedAt: formatted,
+					modifiedAt: formatted
 				});
-				promiseArr.push(await settings.save());
-				
+				await settings.save();
 			}
-		}
-		
-		result = await Promise.all(promiseArr);
-		
-		if(result) {
 			res.json({
 				status: 1,
-				message: "Successfully Inserted Timings For " + gameDays.join(),
+				message: "Successfully Inserted Timings For " + gameDay
 			});
 		} else {
 			res.json({
 				status: 1,
-				message: "Details Already Filled For " +  gameDays.join(),
+				message: "Details Already Filled For " + gameDay
 			});
 		}
+		// let result;
+		// let promiseArr = [];
+
+		// for(let day of gameDays){
+		// 	if (!find) {
+		// 		const settings = new gamesSetting({
+		// 			providerId: providerId,
+		// 			gameDay: day,
+		// 			OBT: req.body.game1.toString(),
+		// 			CBT: req.body.game2.toString(),
+		// 			OBRT: req.body.game3.toString(),
+		// 			CBRT: req.body.game4.toString(),
+		// 			isClosed: req.body.status,
+		// 			modifiedAt: formatted,
+		// 		});
+		// 		promiseArr.push(await settings.save());
+
+		// 	}
+		// }
+
+		// result = await Promise.all(promiseArr);
+
+		// if(result) {
+		// 	res.json({
+		// 		status: 1,
+		// 		message: "Successfully Inserted Timings For " + gameDays.join(),
+		// 	});
+		// } else {
+		// 	res.json({
+		// 		status: 1,
+		// 		message: "Details Already Filled For " +  gameDays.join(),
+		// 	});
+		// }
 	} catch (e) {
+		console.log(e)
 		res.status(400).send(e);
 	}
 });
