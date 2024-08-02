@@ -1,4 +1,4 @@
-const admin = require("../../firebase")
+const messaging = require("../../firebase")
 // const gcm = require('node-gcm');
 // // const sender = new gcm.Sender('AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1');
 // const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
@@ -8,31 +8,53 @@ module.exports = async function (userToken, title, body) {
     let notificationTitle = title;
     let notificationBody = body;
     let  priority='high'
-    const message = {
-        notification: {
-            title: notificationBody,
-            body: notificationTitle,
+    // const message = {
+    //     notification: {
+    //         title: notificationBody,
+    //         body: notificationTitle,
+    //     },
+    //     data: {
+    //         type: "Wallet"
+    //     },
+    //     android: {
+    //         priority: priority  // Setting the priority for Android
+    //     },
+    //     apns: {
+    //         payload: {
+    //             aps: {
+    //                 'content-available': 1,
+    //                 'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
+    //             }
+    //         }
+    //     },
+    //     token: token
+    // };
+    // try {
+    //     const response = await admin.messaging().send(message);
+    // } catch (error) {
+    //     console.log('Error sending message:', error);
+    // }
+    let message = {
+        android: {
+            priority: priority,
         },
         data: {
-            type: "Wallet"
+            title: notificationBody,
+            body: notificationTitle,
+            icon: 'ic_launcher',
+            type: 'Wallet',
         },
-        android: {
-            priority: priority  // Setting the priority for Android
-        },
-        apns: {
-            payload: {
-                aps: {
-                    'content-available': 1,
-                    'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
-                }
-            }
-        },
-        token: token
+        token: token,
     };
     try {
-        const response = await admin.messaging().send(message);
+        const response = await messaging.send(message);
+        console.log('Successfully sent message:', response);
     } catch (error) {
-        console.log('Error sending message:', error);
+        if (error.code === 'messaging/registration-token-not-registered') {
+            console.error('Token is not registered. Removing from database.');
+        } else {
+            console.error('Error sending message:', error);
+        }
     }
 };
 

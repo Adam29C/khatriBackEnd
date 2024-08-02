@@ -1,104 +1,9 @@
-// const user = require('../../model/API/Users');
-// const chunks = require('array.chunk');
-// const gcm = require('node-gcm');
-// // const sender = new gcm.Sender('AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1');
-// const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
-
-// module.exports = async function (req, res, sumDgit, uesrtoken) {
-//     try
-//     {
-//         const x = req.body.gameId;
-//         const str = req.body.providerId;
-//         let data = '';
-//         let name = '';
-//         if(str){ data = str.split("|");   name = data[1];}
-//         let winningDigit = sumDgit;
-//         let title = '';
-//         let body = '';
-//         let token = uesrtoken;
-//         let notificationType = '';
-//         switch(x) {
-//             case '1':
-//                 token = await user.find({ banned : false, andarBaharNotification: true }, {firebaseId : 1,_id:0});
-//                 title = winningDigit;
-//                 body = name; 
-//                 notificationType = "Result";
-//                 break;
-//             case '2':
-//                 token = await user.find({ banned : false, starLineNotification: true }, {firebaseId : 1,_id:0});;
-//                 title = winningDigit;
-//                 body = name;              
-//                 notificationType = "Result";
-//                 break;
-//             case '3':
-//                 token = await user.find({ banned : false, gameNotification: true }, {firebaseId : 1,_id:0});;
-//                 title = winningDigit;
-//                 body = name;              
-//                 notificationType = "Result";
-
-//                 break;
-//             case '4':
-//                 token = await user.find({ banned : false, mainNotification: true }, {firebaseId : 1,_id:0});
-//                 title = req.body.message;
-//                 body = req.body.title;
-//                 notificationType = "Notification";
-//                 break;
-//             default : 
-//                 body  = 'Congrats For Your '+ winningDigit +' Game Win';
-//                 title = 'Points Successfully Credited To Your Wallet For '+ winningDigit  +' Win';
-//                 notificationType = "Wallet";
-//                 break;
-//             }
-
-//             var message = new gcm.Message({
-//                 priority: 'high',
-//                 data: {
-//                     title: title,
-//                     icon: "ic_launcher",
-//                     body: body,
-//                     type: notificationType
-//                 }
-//             });
-//             let length  = token.length;
-//             if(length > 1000){
-//                 const userToken = token.map(token => token.firebaseId); 
-//                 console.log(userToken,'if condition')
-//                 token = chunks(userToken, 1000);
-//                 let newLength = token.length;
-//                 for(j = 0 ; j < newLength; j++)
-//                 {
-//                     let tokenArr = token[j];
-
-//                     sender.send(message, { registrationTokens: tokenArr }, function (err, response) {
-//                         if (err) console.log(err);
-//                         else console.log(response);
-//                     });
-//                 }
-//             }
-//             else{
-//                 const userToken = token.map(token => token.firebaseId); 
-//                 console.log(userToken,'else condition')
-//                 sender.send(message, { registrationTokens: userToken }, function (err, response) {
-//                     if (err) console.log(err,'error');
-//                     else console.log(response) ;
-//                 });
-//             }
-//         }
-//     catch (e) {
-//         console.log(e)
-//     //    return e;
-//     }
-// };
-
 const user = require('../../model/API/Users');
 const chunks = require('array.chunk');
-const admin = require("../../firebase");
-// const gcm = require('node-gcm');
-// const sender = new gcm.Sender('AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1');
-// const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
-
+const messaging = require("../../firebase");
 module.exports = async function (req, res, sumDgit, uesrtoken) {
     try {
+        console.log("result vali api execute hogi")
         const x = req.body.gameId;
         const str = req.body.providerId;
         let data = '';
@@ -144,19 +49,11 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
                 let newLength = token.length;
                 for (j = 0; j < newLength; j++) {
                     let tokenArr = token[j];
-                    // sender.send(message, { registrationTokens: tokenArr }, function (err, response) {
-                    //     if (err) console.log(err);
-                    //     else console.log(response);
-                    // });
                     sendMutipalNotification(tokenArr, title, body, notificationType)
                 }
             }
             else {
                 const userToken = token.map(token => token.firebaseId);
-                // sender.send(message, { registrationTokens: userToken }, function (err, response) {
-                //     if (err) console.log(err, 'error');
-                //     else console.log(response);
-                // });
                 sendMutipalNotification(userToken, title, body, notificationType)
             }
         } else {
@@ -174,32 +71,54 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
                 //     if (err) console.log(err);
                 //     else console.log(response);
                 // });
+                // const message = {
+                //     notification: {
+                        // title: `🥳CONGRATS FOR ${winningDigit} GAME WIN 🎉`,
+                        // body: `${token[i].amount}/-rs Successfully Added To Your Wallet..`,
+                //     },
+                //     data: {
+                //         type: "Wallet"
+                //     },
+                //     android: {
+                //         priority: priority  // Setting the priority for Android
+                //     },
+                //     apns: {
+                //         payload: {
+                //             aps: {
+                //                 'content-available': 1,
+                //                 'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
+                //             }
+                //         }
+                //     },
+                //     token: token[i].firebaseId
+                // };
+                // try {
+                //     const response = await admin.messaging().send(message);
+                // } catch (error) {
+                //     console.log('Error sending message:', error);
+                // }
                 let  priority='high'
-                const message = {
-                    notification: {
-                        title: `🥳CONGRATS FOR ${winningDigit} GAME WIN 🎉`,
-                        body: `${token[i].amount}/-rs Successfully Added To Your Wallet..`,
+                let message = {
+                    android: {
+                        priority: priority,
                     },
                     data: {
-                        type: "Wallet"
-                    },
-                    android: {
-                        priority: priority  // Setting the priority for Android
-                    },
-                    apns: {
-                        payload: {
-                            aps: {
-                                'content-available': 1,
-                                'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
-                            }
-                        }
+                        title: `🥳CONGRATS FOR ${winningDigit} GAME WIN 🎉`,
+                        body: `${token[i].amount}/-rs Successfully Added To Your Wallet..`,
+                        icon: 'ic_launcher',
+                        type: 'Wallet',
                     },
                     token: token[i].firebaseId
                 };
                 try {
-                    const response = await admin.messaging().send(message);
+                    const response = await messaging.send(message);
+                    console.log('Successfully sent message:', response);
                 } catch (error) {
-                    console.log('Error sending message:', error);
+                    if (error.code === 'messaging/registration-token-not-registered') {
+                        console.error('Token is not registered. Removing from database.');
+                    } else {
+                        console.error('Error sending message:', error);
+                    }
                 }
             }
         }
@@ -212,32 +131,30 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
 
 const sendMutipalNotification = async (tokenArr, title, body, notificationType) => {
     let priority = 'high'
-    const message = {
-        notification: {
-            title: title,
+    console.log(tokenArr,"@!!!!!!!!!!!!!!!!")
+    let message = {
+		android: {
+			priority: 'high',
+		},
+		data: {
+			title: title,
             body: body,
-        },
-        data: {
-            type: notificationType
-        },
-        android: {
-            priority: priority  // Setting the priority for Android
-        },
-        apns: {
-            payload: {
-                aps: {
-                    'content-available': 1,
-                    'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
-                }
-            }
-        },
-    };
-    try {
-        const response = await admin.messaging().sendMulticast({
-            tokens: tokenArr,
-            ...message
-        });
-    } catch (error) {
-        console.log('Error sending message:', error);
-    }
+			icon: 'ic_launcher',
+			type: notificationType,
+		},
+		tokens: tokenArr,
+	};
+	try {
+		const response = await messaging.sendMulticast(message);
+		console.log('Successfully sent message:', response);
+		if (response.failureCount > 0) {
+			response.responses.forEach((resp, idx) => {
+				if (!resp.success) {
+					console.error(`Failed to send to ${tokens[idx]}: ${resp.error}`);
+				}
+			});
+		}
+	} catch (error) {
+		console.log('Error sending message:', error);
+	}
 }

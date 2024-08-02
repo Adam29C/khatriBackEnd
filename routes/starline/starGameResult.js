@@ -12,7 +12,7 @@ const mainUser = require("../../model/API/Users");
 const revertEntries = require("../../model/revertPayment");
 const history = require("../../model/wallet_history");
 const moment = require("moment");
-const admin = require("../../firebase")
+const messaging = require("../../firebase")
 // const gcm = require("node-gcm");
 // const sender = new gcm.Sender("AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1");
 // const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
@@ -642,52 +642,31 @@ router.post("/refundAll", session, async (req, res) => {
 
 async function sendRefundNotification(tokenArray, name, body) {
 	let priority = 'high'
-	const message = {
-		notification: {
-			title: `Refund For ${name}`,
-			body: body,
+	let message = {
+		android: {
+			priority: priority,
 		},
 		data: {
-			type: "Notification"
+			title: `Refund For ${name}`,
+			body: body,
+			icon: 'ic_launcher',
+			type: 'Notification',
 		},
-		android: {
-			priority: priority  // Setting the priority for Android
-		},
-		apns: {
-			payload: {
-				aps: {
-					'content-available': 1,
-					'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
-				}
-			}
-		},
+		token: tokenArray,
 	};
 	try {
-		const response = await admin.messaging().sendMulticast({
-			tokens: tokenArray,
-			...message
-		});
+		const response = await messaging.sendMulticast(message);
+		console.log('Successfully sent message:', response);
+		if (response.failureCount > 0) {
+			response.responses.forEach((resp, idx) => {
+				if (!resp.success) {
+					console.error(`Failed to send to ${tokens[idx]}: ${resp.error}`);
+				}
+			});
+		}
 	} catch (error) {
 		console.log('Error sending message:', error);
 	}
 }
 
 module.exports = router;
-
-// var message = new gcm.Message({
-// 	priority: "high",
-// 	data: {
-// 		title: body,
-// 		icon: "ic_launcher",
-// 		body: "Refund For " + name,
-// 		type: "Notification",
-// 	},
-// });
-
-// sender.send(message, { registrationTokens: tokenArray }, function (
-// 	err,
-// 	response
-// ) {
-// 	// if (err) console.log(err);
-// 	// else console.log(response);
-// });

@@ -11,7 +11,7 @@ const mainUser = require("../../model/API/Users");
 const revertEntries = require("../../model/revertPayment");
 const history = require("../../model/wallet_history");
 const moment = require("moment");
-const admin = require("../../firebase")
+const messaging = require("../../firebase")
 
 // const gcm = require("node-gcm");
 // const sender = new gcm.Sender(
@@ -648,53 +648,49 @@ router.post("/refundAll", session, async (req, res) => {
 });
 
 async function sendRefundNotification(tokenArray, name, body) {
-	let  priority='high'
-	const message = {
-		notification: {
-			title: `Refund Jackpot game (${name}) `,
-			body: body,
+	let message = {
+		android: {
+			priority: 'high',
 		},
 		data: {
-			type: "Notification"
+			title: `Refund Jackpot game (${name})`,
+			body: body,
+			icon: 'ic_launcher',
+			type: 'Notification',
 		},
-		android: {
-            priority: priority  // Setting the priority for Android
-        },
-        apns: {
-            payload: {
-                aps: {
-                    'content-available': 1,
-                    'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
-                }
-            }
-        },
+		token: tokenArray,
 	};
 	try {
-		const response = await admin.messaging().sendMulticast({
-            tokens: tokenArray,
-            ...message
-        });
-	} catch (error) {
-		console.log('Error sending message:', error);
-	}
+        const response = await messaging.sendMulticast(message);
+        console.log('Successfully sent message:', response);
+        if (response.failureCount > 0) {
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    console.error(`Failed to send to ${tokenArr[idx]}: ${resp.error}`);
+                }
+            });
+        }
+    } catch (error) {
+        console.log('Error sending message:', error);
+    }
 }
 
 module.exports = router;
 
 // var message = new gcm.Message({
-	// 	priority: "high",
-	// 	data: {
-	// 		title: body,
-	// 		icon: "ic_launcher",
-	// 		body: `Refund Jackpot game (${name}) `,
-	// 		type: "Notification",
-	// 	},
-	// });
+// 	priority: "high",
+// 	data: {
+// 		title: body,
+// 		icon: "ic_launcher",
+// 		body: `Refund Jackpot game (${name}) `,
+// 		type: "Notification",
+// 	},
+// });
 
-	// sender.send(message, { registrationTokens: tokenArray }, function (
-	// 	err,
-	// 	response
-	// ) {
-	// 	// if (err) console.log(err);
-	// 	// else console.log(response);
-	// });
+// sender.send(message, { registrationTokens: tokenArray }, function (
+// 	err,
+// 	response
+// ) {
+// 	// if (err) console.log(err);
+// 	// else console.log(response);
+// });
