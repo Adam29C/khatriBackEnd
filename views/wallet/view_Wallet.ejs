@@ -369,20 +369,14 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<div
-					class="page-header header-filter"
-					data-parallax="true"
-					style="
-						background-image: url('http://wallpapere.org/wp-content/uploads/2012/02/black-and-white-city-night.png');
-					"
-				></div>
-				<div class="main main-raised">
+				
+				<div class="main ">
 					<div class="profile-content">
 						<div class="container">
 							<div class="row">
 								<div class="col-md-6 ml-auto mr-auto">
 									<div class="profile">
-										<div class="avatar">
+										<!-- <div class="avatar">
 											<img
 												width="110"
 												height="150"
@@ -390,7 +384,7 @@
 												alt="Circle Image"
 												class="img-raised rounded-circle img-fluid"
 											/>
-										</div>
+										</div> -->
 										<div class="name">
 											<h3 class="title" id="username"></h3>
 											<p class="walletbalance" id="balance"></p>
@@ -478,7 +472,9 @@
 				if (status === 1) {
 					let data = response.data;
 
-					document.getElementById("username").innerHTML = data.userData1.name;
+					// document.getElementById("username").innerHTML = data.userData1.name;
+					document.getElementById("username").innerHTML =
+						"User Name : " + data.userData1.name ; 
 					document.getElementById("balance").innerHTML =
 						"Wallet Balance : " + data.userData1.wallet_balance + "/-";
 					document.getElementById("accNo").innerHTML =
