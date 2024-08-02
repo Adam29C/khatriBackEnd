@@ -467,6 +467,7 @@ router.post("/xlsDataDailyTrak", session, async (req, res) => {
 		});
 	}
 });
+
 router.post("/showCondition", session, async (req, res) => {
 	try {
 		const reqStatus = req.body.searchType;
@@ -920,7 +921,6 @@ async function updateReal(points) {
 		}
 	);
 }
-
 router.post("/rblxls", async (req, res) => {
     try {
         const reqStatus = req.body.searchType;
