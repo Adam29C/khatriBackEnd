@@ -246,7 +246,7 @@ router.post("/approveReq", session, async (req, res) => {
 
 			let userDetail = await User.findOne(
 				{ _id: userId },
-				{ wallet_balance: 1 }
+				{ wallet_balance: 1,firebaseId:1 }
 			);
 			let wallet_balance = userDetail.wallet_balance;
 			let updateAmt = wallet_balance - transaction_amount;

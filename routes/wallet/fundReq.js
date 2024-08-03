@@ -153,13 +153,16 @@ router.post("/updateWallet/:id", session, async (req, res) => {
     const dt56 = dateTime.create();
     const time = dt56.format("I:M:S p");
     const updateTime = formatted + " " + time;
-
+    let title;
+    let body;
     if (id == 1) {
       update_bal = wallet_bal + parseInt(bal);
       detail = "Amount Added To Wallet By " + adminName;
       particular = particular;
       reqType = "Credit";
       filter = 4
+      title = `Your Credit Request Of Rs. ${bal} is Approved`;
+      body = "Wallet Notification";
     }
     if (id == 2) {
       update_bal = wallet_bal - parseInt(bal);
@@ -167,8 +170,9 @@ router.post("/updateWallet/:id", session, async (req, res) => {
       particular = particular;
       reqType = "Debit";
       filter = 5
+      title = `Your Debit (Withdrawal) Request Of Rs.${parseInt(bal)}/- is Approved ✔️🤑💰`;
+	    body = `Hello ${username} 🤩🤩`;
     }
-
     await User.updateOne(
       { _id: userId },
       {
@@ -210,14 +214,9 @@ router.post("/updateWallet/:id", session, async (req, res) => {
     });
 
     await history.save();
-
-    if (id == 1) {
-      let userToken = [];
-      userToken.push(firebaseToken);
-      let title = "Your Credit Request Of Rs. " + bal + " is Approved";
-      let body = "Wallet Notification";
-      notification(userToken, title, body);
-    }
+    let userToken = [];
+    userToken.push(firebaseToken);
+    notification(userToken, title, body);
 
     res.json({
       status: 1,

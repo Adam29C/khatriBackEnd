@@ -711,8 +711,10 @@ router.post("/addpoint", async (req, res) => {
 				UPINumber = upiDetails.UPI_ID
 			}
 			if (requestType === 1) {
-				body = "Wallet Notification";
-				title = `Your Credit Request Of Rs. ${amount}-/ is Approved`
+				// body = "Wallet Notification";
+				// title = `Your Credit Request Of Rs. ${amount}-/ is Approved`
+				title = `Your Credit (Deposit) Request Of Rs.${amount}/- is Approved ✔️🤑💰`;
+			    body = `Hello ${username} 🤩🤩`;
 				wallet_balance = wallet_balance + parseInt(amount);
 				reqType = "Credit";
 				desc = "Amount Added To Wallet By Admin";
@@ -746,8 +748,10 @@ router.post("/addpoint", async (req, res) => {
 						message: `Your Withdrawal request amount is greater than to your current amount ${user.wallet_balance}`,
 					});
 				}
-				body = "Wallet Notification";
-				title = `Your Debit Request Of Rs. ${amount}-/ is Approved`
+				title = `Your Debit (Withdrawal) Request Of Rs. ${amount}/- is Approved ✔️🤑💰`;
+			    body = `Hello ${username} 🤩🤩`;
+				// body = "Wallet Notification";
+				// title = `Your Debit Request Of Rs. ${amount}-/ is Approved`
 				wallet_balance = wallet_balance - parseInt(amount);
 				reqType = "Debit";
 				desc = "Amount Withdrawn From Wallet By Admin";
