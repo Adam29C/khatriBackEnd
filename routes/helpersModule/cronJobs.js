@@ -547,8 +547,10 @@ module.exports = async function () {
 	async function cleanupOldEntries(database, timeHistoryDetails) {
 		if (timeHistoryDetails.isActive) {
 			const dateThreshold = moment().subtract(timeHistoryDetails.deleteTime, 'days').toDate();
-			const filter = { updatedTime: { $lt: dateThreshold } };
-
+			let filter = { updatedTime: { $lt: dateThreshold } };
+			if(timeHistoryDetails.collectionName){
+				filter= {createTime:{ $lt: dateThreshold }}
+			}
 			try {
 				const collection = database.collection(timeHistoryDetails.collectionName);
 				const result = await collection.deleteMany(filter);
