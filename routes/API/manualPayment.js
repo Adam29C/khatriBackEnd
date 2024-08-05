@@ -10,15 +10,17 @@ router.post("/addManualPayment", async (req, res) => {
     if (!userId) {
       return res.status(200).send({
         statusCode: 200,
-        status: "Failure",
+        code:1,
+         status: "Failure",
         msg: "Id's required",
       });
     }
     let userDetails = await Users.findOne({ _id: userId });
     if (!userDetails) {
       return res.status(200).send({
-        statusCode: 200,
-        status: "Failure",
+        statusCode: 200, 
+        code:1,
+         status: "Failure",
         msg: "User Details Not Found",
       });
     }
@@ -26,7 +28,8 @@ router.post("/addManualPayment", async (req, res) => {
     if(paymentManual){
       return res.status(200).send({
         statusCode: 200,
-        status: "Failure",
+        code:1,
+         status: "Failure",
         msg: "Your Previous Request Already Pending",
       });
     }
@@ -66,6 +69,7 @@ router.post("/addManualPayment", async (req, res) => {
     await manual.save();
     res.status(200).json({
       statusCode: 200,
+      code:0,
       status: "Success",
       message: "Request Add Successfully Wait for 30 Mins. We Will Verify Your Payment And Update",
     });
