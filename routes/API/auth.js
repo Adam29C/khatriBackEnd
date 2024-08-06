@@ -742,7 +742,7 @@ router.post("/sendMobileOtp", async (req, res) => {
 	try {
 		const { mobileNumber } = req.body;
 		if (!mobileNumber) {
-			res.status(400).json({
+			return res.status(400).json({
 				status: 0,
 				message: "Number Is Require",
 			});
@@ -775,7 +775,7 @@ router.post("/sendMobileOtp", async (req, res) => {
 			message: "Otp  Send Successfully",
 		});
 	} catch (error) {
-		res.status(400).json({
+		return res.status(400).json({
 			status: 0,
 			message: "Something Bad Happened Contact Support",
 			error: error,
