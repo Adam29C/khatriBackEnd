@@ -14,6 +14,11 @@ const sendOtp = new SendOtp("1207171791436302472");
 const fetch = require("node-fetch");
 const moment = require("moment");
 dotenv.config();
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKE;
+const otpPhoneNumber = process.env.OTP_PHONE_NUMBER;
+const client = require('twilio')(accountSid, authToken);
+const initialInfo = require("../../model/InitialUserInfo")
 
 const chatDomain = process.env.CHAT_DOMAIN;
 // router.post("/getUser", async(req, res)=>{
@@ -60,23 +65,52 @@ const chatDomain = process.env.CHAT_DOMAIN;
 
 router.post("/checkUsername", async (req, res) => {
 	try {
-		const username = req.body.username;
-		let check = await User.findOne({username : username})
-		if(check){
+		const { mobileNumber, otp, username } = req.body;
+		if (!mobileNumber || !otp || !username) {
+			return res.status(400).json({
+				status: 0,
+				message: "Number, otp, username  Is Require",
+			});
+		}
+		let userInitialInfo = await initialInfo.findOne({ mobileNumber,status:0 }, { Otp: 1, status: 1, currentTime: 1 });
+		if (!userInitialInfo) {
+			return res.status(400).json({
+				status: 0,
+				message: "Data Not Found",
+			});
+		}
+		let newTimestamp = moment(userInitialInfo.currentTime).add(5, 'minutes').valueOf();
+		let currentTime = Date.now();
+		if (currentTime > newTimestamp) {
+			return res.status(400).json({
+				status: 0,
+				message: "OTP has expired. Please try again.",
+			});
+		}
+		if (userInitialInfo.Otp !== otp) {
+			return res.status(400).json({
+				status: 0,
+				message: "Invalid OTP. Please try again.",
+			});
+		} else {
+			await initialInfo.updateOne({ mobileNumber }, { Status: 1, currentTime: Date.now() })
+		}
+		let check = await User.findOne({ username: username })
+		if (check) {
 			return res.json({
-				status : 0,
-				message : `The username "${username}" already exists. Please use a different username`
+				status: 0,
+				message: `The username ${username} already exists. Please use a different username`
 			})
 		}
-		return res.json({
-			status : 1,
-			message : "Valid Username"
-		})
+		return res.status(200).send({
+			status: 1,
+			message: "OTP verified successfully.",
+		});
 	} catch (error) {
 		res.json({
-			status : 0,
-			message : "Server Error",
-			error : error.toString()
+			status: 0,
+			message: "Server Error",
+			error: error.toString()
 		})
 	}
 });
@@ -114,11 +148,11 @@ router.post("/", async (req, res) => {
 			message: "User Already Registered With This Mobile Number",
 		});
 	// sendOtp.send(mobileNumber, "DGAMES", function (error, data) {
-		res.json({
-			status: 1,
-			message: "success",
-			data: data,
-		});
+	res.json({
+		status: 1,
+		message: "success",
+		data: data,
+	});
 	// });
 });
 
@@ -224,104 +258,104 @@ router.post("/register", async (req, res) => {
 
 		const mobileNumber = req.body.mobile;
 		const OTP = req.body.deviceVeriOTP;
-		let otpData = { type: 'error'};
+		let otpData = { type: 'error' };
 		//otpData['type'] = OTP === 1234 || OTP === '1234' ? 'success' : 'error';
 		otpData['type'] = OTP === 1234 || OTP === '1234' ? 'success' : 'success';
 		// sendOtp.verify(mobileNumber, OTP, async function (error, data) {
-			
-			if (otpData.type == "success") {
-				try {
-					// let userPassword = req.body.password;
-					let userMpin = req.body.mpin;
-					const salt = await bcrypt.genSalt(10);
-					// const hashedPassword = await bcrypt.hash(userPassword, salt);
-					const hashedMpin = await bcrypt.hash(userMpin, salt);
 
-					const dt = dateTime.create();
-					const formatted = dt.format("d/m/Y");
-					const time = dt.format("I:M:S p");
-					const ts = moment(formatted, "DD/MM/YYYY").unix();
-					let username = req.body.username;
-					const user = new User({
-						name: req.body.name,
-						// password: hashedPassword,
-						username: username.toLowerCase().replace(/\s/g, ""),
-						mobile: req.body.mobile.replace(/\s/g, ""),
-						firebaseId: req.body.firebaseId,
-						deviceName: req.body.deviceName,
-						deviceId: req.body.deviceId,
-						deviceVeriOTP: req.body.deviceVeriOTP,
-						banned: false,
-						wallet_bal_updated_at: null,
-						wallet_balance: 0,
-						mpin: hashedMpin,
-						mpinOtp: null,
-						CreatedAt: formatted,
-						loginStatus: true,
-						mainNotification: true,
-						gameNotification: true,
-						starLineNotification: true,
-						andarBaharNotification: true,
-						time: time,
-						timestamp: ts,
+		if (otpData.type == "success") {
+			try {
+				// let userPassword = req.body.password;
+				let userMpin = req.body.mpin;
+				const salt = await bcrypt.genSalt(10);
+				// const hashedPassword = await bcrypt.hash(userPassword, salt);
+				const hashedMpin = await bcrypt.hash(userMpin, salt);
+
+				const dt = dateTime.create();
+				const formatted = dt.format("d/m/Y");
+				const time = dt.format("I:M:S p");
+				const ts = moment(formatted, "DD/MM/YYYY").unix();
+				let username = req.body.username;
+				const user = new User({
+					name: req.body.name,
+					// password: hashedPassword,
+					username: username.toLowerCase().replace(/\s/g, ""),
+					mobile: req.body.mobile.replace(/\s/g, ""),
+					firebaseId: req.body.firebaseId,
+					deviceName: req.body.deviceName,
+					deviceId: req.body.deviceId,
+					deviceVeriOTP: req.body.deviceVeriOTP,
+					banned: false,
+					wallet_bal_updated_at: null,
+					wallet_balance: 0,
+					mpin: hashedMpin,
+					mpinOtp: null,
+					CreatedAt: formatted,
+					loginStatus: true,
+					mainNotification: true,
+					gameNotification: true,
+					starLineNotification: true,
+					andarBaharNotification: true,
+					time: time,
+					timestamp: ts,
+				});
+
+				const savedUser = await user.save();
+				mappingTableApi(savedUser).then(function (data) {
+
+					const token = jwt.sign(
+						{ key: user.deviceId },
+						process.env.jsonSecretToken,
+						{ expiresIn: "1h" }
+					);
+
+					let messageData = {
+						name: user.name,
+						mobile: user.mobile,
+					};
+
+					const userData = {
+						token: token,
+						mobile: user.mobile,
+						username: user.username,
+						wallet_balance: user.wallet_balance,
+						userId: user._id,
+						name: user.name,
+						mainNotification: user.mainNotification,
+						gameNotification: user.gameNotification,
+						starLineNotification: user.starLineNotification,
+						andarBaharNotification: user.andarBaharNotification,
+					};
+
+					return res.status(200).send({
+						status: 1,
+						message: "Registered Successfully",
+						data: userData,
+						mpinGenerated: 0,
+						welcome_message: "🙏",
 					});
-					
-					const savedUser = await user.save();
-					mappingTableApi(savedUser).then(function (data) {
-						
-						const token = jwt.sign(
-							{ key: user.deviceId },
-							process.env.jsonSecretToken,
-							{ expiresIn: "1h" }
-						);
 
-						let messageData = {
-							name: user.name,
-							mobile: user.mobile,
-						};
+					// sendWelcomeMessage(messageData).then(function (data) {
+					// 	updateUserCount();
 
-						const userData = {
-							token: token,
-							mobile: user.mobile,
-							username: user.username,
-							wallet_balance: user.wallet_balance,
-							userId: user._id,
-							name: user.name,
-							mainNotification: user.mainNotification,
-							gameNotification: user.gameNotification,
-							starLineNotification: user.starLineNotification,
-							andarBaharNotification: user.andarBaharNotification,
-						};
-						
-						return res.status(200).send({
-							status: 1,
-							message: "Registered Successfully",
-							data: userData,
-							mpinGenerated: 0,
-							welcome_message: "🙏",
-						});
-
-						// sendWelcomeMessage(messageData).then(function (data) {
-						// 	updateUserCount();
-
-						// });
-					});
-				} catch (error) {
-					return res.status(200).json({
-						status: 0,
-						message: "Validation Error",
-						error: error,
-					});
-				}
-			}
-			if (otpData.type == "error") {
-				return res.json({
+					// });
+				});
+			} catch (error) {
+				return res.status(200).json({
 					status: 0,
-					message: "Otp Error",
-					data: data,
+					message: "Validation Error",
 					error: error,
 				});
 			}
+		}
+		if (otpData.type == "error") {
+			return res.json({
+				status: 0,
+				message: "Otp Error",
+				data: data,
+				error: error,
+			});
+		}
 		// });
 	} catch (error) {
 		res.json({
@@ -394,7 +428,7 @@ router.post("/login", async (req, res) => {
 
 					await User.updateOne(
 						{ _id: user._id },
-						{ $set: { loginStatus: true , lastLoginDate:moment().format('DD/MM/YYYY') } }
+						{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
 					);
 
 					res.header("auth-token", token).send({
@@ -445,21 +479,21 @@ router.post("/login", async (req, res) => {
 		});
 	}
 });
-router.get("/getUserInfo",async(req,res)=>{
-	try{
-       const {userId} = req.query;
-	   if(!userId){
-	     	return res.status(200).send({
-			    status: 0,
-			    message: "userId required",
-		    });
-	   }
-	   let userDetails= await User.findOne({_id:userId},{firebaseId:1});
-	   return res.json({
-		status: 1,
-		message: "success",
-		data: userDetails,
-	});
+router.get("/getUserInfo", async (req, res) => {
+	try {
+		const { userId } = req.query;
+		if (!userId) {
+			return res.status(200).send({
+				status: 0,
+				message: "userId required",
+			});
+		}
+		let userDetails = await User.findOne({ _id: userId }, { firebaseId: 1 });
+		return res.json({
+			status: 1,
+			message: "success",
+			data: userDetails,
+		});
 	} catch (error) {
 		res.status(500).send({
 			status: 0,
@@ -478,43 +512,43 @@ router.post("/loginwithOnlyUsername", async (req, res) => {
 				message: "Username Not Found",
 			});
 		} else {
-				const mpin = user.mpin;
-				let mpinGen = 1;
-				if (mpin === null) {
-					mpinGen = 0;
-				}
-			
-				//assign and create token
-				const token = jwt.sign(
-					{ key: user.deviceId },
-					process.env.jsonSecretToken,
-					{ expiresIn: "1h" }
-				);
-				const data = {
-					token: token,
-					mobile: user.mobile,
-					username: user.username,
-					wallet_balance: user.wallet_balance,
-					userId: user._id,
-					name: user.name,
-					deviceId : user.deviceId,
-					mainNotification: user.mainNotification,
-					gameNotification: user.gameNotification,
-					starLineNotification: user.starLineNotification,
-					andarBaharNotification: user.andarBaharNotification,
-				};
+			const mpin = user.mpin;
+			let mpinGen = 1;
+			if (mpin === null) {
+				mpinGen = 0;
+			}
 
-				await User.updateOne(
-					{ _id: user._id },
-					{ $set: { loginStatus: true ,lastLoginDate:moment().format('DD/MM/YYYY')} }
-				);
+			//assign and create token
+			const token = jwt.sign(
+				{ key: user.deviceId },
+				process.env.jsonSecretToken,
+				{ expiresIn: "1h" }
+			);
+			const data = {
+				token: token,
+				mobile: user.mobile,
+				username: user.username,
+				wallet_balance: user.wallet_balance,
+				userId: user._id,
+				name: user.name,
+				deviceId: user.deviceId,
+				mainNotification: user.mainNotification,
+				gameNotification: user.gameNotification,
+				starLineNotification: user.starLineNotification,
+				andarBaharNotification: user.andarBaharNotification,
+			};
 
-				res.header("auth-token", token).send({
-					status: 1,
-					message: "Success",
-					data: data,
-					mpinGenerated: mpinGen,
-				});
+			await User.updateOne(
+				{ _id: user._id },
+				{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
+			);
+
+			res.header("auth-token", token).send({
+				status: 1,
+				message: "Success",
+				data: data,
+				mpinGenerated: mpinGen,
+			});
 		}
 	} catch (error) {
 		res.status(400).send({
@@ -539,7 +573,7 @@ router.post("/mpinLogin", async (req, res) => {
 				});
 			}
 			if (banned === false) {
-				if(req.body.isMpin){
+				if (req.body.isMpin) {
 					const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
 					if (!validPass) {
 						res.status(200).send({
@@ -547,8 +581,8 @@ router.post("/mpinLogin", async (req, res) => {
 							message: "Invalid MPIN",
 						});
 					}
-				}else{
-					await User.findByIdAndUpdate({_id:user._id},{fingerPrint:req.body.mpin});
+				} else {
+					await User.findByIdAndUpdate({ _id: user._id }, { fingerPrint: req.body.mpin });
 				}
 				// const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
 				// if (!validPass) {
@@ -557,40 +591,40 @@ router.post("/mpinLogin", async (req, res) => {
 				// 		message: "Invalid MPIN",
 				// 	});
 				// } else {
-					const token = jwt.sign(
-						{ key: user.deviceId },
-						process.env.jsonSecretToken
-					);
-					const data = {
-						token: token,
-						mobile: user.mobile,
-						username: user.username,
-						wallet_balance: user.wallet_balance,
-						userId: user._id,
-						name: user.name,
-						mainNotification: user.mainNotification,
-						gameNotification: user.gameNotification,
-						starLineNotification: user.starLineNotification,
-						andarBaharNotification: user.andarBaharNotification,
-					};
+				const token = jwt.sign(
+					{ key: user.deviceId },
+					process.env.jsonSecretToken
+				);
+				const data = {
+					token: token,
+					mobile: user.mobile,
+					username: user.username,
+					wallet_balance: user.wallet_balance,
+					userId: user._id,
+					name: user.name,
+					mainNotification: user.mainNotification,
+					gameNotification: user.gameNotification,
+					starLineNotification: user.starLineNotification,
+					andarBaharNotification: user.andarBaharNotification,
+				};
 
-					const mpin = user.mpin;
-					let mpinGen = 1;
-					if (mpin === null) {
-						mpinGen = 0;
-					}
+				const mpin = user.mpin;
+				let mpinGen = 1;
+				if (mpin === null) {
+					mpinGen = 0;
+				}
 
-					await User.updateOne(
-						{ _id: user._id },
-						{ $set: { loginStatus: true ,lastLoginDate:moment().format('DD/MM/YYYY')} }
-					);
+				await User.updateOne(
+					{ _id: user._id },
+					{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
+				);
 
-					res.header("auth-token", token).send({
-						status: 1,
-						message: "Success",
-						data: data,
-						mpinGenerated: mpinGen,
-					});
+				res.header("auth-token", token).send({
+					status: 1,
+					message: "Success",
+					data: data,
+					mpinGenerated: mpinGen,
+				});
 				// }
 			} else {
 				return res.status(200).json({
@@ -640,52 +674,52 @@ router.post("/deviceChnage", async (req, res) => {
 		// const OTP = req.body.OTP;
 		// sendOtp.verify(mobileNumber, OTP, async function (error, data) {
 		// 	if (data.type == "success") {
-				try {
-					const OTP = req.body.OTP;
-					const mobileNumber = req.body.mobileNumber;
-					const userId = req.body.userId;
-					const OlddeviceId = req.body.OlddeviceId;
-					const OldDeviceName = req.body.OldDeviceName;
-					const deviceName = req.body.deviceName;
-					const deviceId = req.body.deviceId;
-					const firebaseToken = req.body.firebaseToken;
-					const dt = dateTime.create();
-					const formatted = dt.format("d/m/Y I:M:S p");
-					let arrayOld = req.body.changeDetails;
-					let data = {
-						OlddeviceId: OlddeviceId,
-						OldDeviceName: OldDeviceName,
-						changeOn: formatted,
-					};
-					arrayOld.push(data);
+		try {
+			const OTP = req.body.OTP;
+			const mobileNumber = req.body.mobileNumber;
+			const userId = req.body.userId;
+			const OlddeviceId = req.body.OlddeviceId;
+			const OldDeviceName = req.body.OldDeviceName;
+			const deviceName = req.body.deviceName;
+			const deviceId = req.body.deviceId;
+			const firebaseToken = req.body.firebaseToken;
+			const dt = dateTime.create();
+			const formatted = dt.format("d/m/Y I:M:S p");
+			let arrayOld = req.body.changeDetails;
+			let data = {
+				OlddeviceId: OlddeviceId,
+				OldDeviceName: OldDeviceName,
+				changeOn: formatted,
+			};
+			arrayOld.push(data);
 
-					const UpdateUser = await User.updateOne(
-						{ _id: userId },
-						{
-							$set: {
-								deviceId: deviceId,
-								firebaseId: firebaseToken,
-								deviceName: deviceName,
-								changeDetails: arrayOld,
-								UpdatedAt: formatted,
-							},
-						}
-					);
-
-					updateFirebase(userId, firebaseToken);
-
-					res.json({
-						status: 1,
-						message: "Success",
-						data: UpdateUser,
-					});
-				} catch (error) {
-					res.json({
-						status: 3,
-						message: "This Device Is Already Registered",
-						data: error,
-					});
+			const UpdateUser = await User.updateOne(
+				{ _id: userId },
+				{
+					$set: {
+						deviceId: deviceId,
+						firebaseId: firebaseToken,
+						deviceName: deviceName,
+						changeDetails: arrayOld,
+						UpdatedAt: formatted,
+					},
 				}
+			);
+
+			updateFirebase(userId, firebaseToken);
+
+			res.json({
+				status: 1,
+				message: "Success",
+				data: UpdateUser,
+			});
+		} catch (error) {
+			res.json({
+				status: 3,
+				message: "This Device Is Already Registered",
+				data: error,
+			});
+		}
 		// 	}
 		// 	if (data.type == "error" || error) {
 		// 		return res.json({
@@ -695,6 +729,51 @@ router.post("/deviceChnage", async (req, res) => {
 		// 		});
 		// 	}
 		// });
+	} catch (error) {
+		res.status(400).json({
+			status: 0,
+			message: "Something Bad Happened Contact Support",
+			error: error,
+		});
+	}
+});
+
+router.post("/sendMobileOtp", async (req, res) => {
+	try {
+		const { mobileNumber } = req.body;
+		if (!mobileNumber) {
+			res.status(400).json({
+				status: 0,
+				message: "Number Is Require",
+			});
+		}
+		let userInfo = await initialInfo.findOne({ mobileNumber });
+		let generateOTP = Math.floor(1000 + Math.random() * 9000);
+		if (!userInfo) {
+			let info = await new initialInfo({
+				mobileNumber,
+				Otp: generateOTP,
+				status: 0,
+				currentTime: Date.now(),
+			})
+			await info.save()
+		} else {
+			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp: generateOTP, status: 0, currentTime: Date.now(), });
+		}
+		let body = `Dear user,
+			${generateOTP} is your OTP ( One time Password ) For Registration Valid For 5 Mins. 
+            Regards,
+            Khatri555.com .`
+		let message = await client.messages.create({
+			from: otpPhoneNumber,
+			body: body,
+			to: mobileNumber
+		});
+		console.log(message.sid)
+		return res.status(200).send({
+			status: 1,
+			message: "Otp  Send Successfully",
+		});
 	} catch (error) {
 		res.status(400).json({
 			status: 0,
