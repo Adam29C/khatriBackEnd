@@ -129,7 +129,6 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
 
 const sendMutipalNotification = async (tokenArr, title, body, notificationType) => {
     let priority = 'high'
-    console.log(tokenArr,"@!!!!!!!!!!!!!!!!")
     let message = {
 		android: {
 			priority: 'high',
