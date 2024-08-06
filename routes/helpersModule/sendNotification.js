@@ -3,7 +3,6 @@ const chunks = require('array.chunk');
 const messaging = require("../../firebase");
 module.exports = async function (req, res, sumDgit, uesrtoken) {
     try {
-        console.log("result vali api execute hogi")
         const x = req.body.gameId;
         const str = req.body.providerId;
         let data = '';
@@ -112,7 +111,6 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
                 };
                 try {
                     const response = await messaging.send(message);
-                    console.log('Successfully sent message:', response);
                 } catch (error) {
                     if (error.code === 'messaging/registration-token-not-registered') {
                         console.error('Token is not registered. Removing from database.');
