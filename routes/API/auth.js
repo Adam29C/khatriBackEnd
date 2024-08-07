@@ -987,7 +987,7 @@ async function otpSend(mobileNumber) {
 		let message = await client.messages.create({
 			from: otpPhoneNumber,
 			body: body,
-			to: "+918371978250"
+			to: mobileNumber
 		});
 		return generateOTP;
 	}catch(error){
