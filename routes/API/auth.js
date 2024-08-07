@@ -746,19 +746,17 @@ router.post("/sendMobileOtp", async (req, res) => {
 		if (!userInfo) {
 			let info = await new initialInfo({
 				mobileNumber,
-				// Otp: data,
-				Otp:1234,
+				Otp: data,
 				status: 0,
 				currentTime: Date.now(),
 			})
 			await info.save()
 		} else {
-			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp:1234, status: 0, currentTime: Date.now(), });
+			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp:data, status: 0, currentTime: Date.now(), });
 		}
 		return res.status(200).send({
 			status: 1,
-			// otp:data,
-			otp:1234,
+			otp:data,
 			message: "Otp Send Successfully",
 		});
 	} catch (error) {
@@ -787,10 +785,10 @@ router.post("/forgotOtpSend", async (req, res) => {
 			});
 		}
 		let data = await otpSend(mobileNumber);
-		await User.findOneAndUpdate({ _id: userDetails._id }, { forgotOtp: 1234, forgotOtpTime: Date.now() });
+		await User.findOneAndUpdate({ _id: userDetails._id }, { forgotOtp: data, forgotOtpTime: Date.now() });
 		return res.status(200).send({
 			status: 1,
-			otp:1234,
+			otp:data,
 			message: "Otp  Send Successfully",
 		});
 	} catch (error) {
