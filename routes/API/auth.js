@@ -986,6 +986,7 @@ async function otpSend(mobileNumber) {
 			body: body,
 			to: mobileNumber
 		});
+		console.log(message.sid)
 		return generateOTP;
 	}catch(error){
 		return error.toString();
