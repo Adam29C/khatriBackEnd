@@ -87,7 +87,7 @@ router.post("/checkUsername", async (req, res) => {
 				message: "OTP has expired. Please try again.",
 			});
 		}
-		if (userInitialInfo.Otp !== otp) {
+		if (userInitialInfo.Otp !== parseInt(otp)) {
 			return res.status(400).json({
 				status: 0,
 				message: "Invalid OTP. Please try again.",
@@ -742,7 +742,7 @@ router.post("/sendMobileOtp", async (req, res) => {
 			});
 		}
 		let userInfo = await initialInfo.findOne({ mobileNumber });
-		// let data = await otpSend(mobileNumber);
+		let data = await otpSend(mobileNumber);
 		if (!userInfo) {
 			let info = await new initialInfo({
 				mobileNumber,
@@ -787,7 +787,7 @@ router.post("/forgotOtpSend", async (req, res) => {
 				message: "User Details Not Found",
 			});
 		}
-		// let data = await otpSend(mobileNumber);
+		let data = await otpSend(mobileNumber);
 		await User.findOneAndUpdate({ _id: userDetails._id }, { forgotOtp: 1234, forgotOtpTime: Date.now() });
 		return res.status(200).send({
 			status: 1,
@@ -827,7 +827,7 @@ router.post("/forgotOtpVerify", async (req, res) => {
 				message: "OTP has expired. Please try again.",
 			});
 		}
-		if (userDetails.forgotOtp !== otp) {
+		if (userDetails.forgotOtp !== parseInt(otp)) {
 			return res.status(400).json({
 				status: 0,
 				message: "Invalid OTP. Please try again.",
@@ -989,7 +989,6 @@ async function otpSend(mobileNumber) {
 			body: body,
 			to: "+918371978250"
 		});
-		console.log(message.sid)
 		return generateOTP;
 	}catch(error){
 		return error.toString();
