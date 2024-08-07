@@ -762,7 +762,6 @@ router.post("/sendMobileOtp", async (req, res) => {
 			message: "Otp Send Successfully",
 		});
 	} catch (error) {
-		console.log(error,"error")
 		return res.status(400).json({
 			status: 0,
 			message: "Something Bad Happened Contact Support",
