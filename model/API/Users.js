@@ -78,6 +78,12 @@ const userSchema = new mongoose.Schema(
 		deviceVeriOTP: {
 			type: Number,
 		},
+		forgotOtp:{
+			type:Number,
+		},
+		forgotOtpTime:{
+			type:Number,
+		},
 		CreatedAt: {
 			type: String,
 			required: true,
