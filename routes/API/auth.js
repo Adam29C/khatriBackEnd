@@ -72,7 +72,7 @@ router.post("/checkUsername", async (req, res) => {
 				message: "Number, otp, username  Is Require",
 			});
 		}
-		let userInitialInfo = await initialInfo.findOne({ mobileNumber,status:0 }, { Otp: 1, status: 1, currentTime: 1 });
+		let userInitialInfo = await initialInfo.findOne({ mobileNumber, status: 0 }, { Otp: 1, status: 1, currentTime: 1 });
 		if (!userInitialInfo) {
 			return res.status(400).json({
 				status: 0,
@@ -93,7 +93,7 @@ router.post("/checkUsername", async (req, res) => {
 				message: "Invalid OTP. Please try again.",
 			});
 		} else {
-			await initialInfo.updateOne({ mobileNumber }, { Status: 1, currentTime: Date.now() })
+			await initialInfo.updateOne({ mobileNumber }, { status: 1})
 		}
 		let check = await User.findOne({ username: username })
 		if (check) {
@@ -259,18 +259,13 @@ router.post("/register", async (req, res) => {
 		const mobileNumber = req.body.mobile;
 		const OTP = req.body.deviceVeriOTP;
 		let otpData = { type: 'error' };
-		//otpData['type'] = OTP === 1234 || OTP === '1234' ? 'success' : 'error';
 		otpData['type'] = OTP === 1234 || OTP === '1234' ? 'success' : 'success';
-		// sendOtp.verify(mobileNumber, OTP, async function (error, data) {
 
 		if (otpData.type == "success") {
 			try {
-				// let userPassword = req.body.password;
 				let userMpin = req.body.mpin;
 				const salt = await bcrypt.genSalt(10);
-				// const hashedPassword = await bcrypt.hash(userPassword, salt);
 				const hashedMpin = await bcrypt.hash(userMpin, salt);
-
 				const dt = dateTime.create();
 				const formatted = dt.format("d/m/Y");
 				const time = dt.format("I:M:S p");
@@ -278,7 +273,6 @@ router.post("/register", async (req, res) => {
 				let username = req.body.username;
 				const user = new User({
 					name: req.body.name,
-					// password: hashedPassword,
 					username: username.toLowerCase().replace(/\s/g, ""),
 					mobile: req.body.mobile.replace(/\s/g, ""),
 					firebaseId: req.body.firebaseId,
@@ -748,30 +742,56 @@ router.post("/sendMobileOtp", async (req, res) => {
 			});
 		}
 		let userInfo = await initialInfo.findOne({ mobileNumber });
-		let generateOTP = Math.floor(1000 + Math.random() * 9000);
+		// let data = await otpSend(mobileNumber);
 		if (!userInfo) {
 			let info = await new initialInfo({
 				mobileNumber,
-				Otp: generateOTP,
+				// Otp: data,
+				Otp:1234,
 				status: 0,
 				currentTime: Date.now(),
 			})
 			await info.save()
 		} else {
-			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp: generateOTP, status: 0, currentTime: Date.now(), });
+			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp:1234, status: 0, currentTime: Date.now(), });
 		}
-		let body = `Dear user,
-			${generateOTP} is your OTP ( One time Password ) For Registration Valid For 5 Mins. 
-            Regards,
-            Khatri555.com .`
-		let message = await client.messages.create({
-			from: otpPhoneNumber,
-			body: body,
-			to: mobileNumber
-		});
-		console.log(message.sid)
 		return res.status(200).send({
 			status: 1,
+			// otp:data,
+			otp:1234,
+			message: "Otp Send Successfully",
+		});
+	} catch (error) {
+		console.log(error,"error")
+		return res.status(400).json({
+			status: 0,
+			message: "Something Bad Happened Contact Support",
+			error: error,
+		});
+	}
+});
+
+router.post("/forgotOtpSend", async (req, res) => {
+	try {
+		const { mobileNumber } = req.body;
+		if (!mobileNumber) {
+			return res.status(400).json({
+				status: 0,
+				message: "Number Is Require",
+			});
+		}
+		let userDetails = await User.findOne({ mobile: mobileNumber });
+		if (!userDetails) {
+			return res.status(400).json({
+				status: 0,
+				message: "User Details Not Found",
+			});
+		}
+		// let data = await otpSend(mobileNumber);
+		await User.findOneAndUpdate({ _id: userDetails._id }, { forgotOtp: 1234, forgotOtpTime: Date.now() });
+		return res.status(200).send({
+			status: 1,
+			otp:1234,
 			message: "Otp  Send Successfully",
 		});
 	} catch (error) {
@@ -781,7 +801,50 @@ router.post("/sendMobileOtp", async (req, res) => {
 			error: error,
 		});
 	}
-});
+})
+
+router.post("/forgotOtpVerify", async (req, res) => {
+	try {
+		const { mobileNumber, otp } = req.body;
+		if (!mobileNumber || !otp) {
+			return res.status(400).json({
+				status: 0,
+				message: "Number And Otp Is Require",
+			});
+		}
+		let userDetails = await User.findOne({ mobile: mobileNumber });
+		if (!userDetails) {
+			return res.status(400).json({
+				status: 0,
+				message: "User Details Not Found",
+			});
+		}
+		let newTimestamp = moment(userDetails.forgotOtpTime).add(5, 'minutes').valueOf();
+		let currentTime = Date.now();
+		if (currentTime > newTimestamp) {
+			return res.status(400).json({
+				status: 0,
+				message: "OTP has expired. Please try again.",
+			});
+		}
+		if (userDetails.forgotOtp !== otp) {
+			return res.status(400).json({
+				status: 0,
+				message: "Invalid OTP. Please try again.",
+			});
+		}
+		return res.status(200).send({
+			status: 1,
+			message: "OTP verified successfully.",
+		});
+	} catch (error) {
+		return res.status(400).json({
+			status: 0,
+			message: "Something Bad Happened Contact Support",
+			error: error,
+		});
+	}
+})
 
 router.post("/sendOTP", async (req, res) => {
 
@@ -914,4 +977,22 @@ async function updateUserCount() {
 	);
 }
 
+async function otpSend(mobileNumber) {
+	try{
+		let generateOTP = Math.floor(1000 + Math.random() * 9000);
+		let body = `Dear user,
+				${generateOTP} is your OTP ( One time Password ) For Registration Valid For 5 Mins. 
+				Regards,
+				Khatri555.com .`
+		let message = await client.messages.create({
+			from: otpPhoneNumber,
+			body: body,
+			to: "+918371978250"
+		});
+		console.log(message.sid)
+		return generateOTP;
+	}catch(error){
+		return error.toString();
+	}
+}
 module.exports = router;
