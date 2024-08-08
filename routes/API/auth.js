@@ -14,10 +14,15 @@ const sendOtp = new SendOtp("1207171791436302472");
 const fetch = require("node-fetch");
 const moment = require("moment");
 dotenv.config();
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKE;
-const otpPhoneNumber = process.env.OTP_PHONE_NUMBER;
-const client = require('twilio')(accountSid, authToken);
+const axios = require('axios');
+// const accountSid = process.env.TWILIO_ACCOUNT_SID;
+// const authToken = process.env.TWILIO_AUTH_TOKE;
+// const otpPhoneNumber = process.env.OTP_PHONE_NUMBER;
+// const client = require('twilio')(accountSid, authToken);
+const account_key = process.env.ACCOUNT_KEY;
+const sender_id = process.env.SENDER_ID;
+const template_id = process.env.TEMPLET_ID;
+const route = process.env.ROUTE;
 const initialInfo = require("../../model/InitialUserInfo")
 
 const chatDomain = process.env.CHAT_DOMAIN;
@@ -93,7 +98,7 @@ router.post("/checkUsername", async (req, res) => {
 				message: "Invalid OTP. Please try again.",
 			});
 		} else {
-			await initialInfo.updateOne({ mobileNumber }, { status: 1})
+			await initialInfo.updateOne({ mobileNumber }, { status: 1 })
 		}
 		let check = await User.findOne({ username: username })
 		if (check) {
@@ -752,11 +757,11 @@ router.post("/sendMobileOtp", async (req, res) => {
 			})
 			await info.save()
 		} else {
-			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp:data, status: 0, currentTime: Date.now(), });
+			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp: data, status: 0, currentTime: Date.now(), });
 		}
 		return res.status(200).send({
 			status: 1,
-			otp:data,
+			otp: data,
 			message: "Otp Send Successfully",
 		});
 	} catch (error) {
@@ -788,7 +793,7 @@ router.post("/forgotOtpSend", async (req, res) => {
 		await User.findOneAndUpdate({ _id: userDetails._id }, { forgotOtp: data, forgotOtpTime: Date.now() });
 		return res.status(200).send({
 			status: 1,
-			otp:data,
+			otp: data,
 			message: "Otp  Send Successfully",
 		});
 	} catch (error) {
@@ -975,17 +980,23 @@ async function updateUserCount() {
 }
 
 async function otpSend(mobileNumber) {
-	try{
+	try {
 		let generateOTP = Math.floor(1000 + Math.random() * 9000);
-		let body = `Dear user,\n${generateOTP} is your OTP ( One time Password ) For Verification Valid For 5 Mins.\nRegards,\nKhatri555.com`;
-		let message = await client.messages.create({
-			from: otpPhoneNumber,
-			body: body,
-			to: mobileNumber
-		});
-		console.log(message.sid)
+		// let body = `Dear user,\n${generateOTP} is your OTP ( One time Password ) For Verification Valid For 5 Mins.\nRegards,\nKhatri555.com`;
+		// let message = await client.messages.create({
+		// 	from: otpPhoneNumber,  
+
+
+		// 	body: body,
+		// 	to: mobileNumber
+		// });
+		// let message = `Dear user,\n${generateOTP} is your OTP ( One time Password ) For Verification Valid For 5 Mins.\nRegards,\nKhatri555.com`;
+		let message= `Your one time verification code is ${generateOTP}. Verification code is valid for 30 min., We have never ask for verification code or pin.`
+		const url = `https://sms.par-ken.com/api/smsapi?key=${account_key}&route=${route}&sender=${sender_id}&number=${mobileNumber}&sms=${message}&templateid=${template_id}`
+		const response = await axios.post(url);
+		console.log('SMS sent successfully:', response.data);
 		return generateOTP;
-	}catch(error){
+	} catch (error) {
 		return error.toString();
 	}
 }
