@@ -977,7 +977,7 @@ async function updateUserCount() {
 async function otpSend(mobileNumber) {
 	try{
 		let generateOTP = Math.floor(1000 + Math.random() * 9000);
-		let body = `Dear user,\n${generateOTP} is your OTP ( One time Password ) For Registration Valid For 5 Mins.\nRegards,\nKhatri555.com`;
+		let body = `Dear user,\n${generateOTP} is your OTP ( One time Password ) For Verification Valid For 5 Mins.\nRegards,\nKhatri555.com`;
 		let message = await client.messages.create({
 			from: otpPhoneNumber,
 			body: body,
