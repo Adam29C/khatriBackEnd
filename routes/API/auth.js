@@ -79,7 +79,7 @@ router.post("/checkUsername", async (req, res) => {
 				message: "Data Not Found",
 			});
 		}
-		let newTimestamp = moment(userInitialInfo.currentTime).add(5, 'minutes').valueOf();
+		let newTimestamp = moment(userInitialInfo.currentTime).add(2, 'minutes').valueOf();
 		let currentTime = Date.now();
 		if (currentTime > newTimestamp) {
 			return res.status(400).json({
@@ -816,7 +816,7 @@ router.post("/forgotOtpVerify", async (req, res) => {
 				message: "User Details Not Found",
 			});
 		}
-		let newTimestamp = moment(userDetails.forgotOtpTime).add(5, 'minutes').valueOf();
+		let newTimestamp = moment(userDetails.forgotOtpTime).add(2, 'minutes').valueOf();
 		let currentTime = Date.now();
 		if (currentTime > newTimestamp) {
 			return res.status(400).json({
@@ -977,16 +977,12 @@ async function updateUserCount() {
 async function otpSend(mobileNumber) {
 	try{
 		let generateOTP = Math.floor(1000 + Math.random() * 9000);
-		let body = `Dear user,
-				${generateOTP} is your OTP ( One time Password ) For Registration Valid For 5 Mins. 
-				Regards,
-				Khatri555.com .`
+		let body = `Dear user,\n${generateOTP} is your OTP ( One time Password ) For Registration Valid For 5 Mins.\nRegards,\nKhatri555.com`;
 		let message = await client.messages.create({
 			from: otpPhoneNumber,
 			body: body,
 			to: mobileNumber
 		});
-		console.log(message.sid)
 		return generateOTP;
 	}catch(error){
 		return error.toString();
