@@ -7,7 +7,8 @@ const dt = dateTime.create();
 
 router.get("/", session, permission, async (req, res) => {
 	try {
-		const reqdata = await requestON.find({enabled:true}).sort({ _id: 1 });
+		// const reqdata = await requestON.find({enabled:true}).sort({ _id: 1 });
+		const reqdata = await requestON.find({isRequest:false}).sort({ _id: 1 });
 		const userInfo = req.session.details;
 		const permissionArray = req.view;
 		const check = permissionArray["reqONOFF"].showStatus;
