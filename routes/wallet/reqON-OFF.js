@@ -41,8 +41,9 @@ router.post("/updateReq", async (req, res) => {
 			{ _id: id },
 			{ $set: { message: message, enabled: status, updatedAt: date } }
 		);
-
-		res.json(update);
+		let requestList = await requestON.find({isRequest:false});
+		// res.json(update);
+		res.json(requestList)
 	} catch (error) {
 		res.json(error);
 	}
