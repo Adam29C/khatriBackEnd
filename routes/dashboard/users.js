@@ -24,10 +24,10 @@ const moment = require("moment");
 const fs = require('fs');
 const path = require('path');
 const uri = process.env.DB_CONNECT;
-const client = new MongoClient.connect(process.env.DB_CONNECT,{
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-});
+const client = new MongoClient(process.env.DB_CONNECT, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
 // const certPath = path.join(__dirname, '../../global-bundle.pem');
 // const client = new MongoClient(uri, {
 //     useNewUrlParser: true,
