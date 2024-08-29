@@ -190,8 +190,23 @@ router.get("/web/AbList", async (req, res) => {
   try {
     let finalArr = {};
     let provider1 = await AB_provider.find();
+    //
+    const providerData = provider1.sort((a, b) => {
+      // Function to convert time in "HH:MM AM/PM" format to 24-hour format in minutes
+      const toMinutes = (time) => {
+        const [timePart, modifier] = time.split(' ');
+        let [hours, minutes] = timePart.split(':').map(Number);
+        // Convert to 24-hour format
+        if (modifier === 'PM' && hours !== 12) hours += 12;
+        if (modifier === 'AM' && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
+
+      return toMinutes(a.providerName) - toMinutes(b.providerName);
+    });
+    //
     const todayDayName = moment().format("dddd");
-    for (let AbDetails of provider1) {
+    for (let AbDetails of providerData) {
       let id = AbDetails._id;
       const settings = await AbGame.find({
         providerId: AbDetails._id,
