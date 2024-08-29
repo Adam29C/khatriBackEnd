@@ -55,7 +55,7 @@ router.post("/insertSettings", session, async (req, res) => {
 		const dt = dateTime.create();
 		const formatted = dt.format("Y-m-d H:M:S");
 		const providerId = req.body.gameid;
-		const gameDay = req.body.gameDay[0];
+		const gameDay = req.body.gameDay;
 		const find = await gamesSetting.findOne({
 			providerId: providerId,
 			gameDay: gameDay,

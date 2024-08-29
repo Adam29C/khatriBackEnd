@@ -706,6 +706,7 @@ router.post("/addpoint", async (req, res) => {
 			let UPINumber = null
 			let title;
 			let body;
+			let filter= 4;
 			if (upiId !== null && upiId !== undefined) {
 				upiDetails = await upiIds.findOne({ _id: upiId });
 				upiObjId = upiDetails._id;
@@ -792,7 +793,7 @@ router.post("/addpoint", async (req, res) => {
 			const wallet_his = new history({
 				userId: userId,
 				bidId: saveId._id,
-				filterType: 4,
+				filterType: filter,
 				previous_amount: previous_amount,
 				current_amount: wallet_balance,
 				transaction_amount: parseInt(amount),
