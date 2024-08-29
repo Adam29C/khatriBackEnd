@@ -18,7 +18,7 @@ const timeHistory = require("../../model/timeHistory");
 
 const fs = require('fs');
 const uri = process.env.DB_CONNECT;
-const client = await MongoClient.connect(process.env.DB_CONNECT,{
+const client = new MongoClient.connect(process.env.DB_CONNECT,{
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 });

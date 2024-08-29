@@ -24,7 +24,7 @@ const moment = require("moment");
 const fs = require('fs');
 const path = require('path');
 const uri = process.env.DB_CONNECT;
-const client = await MongoClient.connect(process.env.DB_CONNECT,{
+const client = new MongoClient.connect(process.env.DB_CONNECT,{
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 });
