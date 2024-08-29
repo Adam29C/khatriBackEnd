@@ -129,6 +129,12 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
 
 const sendMutipalNotification = async (tokenArr, title, body, notificationType) => {
     let priority = 'high'
+    let finalArr=[]
+    for(let arr of tokenArr){
+        if(arr!==""){
+            finalArr.push(arr)
+        }
+    }
     let message = {
 		android: {
 			priority: 'high',
@@ -139,7 +145,7 @@ const sendMutipalNotification = async (tokenArr, title, body, notificationType) 
 			icon: 'ic_launcher',
 			type: notificationType,
 		},
-		tokens: tokenArr,
+		tokens: finalArr,
 	};
 	try {
 		const response = await messaging.sendMulticast(message);

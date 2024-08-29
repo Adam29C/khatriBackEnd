@@ -648,6 +648,12 @@ router.post("/refundAll", session, async (req, res) => {
 });
 
 async function sendRefundNotification(tokenArray, name, body) {
+	let finalArr=[]
+    for(let arr of tokenArray){
+        if(arr!==""){
+            finalArr.push(arr)
+        }
+    }
 	let message = {
 		android: {
 			priority: 'high',
@@ -658,7 +664,7 @@ async function sendRefundNotification(tokenArray, name, body) {
 			icon: 'ic_launcher',
 			type: 'Notification',
 		},
-		token: tokenArray,
+		token: finalArr,
 	};
 	try {
         const response = await messaging.sendMulticast(message);
