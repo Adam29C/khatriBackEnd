@@ -27,7 +27,7 @@ const chatDomain = process.env.CHAT_DOMAIN;
 router.post("/getBal", verify, async (req, res) => {
 	try {
 		const id = req.body.id;
-		const user = await userDetails.findOne({ _id: id }, { wallet_balance: 1 });
+		const user = await userDetails.findOne({ _id: id }, { wallet_balance: 1, username:1, mobile:1 });
 		if (!user) {
 			return res.json({
 				status: 1,
@@ -328,6 +328,7 @@ router.post("/firebaseUpdate", async (req, res) => {
 						// appLink: "https://update.yogicactors.co.uk/apk/Dhan_Games.apk",
 						appLink,
 						forceStatus: fsatuts, //Show Close Button
+                                                newVersion:Currentversion
 					});
 				}
 			}

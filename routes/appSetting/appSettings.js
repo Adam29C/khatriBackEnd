@@ -258,7 +258,6 @@ router.get("/versionSetting", session, permission, async (req, res) => {
   const find = await version.findOne();
   const userInfo = req.session.details;
   const permissionArray = req.view;
-
   if (userInfo.role == 0) {
     res.render("./appSettings/version", {
       data: find,

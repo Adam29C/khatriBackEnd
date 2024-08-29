@@ -133,7 +133,7 @@
         <div class="modal-body">
           <div class="form-group">
             <label for="CorD" class="col-form-label">On or Off</label>
-            <select id="CorD" class="form-control" required>
+            <select id="CorD" class="form-control" required selected>
               <option value="true">On</option>
               <option value="false">Off</option>
             </select>
@@ -170,9 +170,19 @@
       let rowId = $("#userid").val();
       let reason = $("#reason").val();
 
+//       function isBoolean(value) {
+//     return typeof value === 'boolean';
+// }
+
+   
+       let  status1= status === "true" ? true : false
+       let rowId1 =  rowId.replace(/"/g, '')
+       let  reason1=  reason.replace(/"/g, '')  
+
+
       fetch("/reqOnOff/updateReq", {
         method: "POST",
-        body: JSON.stringify({ status: status, rowId: rowId, reason: reason }),
+        body: JSON.stringify({ status: status1, rowId: rowId1, reason: reason1 }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -180,7 +190,7 @@
       })
         .then((res) => res.json())
         .then((body) => {
-          location.reload();
+        location.reload();
         });
     }
 
