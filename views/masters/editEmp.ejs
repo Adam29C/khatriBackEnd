@@ -629,6 +629,11 @@
 <script>
     $("#register").click(function (event) {
         var formData = $('form').serializeArray();
+
+        console.log("formData" ,formData);
+
+
+    // return
             $.ajax({
                 type: "POST",
                 url: "/employee/updateEmployee",
@@ -648,7 +653,7 @@
                         }(window.jQuery),
                         function(t) {
                             window.jQuery.SweetAlert.init();
-                            location.reload();    
+                            // location.reload();    
                         }();
                     }
                     else{
