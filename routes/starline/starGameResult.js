@@ -271,7 +271,7 @@ router.post("/", session, async (req, res) => {
 router.get("/pastResult", session, async (req, res) => {
 	try {
 		// Need to Test
-		return res.json('Not Found');
+		//return res.json('Not Found');
 		const name = req.query.date;
 		const result = await StarlinegameResult.find({ resultDate: name });
 		const countResult = await StarlinegameResult.find({

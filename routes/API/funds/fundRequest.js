@@ -78,6 +78,7 @@ router.post("/addFund", verify, async (req, res) => {
 });
 
 // router.post("/withdrawFund", async (req, res) => {
+
 // 	try {
 // 		let accNumber = req.body.accNumber;
 // 		let ifscCode = req.body.ifscCode;
@@ -1087,6 +1088,19 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 	}
 });
 
+router.post("/completeAutoPayment",async(req,res)=>{
+	try{
+        console.log("Or Kasa kai. kai kri rai rio tu. ");
+		console.log("tharo kam hogyo gai");
+		console.log(req.body)
+	}catch(error){
+		res.json({
+			status: 0,
+			message: "Something Bad Happened Contact Support",
+			error: error,
+		});
+	}
+})
 router.post("/addPaymentOnline", async (req, res) => {
 	try {
 		const {

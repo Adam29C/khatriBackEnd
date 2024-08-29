@@ -77,8 +77,8 @@ router.get("/web/allgames", async (req, res) => {
 
 router.get("/web/games", async (req, res) => {
   try {
-    const userInfo = req.session.details;
-    const permissionArray = req.view;
+    // const userInfo = req.session.details;
+    // const permissionArray = req.view;
     const todayDayName = moment().format("dddd");
     const providers = await gamesProvider.find({}).sort({ _id: 1 });
     const nowTime = moment();
