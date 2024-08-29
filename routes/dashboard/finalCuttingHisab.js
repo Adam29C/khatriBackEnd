@@ -7,6 +7,8 @@ const moment = require("moment");
 const mongodb = require("mongodb");
 const { MongoClient, ObjectID } = mongodb;
 
+const fs = require('fs');
+const path = require('path');
 router.post("/getFinalCutting", async (req, res) => {
 	try {
         // Need To Test
@@ -368,8 +370,7 @@ async function commonQuery(providerId, startDate, endDate, session) {
     ])
     .sort({_id : 1});
 
-    if (Object.keys(allBidData).length != 0) 
-    {
+    if (Object.keys(allBidData).length != 0){
 		for (index in allBidData) {
             let bids = allBidData[index].items;
             let singleDigitSum = 0;
@@ -428,10 +429,18 @@ async function commonQuery(providerId, startDate, endDate, session) {
 module.exports = router;
 
 async function commonQueryNew(providerId, startDate, endDate, session) {
+    // const certPath = path.join(__dirname, '../../global-bundle.pem');
     const client = await MongoClient.connect(process.env.DB_CONNECT,{
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
     });
+
+    // const client = new MongoClient(uri, {
+    //     useNewUrlParser: true,
+    //     useUnifiedTopology: true,
+    //     tls: true,
+    //     tlsCAFile: certPath
+    // });
 
     const db = client.db("dhandb")
     const allBidData = await db.collection("game_bids").aggregate([{

@@ -21,11 +21,20 @@ const walletHistories = require("../../model/wallet_history")
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require('mongodb');
 const moment = require("moment");
+const fs = require('fs');
+const path = require('path');
 const uri = process.env.DB_CONNECT;
-const client = new MongoClient(uri, {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-});
+const client = new MongoClient(process.env.DB_CONNECT, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+// const certPath = path.join(__dirname, '../../global-bundle.pem');
+// const client = new MongoClient(uri, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     tls: true,
+//     tlsCAFile: certPath
+// });
 
 router.get("/", session, permission, async (req, res) => {
 	try {
@@ -331,7 +340,7 @@ router.post("/deleteUserByAdmin", session, async (req, res) => {
 		await walletHistories.deleteMany(filter)
 
 		await client.connect();
-		const database = client.db("test");
+		const database = client.db("admin");
 		const mappingCollection = database.collection("mapping_tables");
 		await mappingCollection.deleteMany(filter);
 		const messageCollection = database.collection("messages");

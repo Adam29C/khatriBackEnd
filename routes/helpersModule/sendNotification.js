@@ -147,7 +147,7 @@ const sendMutipalNotification = async (tokenArr, title, body, notificationType) 
 		if (response.failureCount > 0) {
 			response.responses.forEach((resp, idx) => {
 				if (!resp.success) {
-					console.error(`Failed to send to ${tokens[idx]}: ${resp.error}`);
+					console.error(`Failed to send to ${tokenArr[idx]}: ${resp.error}`);
 				}
 			});
 		}

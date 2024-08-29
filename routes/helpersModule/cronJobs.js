@@ -16,11 +16,19 @@ const Pusher = require("pusher");
 const path = require("path");
 const timeHistory = require("../../model/timeHistory");
 
+const fs = require('fs');
 const uri = process.env.DB_CONNECT;
-const client = new MongoClient(uri, {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-});
+const client = new MongoClient(process.env.DB_CONNECT, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+// const certPath = path.join(__dirname, '../../global-bundle.pem');
+// const client = new MongoClient(uri, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     tls: true,
+//     tlsCAFile: certPath
+// });
 
 const chatDomain = process.env.CHAT_DOMAIN;
 module.exports = async function () {
@@ -563,7 +571,7 @@ module.exports = async function () {
 	async function runCleanupTasks() {
 		try {
 			await client.connect();
-			const database = client.db("test");
+			const database = client.db("client");
 			let timeHistoryList = await timeHistory.find();
 			const cleanupPromises = timeHistoryList.map(details => cleanupOldEntries(database, details));
 			await Promise.all(cleanupPromises);
