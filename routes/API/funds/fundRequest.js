@@ -1093,6 +1093,10 @@ router.post("/completeAutoPayment",async(req,res)=>{
         console.log("Or Kasa kai. kai kri rai rio tu. ");
 		console.log("tharo kam hogyo gai");
 		console.log(req.body)
+		return res.json({
+			status: 1,
+			message: "Dear User Your Transaction is processed successfully",
+		});
 	}catch(error){
 		res.json({
 			status: 0,
