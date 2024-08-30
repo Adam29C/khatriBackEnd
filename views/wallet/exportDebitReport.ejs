@@ -515,7 +515,10 @@
       },
       credentials: "same-origin",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        res.json();
+        location.reload();
+      })
       .then((body) => {
         const tr_id = body.data + "abcd";
         $("#datatableExport")
@@ -615,7 +618,6 @@
           document.body.removeChild(element);
         });
     }
-
   }
 
   function todayAppReport() {
@@ -641,25 +643,25 @@
             "<tr><td>" +
             i +
             "</td>\
-                    <td>" +
+                      <td>" +
             e.ReportName +
             "</td>\
-                    <td>" +
+                      <td>" +
             e.ReportTime +
             "</td>\
-                    <td>" +
+                      <td>" +
             e.adminName +
             '</td>\
-                    <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="getReport(' +
+                      <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="getReport(' +
             id +
             ')">Download Report</button></td>\
-                    <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="GenerateReport(' +
+                      <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="GenerateReport(' +
             id +
             ')">Download Report</button></td>\
-                        <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateRport(' +
+                          <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateRport(' +
             id +
             ')">Download Report</button></td>\
-                    </tr>';
+                      </tr>';
           i++;
         });
 
@@ -1230,12 +1232,11 @@
   // ----------------- ganpat code ----------------
 
   function generateRport(id) {
-
     const searchType = $("#req_status").val();
     // const reportType = $("#report_type").val();
     const reportDate = $("#datepicker-autoclose").val();
 
-console.log("reportDate" ,reportDate);
+    console.log("reportDate", reportDate);
 
     const req = {
       reportDate: reportDate,
@@ -1266,10 +1267,8 @@ console.log("reportDate" ,reportDate);
           "Destination Bank",
           "Destination Bank IFS Code",
           "Beneficiary Name",
-          "Email ",
+          "Email",
         ];
-
-
 
         var formatHeader = excel.addStyle({
           border: "none,none,none,thin #333333",
