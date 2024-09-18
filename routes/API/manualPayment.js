@@ -38,7 +38,8 @@ router.post("/addManualPayment", async (req, res) => {
     if (base64Image) {
       const buffer = Buffer.from(base64Image, "base64");
       const params = {
-        Bucket: "khatribuckets",
+        // bucket: "khatri555",
+        bucket:"khatribuckets",
         Key: `uploads/manualPayment/${Date.now()}.jpg`,
         Body: buffer,
         ContentEncoding: "base64",
@@ -74,6 +75,7 @@ router.post("/addManualPayment", async (req, res) => {
       message: "Request Add Successfully Wait for 30 Mins. We Will Verify Your Payment And Update",
     });
   } catch (error) {
+console.log(error)
     return res.status(500).send({
       statusCode: 500,
       status: "Failure",

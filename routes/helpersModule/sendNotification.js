@@ -42,61 +42,23 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
                     break;
             }
             let length = token.length;
-            if (length > 1000) {
-                const userToken = token.map(token => token.firebaseId);
-                token = chunks(userToken, 1000);
-                let newLength = token.length;
+            if (length > 400) {
+                let finalArr = token.map(token => token.firebaseId).filter(firebaseId => firebaseId !== "");
+                let finalToken = chunks(finalArr, 400);
+                let newLength = finalToken.length;
                 for (j = 0; j < newLength; j++) {
-                    let tokenArr = token[j];
+                    let tokenArr = finalToken[j];
                     sendMutipalNotification(tokenArr, title, body, notificationType)
                 }
             }
             else {
                 const userToken = token.map(token => token.firebaseId);
+                console.log("Else condition execute")
                 sendMutipalNotification(userToken, title, body, notificationType)
             }
         } else {
             for (let i = 0; i < token.length; i++) {
-                // var message = new gcm.Message({
-                //     priority: 'high',
-                //     data: {
-                //         title: `${token[i].amount}/-rs Successfully Added To Your Wallet..`,
-                //         icon: "ic_launcher",
-                //         body: `🥳CONGRATS FOR ${winningDigit} GAME WIN 🎉`,
-                //         type: "Wallet"
-                //     }
-                // });
-                // sender.send(message, { registrationTokens: [token[i].firebaseId] }, function (err, response) {
-                //     if (err) console.log(err);
-                //     else console.log(response);
-                // });
-                // const message = {
-                //     notification: {
-                        // title: `🥳CONGRATS FOR ${winningDigit} GAME WIN 🎉`,
-                        // body: `${token[i].amount}/-rs Successfully Added To Your Wallet..`,
-                //     },
-                //     data: {
-                //         type: "Wallet"
-                //     },
-                //     android: {
-                //         priority: priority  // Setting the priority for Android
-                //     },
-                //     apns: {
-                //         payload: {
-                //             aps: {
-                //                 'content-available': 1,
-                //                 'priority': priority === 'high' ? 10 : 5  // Setting the priority for iOS
-                //             }
-                //         }
-                //     },
-                //     token: token[i].firebaseId
-                // };
-                // try {
-                //     const response = await admin.messaging().send(message);
-                // } catch (error) {
-                //     console.log('Error sending message:', error);
-                // }
-                let  priority='high'
+                let priority = 'high'
                 let message = {
                     android: {
                         priority: priority,
@@ -128,36 +90,28 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
 };
 
 const sendMutipalNotification = async (tokenArr, title, body, notificationType) => {
-    let priority = 'high'
-    let finalArr=[]
-    for(let arr of tokenArr){
-        if(arr!==""){
-            finalArr.push(arr)
-        }
-    }
     let message = {
-		android: {
-			priority: 'high',
-		},
-		data: {
-			title: title,
+        android: {
+            priority: 'high',
+        },
+        data: {
+            title: title,
             body: body,
-			icon: 'ic_launcher',
-			type: notificationType,
-		},
-		tokens: finalArr,
-	};
-	try {
-		const response = await messaging.sendMulticast(message);
-		console.log('Successfully sent message:', response);
-		if (response.failureCount > 0) {
-			response.responses.forEach((resp, idx) => {
-				if (!resp.success) {
-					console.error(`Failed to send to ${tokenArr[idx]}: ${resp.error}`);
-				}
-			});
-		}
-	} catch (error) {
-		console.log('Error sending message:', error);
-	}
+            icon: 'ic_launcher',
+            type: notificationType,
+        },
+        tokens: tokenArr,
+    };
+    try {
+        const response = await messaging.sendMulticast(message);
+        if (response.failureCount > 0) {
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    console.error(`Failed to send to ${tokenArr[idx]}: ${resp.error}`);
+                }
+            });
+        }
+    } catch (error) {
+        console.log('Error sending message:', error);
+    }
 }

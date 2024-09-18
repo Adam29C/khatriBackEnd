@@ -262,7 +262,7 @@ router.post("/addFund", verify, async (req, res) => {
 // });
 
 router.post("/withdrawFund", async (req, res) => {
-	try {
+	try{
 		let accNumber = req.body.accNumber;
 		let ifscCode = req.body.ifscCode;
 		let bankName = req.body.bankName;
@@ -706,7 +706,7 @@ router.post("/addpoint", async (req, res) => {
 			let UPINumber = null
 			let title;
 			let body;
-			let filter= 4;
+            let filter= 4;
 			if (upiId !== null && upiId !== undefined) {
 				upiDetails = await upiIds.findOne({ _id: upiId });
 				upiObjId = upiDetails._id;
@@ -1088,13 +1088,9 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 		});
 	}
 });
-
 router.post("/completeAutoPayment",async(req,res)=>{
 	try{
-        console.log("Or Kasa kai. kai kri rai rio tu. ");
-		console.log("tharo kam hogyo gai");
-		console.log(req.body)
-		return res.json({
+        return res.json({
 			status: 1,
 			message: "Dear User Your Transaction is processed successfully",
 		});

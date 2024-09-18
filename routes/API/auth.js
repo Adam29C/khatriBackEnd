@@ -203,7 +203,6 @@ router.post("/verifyMobile", async (req, res) => {
 				changeDetails: user.changeDetails,
 				token: token,
 			};
-
 			res.json({
 				status: 1,
 				message: "Success",
@@ -430,7 +429,7 @@ router.post("/login", async (req, res) => {
 						{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
 					);
 
-					res.header("auth-token", token).send({
+					return res.header("auth-token", token).send({
 						status: 1,
 						message: "Success",
 						data: data,
@@ -457,7 +456,7 @@ router.post("/login", async (req, res) => {
 						token: token,
 					};
 
-					res.header("auth-token", token).send({
+					return res.header("auth-token", token).send({
 						status: 2,
 						message: "You Have Changed Your Device Kindly Update Your Device",
 						data: data,
@@ -471,7 +470,7 @@ router.post("/login", async (req, res) => {
 			}
 		}
 	} catch (error) {
-		res.status(400).send({
+		return res.status(400).send({
 			status: 0,
 			message: "Failed",
 			error: error.toString(),
@@ -494,7 +493,7 @@ router.get("/getUserInfo", async (req, res) => {
 			data: userDetails,
 		});
 	} catch (error) {
-		res.status(500).send({
+		return res.status(500).send({
 			status: 0,
 			message: "Failed",
 			error: error.toString(),
@@ -542,7 +541,7 @@ router.post("/loginwithOnlyUsername", async (req, res) => {
 				{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
 			);
 
-			res.header("auth-token", token).send({
+			return res.header("auth-token", token).send({
 				status: 1,
 				message: "Success",
 				data: data,
@@ -550,7 +549,7 @@ router.post("/loginwithOnlyUsername", async (req, res) => {
 			});
 		}
 	} catch (error) {
-		res.status(400).send({
+		return res.status(400).send({
 			status: 0,
 			message: "Failed",
 			error: error.toString(),
@@ -566,7 +565,7 @@ router.post("/mpinLogin", async (req, res) => {
 			let mpin = user.mpin;
 			const banned = user.banned;
 			if (mpin == null) {
-				res.status(200).send({
+				return res.status(200).send({
 					status: 0,
 					message: "MPIN Not Available, Generate Mpin First",
 				});
@@ -575,7 +574,7 @@ router.post("/mpinLogin", async (req, res) => {
 				if (req.body.isMpin) {
 					const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
 					if (!validPass) {
-						res.status(200).send({
+						return res.status(200).send({
 							status: 0,
 							message: "Invalid MPIN",
 						});
@@ -618,7 +617,7 @@ router.post("/mpinLogin", async (req, res) => {
 					{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
 				);
 
-				res.header("auth-token", token).send({
+				return res.header("auth-token", token).send({
 					status: 1,
 					message: "Success",
 					data: data,
@@ -653,13 +652,13 @@ router.post("/logout", async (req, res) => {
 			{ _id: req.body.userId },
 			{ $set: { loginStatus: false } }
 		);
-		res.status(200).json({
+		return res.status(200).json({
 			status: 1,
 			message: "Logged Out Successfully",
 			data: updateUser,
 		});
 	} catch (e) {
-		res.status(400).send({
+		return res.status(400).send({
 			status: 0,
 			message: "Failed",
 			error: e,
@@ -729,7 +728,7 @@ router.post("/deviceChnage", async (req, res) => {
 		// 	}
 		// });
 	} catch (error) {
-		res.status(400).json({
+		return res.status(400).json({
 			status: 0,
 			message: "Something Bad Happened Contact Support",
 			error: error,
@@ -953,6 +952,7 @@ async function updateFirebase(id, firebaseToken) {
 		method: "POST",
 		// url: "https://chatpanel.rolloutgames.xyz/mappingTableFirebaseToken",
 		// url: "http://162.241.115.39:3000/mappingTableFirebaseToken",
+
 		url: `${chatDomain}/mappingTableFirebaseToken`,
 		headers: {
 			"Content-Type": "application/json",

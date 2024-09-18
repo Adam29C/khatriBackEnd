@@ -17,11 +17,7 @@ const path = require("path");
 const timeHistory = require("../../model/timeHistory");
 
 const fs = require('fs');
-const uri = process.env.DB_CONNECT;
-const client = new MongoClient(process.env.DB_CONNECT, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+// const uri = process.env.DB_CONNECT;
 // const certPath = path.join(__dirname, '../../global-bundle.pem');
 // const client = new MongoClient(uri, {
 //     useNewUrlParser: true,
@@ -29,6 +25,10 @@ const client = new MongoClient(process.env.DB_CONNECT, {
 //     tls: true,
 //     tlsCAFile: certPath
 // });
+const client = new MongoClient(process.env.DB_CONNECT, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
 
 const chatDomain = process.env.CHAT_DOMAIN;
 module.exports = async function () {
@@ -229,7 +229,7 @@ module.exports = async function () {
 		}
 	});
 
-	cron.schedule("0 0 * * *", async () => {
+	cron.schedule("0 8 * * *", async () => {
 		try {
 			const dt = dateTime.create();
 			const formatted = dt.format("m/d/Y I:M:S p");
@@ -248,13 +248,36 @@ module.exports = async function () {
 		}
 	});
 
+	// cron.schedule("1 0 * * *", async () => {
+	// 	if (process.env.pm_id == "1") {
+	// 		try {
+	// 			var lastweekEnd = moment().subtract(1, "days").format("DD/MM/YYYY");
+	// 			let lastweekStart1 = moment(lastweekEnd, "DD/MM/YYYY").unix();
+	// 			const yesterdayRegistered = await users
+	// 				.find({ timestamp: lastweekStart1 })
+	// 				.count();
+	// 			let dataUpdate = await dashboard.find();
+	// 			const update_id = dataUpdate[0]._id;
+	// 			await dashboard.updateOne(
+	// 				{ _id: update_id },
+	// 				{
+	// 					$set: {
+	// 						yesterdayRegistered: parseInt(yesterdayRegistered),
+	// 					},
+	// 				}
+	// 			);
+	// 		} catch (error) {
+	// 			console.log(error);
+	// 		}
+	// 	}
+	// });
+
 	cron.schedule("1 0 * * *", async () => {
 		if (process.env.pm_id == "1") {
 			try {
-				var lastweekEnd = moment().subtract(1, "days").format("DD/MM/YYYY");
-				let lastweekStart1 = moment(lastweekEnd, "DD/MM/YYYY").unix();
+				let yesterdayRegister = moment().subtract(1, 'days').format('DD/MM/YYYY');
 				const yesterdayRegistered = await users
-					.find({ timestamp: lastweekStart1 })
+					.find({ CreatedAt: yesterdayRegister })
 					.count();
 				let dataUpdate = await dashboard.find();
 				const update_id = dataUpdate[0]._id;
@@ -571,7 +594,8 @@ module.exports = async function () {
 	async function runCleanupTasks() {
 		try {
 			await client.connect();
-			const database = client.db("client");
+			// const database = client.db("admin");
+			const database = client.db("test");
 			let timeHistoryList = await timeHistory.find();
 			const cleanupPromises = timeHistoryList.map(details => cleanupOldEntries(database, details));
 			await Promise.all(cleanupPromises);
