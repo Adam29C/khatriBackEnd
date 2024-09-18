@@ -83,37 +83,37 @@ const manual = require("./routes/wallet/manualpayment");
 dotenv.config();
 
 // Connect To DB
-//mongoose.connect(
-//   process.env.DB_CONNECT,
-//    {
-//      useNewUrlParser: true,
-//      useFindAndModify: false,
-//      useCreateIndex: true,
-//      useUnifiedTopology: true,
-//    },
-//    (err) => {
-//      if (err) console.log(err);
-//      else console.log("Mongo Connected");
-//      console.log(mongoose.version)
-//    }
-//  );
-let certPath = path.join(__dirname, './global-bundle.pem');
 mongoose.connect(
-process.env.DB_CONNECT,
-   {    
-     ssl: true,  // Ensure SSL is enabled
-     sslCA: fs.readFileSync(certPath),  // Provide the CA certificate
-     tlsAllowInvalidCertificates: true,  // Allow invalid certificates (temporary workaround)
+  process.env.DB_CONNECT,
+   {
+     useNewUrlParser: true,
+     useFindAndModify: false,
+     useCreateIndex: true,
+     useUnifiedTopology: true,
    },
    (err) => {
-     if (err) {
-       console.log('Error connecting to MongoDB:', err);
-     } else {
-       console.log('MongoDB Connected');
-       console.log('Mongoose version:', mongoose.version);
-     }
+     if (err) console.log(err);
+     else console.log("Mongo Connected");
+     console.log(mongoose.version)
    }
  );
+// let certPath = path.join(__dirname, './global-bundle.pem');
+// mongoose.connect(
+// process.env.DB_CONNECT,
+//    {    
+//      ssl: true,  // Ensure SSL is enabled
+//      sslCA: fs.readFileSync(certPath),  // Provide the CA certificate
+//      tlsAllowInvalidCertificates: true,  // Allow invalid certificates (temporary workaround)
+//    },
+//    (err) => {
+//      if (err) {
+//        console.log('Error connecting to MongoDB:', err);
+//      } else {
+//        console.log('MongoDB Connected');
+//        console.log('Mongoose version:', mongoose.version);
+//      }
+//    }
+//  );
 
 app.use(session({
   secret: "dashboard###$$$$123321",
