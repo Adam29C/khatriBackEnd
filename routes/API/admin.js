@@ -16,6 +16,7 @@ var ip = require("ip");
 
 router.post("/registerAdmin", async (req, res) => {
 	try {
+console.log("registerAdmin")
 		let data = req.header("x-api-key");
 		if (!data)
 			return res.status(200).send({
@@ -79,6 +80,7 @@ router.post("/registerAdmin", async (req, res) => {
 
 router.post("/loginDashboard", async (req, res) => {
 	try {
+console.log("registerAdmin2")
 		const { error } = loginValidationadmin(req.body);
 		if (error) {
 			const data = { message: error.details[0].message };
@@ -134,12 +136,14 @@ router.post("/loginDashboard", async (req, res) => {
 			}
 		}
 	} catch (error) {
+console.log(error)
 		//  res.render('index', {message : error});
 	}
 });
 
 router.post("/login", async (req, res) => {
 	try {
+console.log("registerAdmin3")
 		const username = req.body.username.toLowerCase().replace(/\s/g, "");
 		const password = req.body.password;
 		const user = await admin.findOne({ username: username });
@@ -193,6 +197,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/adminId",async(req,res)=>{
 	try{
+console.log("registerAdmin4")
        let adminDetails = await admin.findOne({username:"admin"});
 	   res.status(200).send({
 		status: 1,
