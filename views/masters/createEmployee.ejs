@@ -255,7 +255,7 @@
                       <input id="starlineRefund" name="starlineRefund"
                       type="checkbox" value="starlineRefund" <%
                       if(permission['starlineRefund']){ %> checked <% } %> >
-                      <label for="starlineRefund">Starline Refund</label>
+                      <label for="starlineRevert">Starline Refund</label>
                     </div>
                   </div>
                   <div class="checkbox checkbox-purple">
@@ -668,7 +668,7 @@
                         type="checkbox"
                         value="ajaySir"
                       />
-                      <label for="ajaySir">Sir Report</label>
+                      <label for="ajaySir">Ajay Sir Report</label>
                     </div>
                     <div class="checkbox checkbox-purple childClass">
                       <input
@@ -806,11 +806,6 @@
       $("#divRegister2").css("display", "none");
       $("#divRegister1").css("display", "block");
     } else {
-
-// console.log("formData" ,formData);
-
-
-    return
       $.ajax({
         type: "POST",
         url: "/employee/createEmployee",
