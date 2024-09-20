@@ -182,7 +182,7 @@
                                             checked
                                         <% } %>
                                     >
-                                        <label for="starlineRefund">Starline Refund</label>
+                                        <label for="starlineRevert">Starline Refund</label>
                                     </div>
                             </div>
                             <div class="checkbox checkbox-purple" >
@@ -543,7 +543,7 @@
                                                 checked
                                             <% } %>
                                         >
-                                        <label for="ajaySir">Sir Report</label>
+                                        <label for="ajaySir">Ajay Sir Report</label>
                                     </div>
                                     <div class="checkbox checkbox-purple childClass">
                                         <input id="credDebReport" name="credDebReport" type="checkbox" value="credDebReport" <% if(permission['credDebReport']){ %>
@@ -629,11 +629,6 @@
 <script>
     $("#register").click(function (event) {
         var formData = $('form').serializeArray();
-
-        console.log("formData" ,formData);
-
-
-    // return
             $.ajax({
                 type: "POST",
                 url: "/employee/updateEmployee",
@@ -653,7 +648,7 @@
                         }(window.jQuery),
                         function(t) {
                             window.jQuery.SweetAlert.init();
-                            // location.reload();    
+                            location.reload();    
                         }();
                     }
                     else{

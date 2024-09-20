@@ -19,20 +19,20 @@ module.exports = async function (req, res, next) {
                 next();
             }
             catch(e) {
-                res.status(200).json({
+                return res.status(200).json({
                     status: 55,
                     message: 'Invalid Token or Token Expire',
                     error  : e
                 });
             }
         }else{
-            res.status(200).json({
+            return res.status(200).json({
                 status: 2,
                 message: 'User Or Device Not Found'
             });
         }
     } catch (error) {
-        res.status(200).json({
+        return res.status(200).json({
             status: 0,
             message: 'Something Happened Contact Support',
             error  : error
