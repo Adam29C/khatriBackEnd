@@ -259,7 +259,7 @@
               total = total + parseInt(FinalLoss);
             }
 
-            // console.log(FinalLoss, key, j);
+
             digitHtml +=
               "<tr>\
                                      <td>" +
@@ -275,6 +275,7 @@
                                    </tr>";
             j++;
           });
+
 
           $("#singleDigit").html(digitHtml);
           $("#datatable3").DataTable({ order: [[1, "desc"]] });
