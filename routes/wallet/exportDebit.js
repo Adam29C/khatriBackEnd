@@ -246,7 +246,7 @@ router.post("/approveReq", session, async (req, res) => {
 
 			let userDetail = await User.findOne(
 				{ _id: userId },
-				{ wallet_balance: 1,firebaseId:1 }
+				{ wallet_balance: 1, firebaseId: 1 }
 			);
 			let wallet_balance = userDetail.wallet_balance;
 			let updateAmt = wallet_balance - transaction_amount;
@@ -922,52 +922,138 @@ async function updateReal(points) {
 	);
 }
 router.post("/rblxls", async (req, res) => {
-    try {
-        const reqStatus = req.body.searchType;
-        const reportDate = req.body.reportDate;
-        const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
-        let query = {
-            reqStatus: reqStatus,
-            reqType: "Debit",
-            reqDate: formatDate,
-            fromExport: true,
-        };
-        if (reqStatus == "Pending") {
-            query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
-        }
-        const userBebitReq = await debitReq.find(query, {
-            _id: 1,
-            reqAmount: 1,
-            withdrawalMode: 1,
-            reqDate: 1,
-            toAccount: 1,
-            mobile: 1
-        });
-        const formattedData = userBebitReq.map(item => ({
-            destinationAcNumber: item.toAccount.accNumber,
-            destinationBankName: item.toAccount.bankName,
-            destinationIfscCode: item.toAccount.ifscCode,
-            destinationAccName: item.toAccount.accName,
-            amount: item.reqAmount,
-            withdrawalMode: item.withdrawalMode,
-            paymentType: "NFT",
-            sourceNarration: "to XYZ",
-            currency: "INR",
-            destinationNarration: "From abc",
-            beneficiaryAccountType: "Saving",
-            sourceAccountNumber: "100881008810088",
-            email: "abc@ac.com"
-        }));
-        res.json({
-            status: 0,
-            Profile: formattedData,
-            date: formatDate,
-        });
-    } catch (error) {
-        res.json({
-            status: 0,
-            error: error.message || error,
-        });
-    }
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+		let query = {
+			reqStatus: reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
+		if (reqStatus == "Pending") {
+			query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1
+		});
+		const formattedData = userBebitReq.map(item => ({
+			destinationAcNumber: item.toAccount.accNumber,
+			destinationBankName: item.toAccount.bankName,
+			destinationIfscCode: item.toAccount.ifscCode,
+			destinationAccName: item.toAccount.accName,
+			amount: item.reqAmount,
+			withdrawalMode: item.withdrawalMode,
+			paymentType: "NFT",
+			sourceNarration: "to XYZ",
+			currency: "INR",
+			destinationNarration: "From abc",
+			beneficiaryAccountType: "Saving",
+			sourceAccountNumber: "100881008810088",
+			email: "abc@ac.com"
+		}));
+		res.json({
+			status: 0,
+			Profile: formattedData,
+			date: formatDate,
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
+});
+
+router.post("/mkxls", async (req, res) => {
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+		let query = {
+			reqStatus: reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
+		if (reqStatus == "Pending") {
+			query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1
+		});
+		const formattedData = userBebitReq.map(item => ({
+			"Client_Code": "MKTTC",
+			"Product_Code": "VPAY",
+			"Payment_Type(IFT/NEFT/RTGS/IMPS)": "NEFT",
+			"Payment_Ref_No": "",
+			"Payment_Date": "",
+			"Instrument Date": "",
+			"Dr_Ac_No": 1548423085,
+			"Amount": item?.reqAmount,
+			"Bank_Code_Indicator": "M",
+			"Beneficiary_Code":"",
+			"Beneficiary_Name":item?.toAccount.accName ? item.toAccount.accName : "",
+			"Beneficiary_Bank": "",
+			"Beneficiary_Branch / IFSC Code": item?.toAccount.ifscCode ? item?.toAccount?.ifscCode : "",
+			"Beneficiary_Acc_No": item?.toAccount.accNumber ? item?.toAccount?.accNumber : "",
+			"Location": "",
+			"Print_Location": "",
+			"Instrument_Number": "",
+			"Ben_Add1": "",
+			"Ben_Add2": "",
+			"Ben_Add3": "",
+			"Ben_Add4": "",
+			"Beneficiary_Email": "",
+			"Beneficiary_Mobile": "",
+			"Debit_Narration": "",
+			"Credit_Narration": "",
+			"Payment Details 1": "",
+			"Payment Details 2": "",
+			"Payment Details 3": "",
+			"Payment Details 4": "",
+			"Enrichment_1": "",
+			"Enrichment_2": "",
+			"Enrichment_3": "",
+			"Enrichment_4": "",
+			"Enrichment_5": "",
+			"Enrichment_6": "",
+			"Enrichment_7": "",
+			"Enrichment_8": "",
+			"Enrichment_9": "",
+			"Enrichment_10": "",
+			"Enrichment_11": "",
+			"Enrichment_12": "",
+			"Enrichment_13": "",
+			"Enrichment_14": "",
+			"Enrichment_15": "",
+			"Enrichment_16": "",
+			"Enrichment_17": "",
+			"Enrichment_18": "",
+			"Enrichment_19": "",
+			"Enrichment_20": ""
+		}));
+		res.json({
+			status: 0,
+			Profile: formattedData,
+			date: formatDate,
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
 });
 module.exports = router;
