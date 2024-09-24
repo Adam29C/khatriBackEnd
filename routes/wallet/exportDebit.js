@@ -1014,13 +1014,13 @@ router.post("/mkxls", async (req, res) => {
 
 			finalReport += Client_Code + "~" + Product_Code + "~NEFT~~" + formatDate + "~~" + Dr_Ac_No + "~" + amt + "~" + Bank_Code_Indicator + "~~" + name + "~~" + ifsc + "~" + accNo + "~~~~~~~~~~~~~~~~~~~~~~~~\n";
 		}
-		res.json({
+		return res.json({
 			status: 0,
 			filename: filename,
 			writeString: finalReport,
 		});
 	} catch (error) {
-		res.json({
+		return res.json({
 			status: 0,
 			error: error.message || error,
 		});
