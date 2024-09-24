@@ -1012,7 +1012,7 @@ router.post("/mkxls", async (req, res) => {
 			let Dr_Ac_No = 1548423085;
 			let Bank_Code_Indicator = "M";
 
-			finalReport += Client_Code + "~" + Product_Code + "~NEFT~~" + formatDate + "~~" + Dr_Ac_No + "~" + amt + "~" + Bank_Code_Indicator + "~~" + name + "~~" + ifsc + "~" + accNo + "~~~~~~~~~~~~~~~~~~~~~~~~\n";
+			finalReport += Client_Code + "~" + Product_Code + "~NEFT~~" + formatDate + "~~" + Dr_Ac_No + "~" + amt + "~" + Bank_Code_Indicator + "~~" + name + "~~" + ifsc + "~" + accNo + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 		}
 		return res.json({
 			status: 0,
