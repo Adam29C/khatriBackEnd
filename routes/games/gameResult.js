@@ -12,7 +12,8 @@ const mainUser = require("../../model/API/Users");
 const revertEntries = require("../../model/revertPayment");
 const history = require("../../model/wallet_history");
 const moment = require("moment");
-const messaging = require("../../firebase")
+const messaging = require("../../firebase");
+const lodash = require('lodash');
 
 // const gcm = require("node-gcm");
 // const sender = new gcm.Sender(
@@ -219,6 +220,22 @@ router.post("/", session, async (req, res) => {
 		const todayDay = dt.format("W");
 		const todayDate = dt.format("m/d/Y");
 		const currentTime = dt.format("I:M p");
+
+		if (session === "Close") {
+			let gameResultData = await gameResult.findOne({
+				providerId: id,
+				resultDate: resultDate,
+				session: "Open"
+			});
+			if (!gameResultData) {
+				return res.json({
+					status: 0,
+					message: "Result  Not Declared",
+					data: `Open Result Not Declared For :${name}, Date: ${req.body.resultDate}, Declare Open First`,
+				});
+			}
+
+		}
 
 		let getItem = { OBRT: 1, gameDay: 1 };
 		if (session == "Close") {
@@ -632,9 +649,9 @@ router.post("/paymentRevert", session, async (req, res) => {
 					//history
 					let arrValue = {
 						userId: userid,
-						bidId : rowId,
-						filterType : 8,
-						reqType : "main",
+						bidId: rowId,
+						filterType: 8,
+						reqType: "main",
 						previous_amount: walletBal,
 						current_amount: revertBalance,
 						transaction_amount: winAmount,
@@ -703,9 +720,9 @@ router.post("/paymentRevert", session, async (req, res) => {
 				//history
 				let arrValue = {
 					userId: userid,
-					bidId : rowId,
-					filterType : 3,
-					reqType : "main",
+					bidId: rowId,
+					filterType: 3,
+					reqType: "main",
 					previous_amount: walletBal,
 					current_amount: revertBalance,
 					transaction_amount: winAmount,
@@ -858,29 +875,43 @@ router.post("/refundAll", session, async (req, res) => {
 			);
 
 			const firebaseId = singleUserUpdate.firebaseId;
-			var singleUserBidUpdate = await gameBids.findOneAndUpdate(
-				{
-					userId: userId,
-					providerId: providerId,
-					gameDate: resultDate,
-					winStatus: 0,
-				},
-				{
-					winStatus: 5,
-					updatedAt: formatted2,
-				},
-				{
-					new: true,
-					upsert: true,
-				}
-			);
+			let singleUserBidUpdate = await gameBids.findOne({
+				userId: userId,
+				providerId: providerId,
+				gameDate: resultDate,
+				winStatus: 0,
+			})
+
+			// var singleUserBidUpdate = await gameBids.findOneAndUpdate(
+			// 	{
+			// userId: userId,
+			// providerId: providerId,
+			// gameDate: resultDate,
+			// winStatus: 0,
+			// 	},
+			// 	{
+			// 		winStatus: 5,
+			// 		updatedAt: formatted2,
+			// 	},
+			// 	{
+			// 		new: true,
+			// 		upsert: true,
+			// 	}
+			// );
+
+			await gameBids.deleteOne({
+				userId: userId,
+				providerId: providerId,
+				gameDate: resultDate,
+				winStatus: 0,
+			})
 
 			const dateTime = formatted2.split(" ");
 			let arrValue = new history({
 				userId: userId,
-				bidId : singleUserUpdate._id,
-				reqType : "main",
-				filterType : 3,
+				bidId: singleUserUpdate._id,
+				reqType: "main",
+				filterType: 3,
 				previous_amount: current_amount,
 				current_amount: singleUserUpdate.wallet_balance,
 				provider_id: singleUserBidUpdate.providerId,
@@ -934,9 +965,9 @@ router.post("/refundAll", session, async (req, res) => {
 
 					let arrValue = new history({
 						userId: userId,
-						bidId : rowId._id,
-						filterType : 3,
-						reqType : "main",
+						bidId: rowId._id,
+						filterType: 3,
+						reqType: "main",
 						previous_amount: current_amount,
 						current_amount: singleUserUpdate.wallet_balance,
 						transaction_amount: biddingPoints,
@@ -951,15 +982,16 @@ router.post("/refundAll", session, async (req, res) => {
 
 					await arrValue.save();
 
-					await gameBids.updateOne(
-						{ _id: rowId },
-						{
-							$set: {
-								winStatus: 5,
-								updatedAt: formatted2,
-							},
-						}
-					);
+					// await gameBids.updateOne(
+					// 	{ _id: rowId },
+					// 	{
+					// 		$set: {
+					// 			winStatus: 5,
+					// 			updatedAt: formatted2,
+					// 		},
+					// 	}
+					// );
+					await gameBids.deleteOne({ _id: rowId })
 					let firebaseId = singleUserUpdate.firebaseId;
 					tokenArray.push(firebaseId);
 					i++;
@@ -985,17 +1017,47 @@ router.post("/refundAll", session, async (req, res) => {
 	}
 });
 
+// async function sendRefundNotification(tokenArray, name, body) {
+// 	let priority = 'high'
+// 	let finalArr = []
+// 	for (let arr of tokenArray) {
+// 		if (arr !== "") {
+// 			finalArr.push(arr)
+// 		}
+// 	}
+// 	let message = {
+// 		android: {
+// 			priority: priority,
+// 		},
+// 		data: {
+// 			title: `Refund For ${name}`,
+// 			body: body,
+// 			icon: 'ic_launcher',
+// 			type: 'Notification',
+// 		},
+// 		token: finalArr,
+// 	};
+// 	try {
+// 		const response = await messaging.sendMulticast(message);
+// 		console.log('Successfully sent message:', response);
+// 		if (response.failureCount > 0) {
+// 			response.responses.forEach((resp, idx) => {
+// 				if (!resp.success) {
+// 					console.error(`Failed to send to ${tokens[idx]}: ${resp.error}`);
+// 				}
+// 			});
+// 		}
+// 	} catch (error) {
+// 		console.log('Error sending message:', error);
+// 	}
+// }
+
 async function sendRefundNotification(tokenArray, name, body) {
-	let priority = 'high'
-	let finalArr=[]
-    for(let arr of tokenArray){
-        if(arr!==""){
-            finalArr.push(arr)
-        }
-    }
+	let finalArr = tokenArray.filter(token => token !== "");
+	let tokenChunks = lodash.chunk(finalArr, 500);
 	let message = {
 		android: {
-			priority: priority,
+			priority: 'high',
 		},
 		data: {
 			title: `Refund For ${name}`,
@@ -1003,20 +1065,21 @@ async function sendRefundNotification(tokenArray, name, body) {
 			icon: 'ic_launcher',
 			type: 'Notification',
 		},
-		token: finalArr,
 	};
-	try {
-		const response = await messaging.sendMulticast(message);
-		console.log('Successfully sent message:', response);
-		if (response.failureCount > 0) {
-			response.responses.forEach((resp, idx) => {
-				if (!resp.success) {
-					console.error(`Failed to send to ${tokens[idx]}: ${resp.error}`);
-				}
-			});
+	for (let chunk of tokenChunks) {
+		message.tokens = chunk;
+		try {
+			const response = await messaging.sendMulticast(message);
+			if (response.failureCount > 0) {
+				response.responses.forEach((resp, idx) => {
+					if (!resp.success) {
+						console.error(`Failed to send to ${chunk[idx]}: ${resp.error}`);
+					}
+				});
+			}
+		} catch (error) {
+			console.log('Error sending message:', error);
 		}
-	} catch (error) {
-		console.log('Error sending message:', error);
 	}
 }
 

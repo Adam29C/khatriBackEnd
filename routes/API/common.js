@@ -17,6 +17,7 @@ const version = require("../../model/dashBoard/AppVersion");
 const moment = require('moment');
 const dotenv = require("dotenv");
 const SendOtp = require("sendotp");
+const { ObjectId } = require("mongodb");
 // const sendOtp = new SendOtp("290393AuGCyi6j5d5bfd26");
 const sendOtp = new SendOtp("1207171791436302472");
 dotenv.config();
@@ -27,7 +28,7 @@ const chatDomain = process.env.CHAT_DOMAIN;
 router.post("/getBal", verify, async (req, res) => {
 	try {
 		const id = req.body.id;
-		const user = await userDetails.findOne({ _id: id }, { wallet_balance: 1, username:1, mobile:1 });
+		const user = await userDetails.findOne({ _id: id }, { wallet_balance: 1, username: 1, mobile: 1 });
 		if (!user) {
 			return res.json({
 				status: 1,
@@ -115,7 +116,7 @@ router.post("/walletHistoryPaginatoion", verify, async (req, res) => {
 		let perPage = 50;
 		let page = parseInt(req.body.skipValue);
 		history
-			.find({ userId: userId })
+			.find({ userId: new ObjectId(userId) })
 			.sort({ _id: -1 })
 			.skip(perPage * page - perPage)
 			.limit(perPage)
@@ -123,7 +124,7 @@ router.post("/walletHistoryPaginatoion", verify, async (req, res) => {
 				if (err) throw err;
 				if (Object.keys(hisdata).length > 0) {
 					history.countDocuments({ userId: userId }).exec((err, count) => {
-						res.json({
+						return res.json({
 							status: 1,
 							records: hisdata,
 							current: page,
@@ -132,14 +133,14 @@ router.post("/walletHistoryPaginatoion", verify, async (req, res) => {
 						});
 					});
 				} else {
-					res.json({
+					return res.json({
 						status: 0,
 						message: "No Account History Found",
 					});
 				}
 			});
 	} catch (e) {
-		res.json({
+		return res.json({
 			status: 0,
 			message: "Something Bad Happened Please Contact Support",
 			error: e,
@@ -312,7 +313,7 @@ router.post("/firebaseUpdate", async (req, res) => {
 						forceStatus: fsatuts, //Show Close Button
 						name: userName,
 						mpinGen: pinStatus,
-                        newVersion:Currentversion
+						newVersion: Currentversion
 					});
 				}
 			} else {
@@ -328,7 +329,7 @@ router.post("/firebaseUpdate", async (req, res) => {
 						// appLink: "https://update.yogicactors.co.uk/apk/Dhan_Games.apk",
 						appLink,
 						forceStatus: fsatuts, //Show Close Button
-                                                newVersion:Currentversion
+						newVersion: Currentversion
 					});
 				}
 			}

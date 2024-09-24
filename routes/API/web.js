@@ -27,12 +27,44 @@ router.get("/web/walletContact", async (req, res) => {
   }
 });
 
+
+// router.get("/web/allgames", async (req, res) => {
+//   try {
+//     const provider = await gamesProvider.find().sort({ _id: 1 });
+//     const today = moment();
+//     const dayOfWeek = today.format('dddd').toUpperCase();
+//     let gameSettings= gameSetting.find({gameDay:dayOfWeek},{providerId:1,OBT:1})
+//     // res.send({ data: provider, data1:gameSettings });
+//     res.json({data: provider, data1:gameSettings })
+//   } catch (e) {
+//     console.log(e)
+//     res.json({ message: e });
+//   }
+// });
 router.get("/web/allgames", async (req, res) => {
   try {
-    const provider = await gamesProvider.find().sort({ _id: 1 });
-    res.send({ data: provider });
+    const providers = await gamesProvider.find().sort({ _id: 1 });
+    const today = moment();
+    const dayOfWeek = today.format('dddd');
+    const gameSettings = await gamesSetting.find({ gameDay: dayOfWeek }, { providerId: 1, OBT: 1 });
+    const gameSettingsMap = {};
+    gameSettings.forEach(setting => {
+      gameSettingsMap[setting.providerId] = setting.OBT;
+    });
+    const filteredProviders = providers.filter(provider => gameSettingsMap[provider._id]);
+    const providersWithOBT = filteredProviders.map(provider => ({
+      ...provider.toObject(),
+      OBT: gameSettingsMap[provider._id]
+    }));
+    providersWithOBT.sort((a, b) => {
+      const timeA = moment(a.OBT, 'hh:mm A');
+      const timeB = moment(b.OBT, 'hh:mm A');
+      return timeA - timeB;
+    });
+    // res.json({ data: providersWithOBT});
+    res.send({ data: providersWithOBT});
   } catch (e) {
-    res.json({ message: e });
+    res.json({ message: e.message });
   }
 });
 
@@ -75,21 +107,76 @@ router.get("/web/allgames", async (req, res) => {
 
 // ---------------------------------------------------------------------
 
+// router.get("/web/games", async (req, res) => {
+//     try {
+//       // const userInfo = req.session.details;
+//       // const permissionArray = req.view;
+//       const todayDayName = moment().format("dddd");
+//       const providers = await gamesProvider.find({}).sort({ _id: 1 });
+//       const nowTime = moment();
+  
+//       const finalArr = await Promise.all(
+//         providers.map(async (provider) => {
+//           const id = mongoose.Types.ObjectId(provider._id);
+//           const settings = await gamesSetting
+//             .find({ providerId: id, gameDay: todayDayName })
+//             .sort({ _id: 1 });
+  
+//           const updatedSettings = settings.map((gameDetail) => {
+//             const obtTime = moment(gameDetail.OBT, "hh:mm A");
+//             const cbtTime = moment(gameDetail.CBT, "hh:mm A");
+//             let message;
+//             if (nowTime.isBefore(obtTime) && gameDetail.isClosed === "1") {
+//               message = "Betting is running for open";
+//             } else if (
+//               nowTime.isAfter(obtTime) &&
+//               nowTime.isBefore(cbtTime) &&
+//               gameDetail.isClosed === "1"
+//             ) {
+//               message = "Betting is running for close";
+//             } else {
+//               message = "Close for today";
+//             }
+//             return {
+//               ...gameDetail.toObject(), // Convert to plain object if gameDetail is a mongoose document
+//               message: message,
+//             };
+//           });
+//           return {
+//             _id: id,
+//             providerName: provider.providerName,
+//             providerResult: provider.providerResult,
+//             modifiedAt: provider.modifiedAt,
+//             resultStatus: provider.resultStatus,
+//             activeStatus: provider.activeStatus,
+//             gameDetails: updatedSettings,
+//           };
+//         })
+//       );
+//       let appVersionInfo = await AppVersion.findOne();
+//       let appInfo;
+//       if (!appVersionInfo.maintainence) {
+//         appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
+//       } else {
+//         appInfo = "Maintenance";
+//       }
+//       res.send({ data: finalArr, status: true, appInfo });
+//     } catch (e) {
+//       res.json({ message: e.message });
+//     }
+//   });
+
 router.get("/web/games", async (req, res) => {
   try {
-    // const userInfo = req.session.details;
-    // const permissionArray = req.view;
     const todayDayName = moment().format("dddd");
     const providers = await gamesProvider.find({}).sort({ _id: 1 });
     const nowTime = moment();
-
     const finalArr = await Promise.all(
       providers.map(async (provider) => {
         const id = mongoose.Types.ObjectId(provider._id);
         const settings = await gamesSetting
           .find({ providerId: id, gameDay: todayDayName })
           .sort({ _id: 1 });
-
         const updatedSettings = settings.map((gameDetail) => {
           const obtTime = moment(gameDetail.OBT, "hh:mm A");
           const cbtTime = moment(gameDetail.CBT, "hh:mm A");
@@ -121,6 +208,21 @@ router.get("/web/games", async (req, res) => {
         };
       })
     );
+    const parseTime = (timeStr) => {
+      const [time, modifier] = timeStr.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      
+      if (modifier === 'PM' && hours !== 12) hours += 12;
+      if (modifier === 'AM' && hours === 12) hours = 0;
+    
+      return new Date(0, 0, 0, hours, minutes);
+    };
+    
+    finalArr.sort((a, b) => {
+      const timeA = parseTime(a.gameDetails[0].OBT);
+      const timeB = parseTime(b.gameDetails[0].OBT);
+      return timeA - timeB;
+    });
     let appVersionInfo = await AppVersion.findOne();
     let appInfo;
     if (!appVersionInfo.maintainence) {
@@ -144,9 +246,8 @@ router.get("/web/startline", async (req, res) => {
       const settings = await starSettings
         .find({ providerId: id, gameDay: todayDayName })
         .sort({ _id: 1 });
-      const currentTime = moment();
-
-      const updatedSettings = settings.map((setting) => {
+       const currentTime = moment();
+       const updatedSettings = settings.map((setting) => {
         const obt = moment(setting.OBT, "HH:mm A");
         const cbt = moment(setting.CBT, "HH:mm A");
         let message;
@@ -836,6 +937,72 @@ router.post("/web/jodichart", async (req, res) => {
   }
 });
 
+router.get("/web/panachart/all", async (req, res) => {
+  try {
+    // Fetch all providers and results
+    const providers = await gamesProvider.find().sort({ _id: 1 });
+    const results = await gameResult.find().sort({ _id: -1 });
+
+    // Group data by resultDate
+    const groupedDataByDate = results.reduce((acc, item) => {
+      const resultDate = item.resultDate;
+      if (!acc[resultDate]) {
+        acc[resultDate] = [];
+      }
+      acc[resultDate].push(item);
+      return acc;
+    }, {});
+
+    // Format the data
+    const formattedData = Object.entries(groupedDataByDate).map(
+      ([resultDate, items]) => ({
+        resultDate: resultDate,
+        results: items
+      })
+    );
+
+    res.send({ data: formattedData, status: true });
+  } catch (e) {
+    res.json({
+      status: 0,
+      message: e.message,
+    });
+  }
+});
+
+router.get("/web/jodichart/all", async (req, res) => {
+  try {
+    // Fetch all providers and results
+    const providers = await gamesProvider.find().sort({ _id: 1 });
+    const results = await gameResult.find().sort({ _id: -1 });
+
+    // Group data by resultDate
+    const groupedDataByDate = results.reduce((acc, item) => {
+      const resultDate = item.resultDate;
+      if (!acc[resultDate]) {
+        acc[resultDate] = [];
+      }
+      acc[resultDate].push(item);
+      return acc;
+    }, {});
+
+    // Format the data
+    const formattedData = Object.entries(groupedDataByDate).map(
+      ([resultDate, items]) => ({
+        resultDate: resultDate,
+        results: items,
+      })
+    );
+
+    res.send({ data: formattedData, status: true });
+  } catch (e) {
+    res.json({
+      status: 0,
+      message: e.message,
+    });
+  }
+});
+
 router.post("/web/startline_pana_chart", async (req, res) => {
   try {
     const { name } = req.body;
@@ -1394,17 +1561,35 @@ router.get("/web/app_url", async (req, res) => {
     let appInfo;
     if (!appVersionInfo.maintainence) {
       appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
+      return res.send({ status: true, appInfo });
     } else {
-      appInfo = "Maintenance";
+      return res.send({ status: false });
     }
-    res.send({ status: true, appInfo });
   } catch (e) {
-    res.json({
+    return res.json({
       status: 0,
       message: e.message,
     });
   }
 });
+
+// router.get("/web/app_url", async (req, res) => {
+//   try {
+//     let appVersionInfo = await AppVersion.findOne();
+//     let appInfo;
+//     if (!appVersionInfo.maintainence) {
+//       appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
+//     } else {
+//       appInfo = "Maintenance";
+//     }
+//     res.send({ status: true, appInfo });
+//   } catch (e) {
+//     res.json({
+//       status: 0,
+//       message: e.message,
+//     });
+//   }
+// });
 
 // router.post("/web/startline_pana_chart", async (req, res) => {
 //   try {
@@ -1875,10 +2060,94 @@ router.get("/web/allAbList", async (req, res) => {
   }
 });
 
+router.get("/web/startline_pana_chart/all", async (req, res) => {
+  try {
+    const results = await starline_game_Result.find().sort({ resultDate: 1 });
 
+    function sortByTime(a, b) {
+      const timeA = new Date('1970/01/01 ' + a.providerName);
+      const timeB = new Date('1970/01/01 ' + b.providerName); 
+      return timeA - timeB;
+    }
 
+    const groupedDataByDate = results.reduce((acc, item) => {
+      const resultDate = item.resultDate;
+      if (!acc[resultDate]) {
+        acc[resultDate] = [];
+      }
+      acc[resultDate].push(item);
+      return acc;
+    }, {});
 
+    const formattedData = Object.entries(groupedDataByDate).map(
+      ([resultDate, items]) => ({
+        resultDate,
+        results: items
+          .sort(sortByTime)
+          .map(item => ({
+            providerId: item.providerId,
+            providerName: item.providerName,
+            resultDate: item.resultDate,
+            winningDigit: item.winningDigit || "***",
+            winningDigitFamily:item.winningDigitFamily === 0 ? 0 : item.winningDigitFamily || "*",
+            status: item.status || "0",
+          }))
+      })
+    );
 
+    res.send({ data: formattedData, status: true });
+  } catch (e) {
+    res.json({  
+      status: 0,
+      message: e.message,
+    });
+  }
+});
+
+router.get("/web/jackpot_jodi_chart/all", async (req, res) => {
+  try {
+    const results = await ABgameResult.find().sort({ resultDate: 1 });
+    const groupedDataByDate = results.reduce((acc, item) => {
+      const resultDate = item.resultDate;
+      if (!acc[resultDate]) {
+        acc[resultDate] = [];
+      }
+      acc[resultDate].push(item);
+      return acc;
+    }, {});
+
+    const getTimeValue = (providerName) => {
+      const [time, period] = providerName.split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+      if (period === "PM" && hours !== 12) hours += 12;
+      if (period === "AM" && hours === 12) hours = 0;
+      return hours * 60 + minutes; 
+    };
+
+    const formattedData = Object.entries(groupedDataByDate).map(
+      ([resultDate, items]) => ({
+        resultDate,
+        results: items
+          .sort((a, b) => getTimeValue(a.providerName) - getTimeValue(b.providerName))
+          .map(item => ({
+            providerId: item.providerId,
+            providerName: item.providerName,
+            resultDate: item.resultDate,
+            winningDigit: item.winningDigit || "**", // Default value if missing
+            status: item.status || "0",              // Default value if missing
+          }))
+      })
+    );
+
+    // Send the response
+    res.send({ data: formattedData, status: true });
+  } catch (e) {
+    res.json({
+      status: 0,
+      message: e.message,
+    });
+  }
+});
 
 function getWeekNumber(date) {
   const onejan = new Date(date.getFullYear(), 0, 1);

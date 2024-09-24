@@ -16,6 +16,8 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const morgan = require("morgan");
 const whatsAppCron = require("./routes/whatsapp/whatsapp");
+const fs = require('fs');
+const https = require('https'); // Add HTTPS module
 
 // var MemoryStore = require('memorystore')(session)
 
@@ -78,32 +80,47 @@ const payment_additional = require("./routes/paymentAdditional/getway")
 const chat = require("./routes/chat/chat");
 const manualPayment = require("./routes/API/manualPayment")
 const manual = require("./routes/wallet/manualpayment");
-
-//Connect To DB
 dotenv.config();
+
+// Connect To DB
 mongoose.connect(
   process.env.DB_CONNECT,
-  {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-  },
-  (err) => {
-    if (err) console.log(err);
-    else console.log("Mongo Connected");
-  }
-);
+   {
+     useNewUrlParser: true,
+     useFindAndModify: false,
+     useCreateIndex: true,
+     useUnifiedTopology: true,
+   },
+   (err) => {
+     if (err) console.log(err);
+     else console.log("Mongo Connected");
+     console.log(mongoose.version)
+   }
+ );
+// let certPath = path.join(__dirname, './global-bundle.pem');
+// mongoose.connect(
+// process.env.DB_CONNECT,
+//    {    
+//      ssl: true,  // Ensure SSL is enabled
+//      sslCA: fs.readFileSync(certPath),  // Provide the CA certificate
+//      tlsAllowInvalidCertificates: true,  // Allow invalid certificates (temporary workaround)
+//    },
+//    (err) => {
+//      if (err) {
+//        console.log('Error connecting to MongoDB:', err);
+//      } else {
+//        console.log('MongoDB Connected');
+//        console.log('Mongoose version:', mongoose.version);
+//      }
+//    }
+//  );
 
-// Configure session middleware
-app.use(
-  session({
-    store: MongoStore.create({ mongoUrl: process.env.DB_CONNECT }),
-    secret: "dashboard###$$$$123321",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+app.use(session({
+  secret: "dashboard###$$$$123321",
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
 
 // Logger
 app.use(morgan("dev"));
@@ -214,7 +231,7 @@ const userWalletTracing = require("./model/Wallet_Bal_trace");
 const userDltCron = require("./routes/helpersModule/cronJobs");
 
 userDltCron();
-cron.schedule("0 9 * * *", async () => {
+cron.schedule("0 8 * * *", async () => {
   try {
     const dt = dateTime.create();
     const formatted = dt.format("m/d/Y I:M:S p");
@@ -231,9 +248,8 @@ cron.schedule("0 9 * * *", async () => {
   }
 });
 
-cron.schedule("58 9 * * *", async () => {
+cron.schedule("58 7 * * *", async () => {
   try {
-
     const dt = dateTime.create();
     const formatted = dt.format("m/d/Y I:M:S p");
 
@@ -301,9 +317,12 @@ cron.schedule("*/1 * * * *", async (req, res) => {
     console.log(error);
   }
 });
-
-const port = process.env.port || 5000;
-
+console.log(process.env.port)
+// const port = process.env.PORT || 9206;
+// https.createServer(app).listen(port, () => {
+//   console.log(`Running securely on PORT: ${port} Date: ${new Date().toLocaleString()}`);
+// });
+let port = 9206
 app.listen(port, () => {
   new Date().toLocaleDateString();
   console.log(`Running on PORT: ${port} Date: ${new Date().toLocaleString()}`);

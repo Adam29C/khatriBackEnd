@@ -167,9 +167,13 @@ router.post("/userReport", session, async (req, res) => {
 			const bidsData = await bids.aggregate([
 				{
 					$match: {
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						//  $gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 					},
 				},
@@ -187,9 +191,13 @@ router.post("/userReport", session, async (req, res) => {
 			const bidsData = await bids.aggregate([
 				{
 					$match: {
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						//  $gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 						userName: userName,
 					},
@@ -208,9 +216,13 @@ router.post("/userReport", session, async (req, res) => {
 				{
 					$match: {
 						providerId: new ObjectId(provider),
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 					},
 				},
@@ -228,9 +240,13 @@ router.post("/userReport", session, async (req, res) => {
 				{
 					$match: {
 						providerId: new ObjectId(provider),
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 						userName: userName,
 					},
@@ -271,9 +287,13 @@ router.post("/userReportStar", session, async (req, res) => {
 			const bidsData = await starBids.aggregate([
 				{
 					$match: {
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 					},
 				},
@@ -290,9 +310,13 @@ router.post("/userReportStar", session, async (req, res) => {
 			const bidsData = await starBids.aggregate([
 				{
 					$match: {
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 						userName: userName,
 					},
@@ -311,9 +335,13 @@ router.post("/userReportStar", session, async (req, res) => {
 				{
 					$match: {
 						providerId: new ObjectId(provider),
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 					},
 				},
@@ -331,9 +359,13 @@ router.post("/userReportStar", session, async (req, res) => {
 				{
 					$match: {
 						providerId: new ObjectId(provider),
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 						userName: userName,
 					},
@@ -375,9 +407,13 @@ router.post("/userReportAB", session, async (req, res) => {
 			const bidsData = await abBids.aggregate([
 				{
 					$match: {
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 					},
 				},
@@ -394,9 +430,13 @@ router.post("/userReportAB", session, async (req, res) => {
 			const bidsData = await abBids.aggregate([
 				{
 					$match: {
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 						userName: userName,
 					},
@@ -416,9 +456,13 @@ router.post("/userReportAB", session, async (req, res) => {
 				{
 					$match: {
 						providerId: new ObjectId(provider),
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 					},
 				},
@@ -437,9 +481,13 @@ router.post("/userReportAB", session, async (req, res) => {
 				{
 					$match: {
 						providerId: new ObjectId(provider),
-						dateStamp: {
-							$gte: startDate,
-							$lte: endDate,
+						// dateStamp: {
+						// 	$gte: startDate,
+						// 	$lte: endDate,
+						// },
+						gameDate:{
+							$gte:sDate,
+							$lte:eDate
 						},
 						userName: userName,
 					},
