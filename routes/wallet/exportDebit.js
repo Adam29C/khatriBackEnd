@@ -993,61 +993,31 @@ router.post("/mkxls", async (req, res) => {
 			toAccount: 1,
 			mobile: 1
 		});
-		const formattedData = userBebitReq.map(item => ({
-			"Client_Code": "MKTTC",
-			"Product_Code": "VPAY",
-			"Payment_Type(IFT/NEFT/RTGS/IMPS)": "NEFT",
-			"Payment_Ref_No": "",
-			"Payment_Date": "",
-			"Instrument Date": "",
-			"Dr_Ac_No": 1548423085,
-			"Amount": item?.reqAmount,
-			"Bank_Code_Indicator": "M",
-			"Beneficiary_Code":"",
-			"Beneficiary_Name":item?.toAccount.accName ? item.toAccount.accName : "",
-			"Beneficiary_Bank": "",
-			"Beneficiary_Branch / IFSC Code": item?.toAccount.ifscCode ? item?.toAccount?.ifscCode : "",
-			"Beneficiary_Acc_No": item?.toAccount.accNumber ? item?.toAccount?.accNumber : "",
-			"Location": "",
-			"Print_Location": "",
-			"Instrument_Number": "",
-			"Ben_Add1": "",
-			"Ben_Add2": "",
-			"Ben_Add3": "",
-			"Ben_Add4": "",
-			"Beneficiary_Email": "",
-			"Beneficiary_Mobile": "",
-			"Debit_Narration": "",
-			"Credit_Narration": "",
-			"Payment Details 1": "",
-			"Payment Details 2": "",
-			"Payment Details 3": "",
-			"Payment Details 4": "",
-			"Enrichment_1": "",
-			"Enrichment_2": "",
-			"Enrichment_3": "",
-			"Enrichment_4": "",
-			"Enrichment_5": "",
-			"Enrichment_6": "",
-			"Enrichment_7": "",
-			"Enrichment_8": "",
-			"Enrichment_9": "",
-			"Enrichment_10": "",
-			"Enrichment_11": "",
-			"Enrichment_12": "",
-			"Enrichment_13": "",
-			"Enrichment_14": "",
-			"Enrichment_15": "",
-			"Enrichment_16": "",
-			"Enrichment_17": "",
-			"Enrichment_18": "",
-			"Enrichment_19": "",
-			"Enrichment_20": ""
-		}));
+		let finalReport = "";
+		let Client_Code = "MKTTC";
+		let filename =`${Client_Code}.txt`;
+		for (index in userBebitReq) {
+			let bankDetails = userBebitReq[index].toAccount;
+			let ifsc = bankDetails.ifscCode;
+			let name = bankDetails.accName;
+			let amt = userBebitReq[index].reqAmount;
+			let accNo = bankDetails.accNumber;
+
+			if (ifsc != null) {
+				ifsc = ifsc.toUpperCase();
+				name = name.replace(/\.+/g, " ");
+				name = name.toUpperCase();
+			}
+			let Product_Code = "VPAY";
+			let Dr_Ac_No = 1548423085;
+			let Bank_Code_Indicator = "M";
+
+			finalReport += Client_Code + "~" + Product_Code + "~NEFT~~" + formatDate + "~~" + Dr_Ac_No + "~" + amt + "~" + Bank_Code_Indicator + "~~" + name + "~~" + ifsc + "~" + accNo + "~~~~~~~~~~~~~~~~~~~~~~~~\n";
+		}
 		res.json({
 			status: 0,
-			Profile: formattedData,
-			date: formatDate,
+			filename: filename,
+			writeString: finalReport,
 		});
 	} catch (error) {
 		res.json({
