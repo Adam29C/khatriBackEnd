@@ -69,7 +69,7 @@
                 <option value="0">Kotk XLS</option>
                 <option value="6">Cash free</option>
                 <option value="7">Rbl.xls</option>
-                <option value="8">Mk xls</option>
+                <option value="8">MK.txt</option>
 
                 <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
 								<option value="1">Tirupatie Kotk XLS</option>
@@ -1316,7 +1316,6 @@
 
   function generateMKRport(id) {
     const searchType = $("#req_status").val();
-    // const reportType = $("#report_type").val();
     const reportDate = $("#datepicker-autoclose").val();
 
     console.log("reportDate", reportDate);
@@ -1326,7 +1325,7 @@
       searchType: searchType,
     };
 
-    fetch("/debitReport/rblxls", {
+    fetch("/debitReport/mkxls", {
       method: "POST",
       body: JSON.stringify(req),
       headers: {
@@ -1336,6 +1335,11 @@
     })
       .then((res) => res.json())
       .then((json) => {
+
+        console.log("json" ,json);
+        
+return 
+
         const xlsData = json.Profile;
         const reportDate = json.date;
         var excel = $JExcel.new("Calibri light 10 #333333");
