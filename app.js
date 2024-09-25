@@ -322,7 +322,8 @@ console.log(process.env.port)
 // https.createServer(app).listen(port, () => {
 //   console.log(`Running securely on PORT: ${port} Date: ${new Date().toLocaleString()}`);
 // });
-let port = 9206
+// let port = 9206
+let port = 5000
 app.listen(port, () => {
   new Date().toLocaleDateString();
   console.log(`Running on PORT: ${port} Date: ${new Date().toLocaleString()}`);
