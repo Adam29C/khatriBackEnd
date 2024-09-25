@@ -35,7 +35,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     let originalname = file.originalname;
     let ext = originalname.split(".").pop();
-    let filename = `Khatri-V${req.body.appVer}.${ext}`;
+    let filename = `Bhau777-V${req.body.appVer}.${ext}`;
     cb(null, filename);
   },
 });
