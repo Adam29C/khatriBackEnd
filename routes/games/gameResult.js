@@ -221,7 +221,7 @@ router.post("/", session, async (req, res) => {
 		const todayDate = dt.format("m/d/Y");
 		const currentTime = dt.format("I:M p");
 
-		if (session === "Close") {
+                if (session === "Close") {
 			let gameResultData = await gameResult.findOne({
 				providerId: id,
 				resultDate: resultDate,
@@ -649,9 +649,9 @@ router.post("/paymentRevert", session, async (req, res) => {
 					//history
 					let arrValue = {
 						userId: userid,
-						bidId: rowId,
-						filterType: 8,
-						reqType: "main",
+						bidId : rowId,
+						filterType : 8,
+						reqType : "main",
 						previous_amount: walletBal,
 						current_amount: revertBalance,
 						transaction_amount: winAmount,
@@ -720,9 +720,9 @@ router.post("/paymentRevert", session, async (req, res) => {
 				//history
 				let arrValue = {
 					userId: userid,
-					bidId: rowId,
-					filterType: 3,
-					reqType: "main",
+					bidId : rowId,
+					filterType : 3,
+					reqType : "main",
 					previous_amount: walletBal,
 					current_amount: revertBalance,
 					transaction_amount: winAmount,
@@ -909,9 +909,9 @@ router.post("/refundAll", session, async (req, res) => {
 			const dateTime = formatted2.split(" ");
 			let arrValue = new history({
 				userId: userId,
-				bidId: singleUserUpdate._id,
-				reqType: "main",
-				filterType: 3,
+				bidId : singleUserUpdate._id,
+				reqType : "main",
+				filterType : 3,
 				previous_amount: current_amount,
 				current_amount: singleUserUpdate.wallet_balance,
 				provider_id: singleUserBidUpdate.providerId,
@@ -965,9 +965,9 @@ router.post("/refundAll", session, async (req, res) => {
 
 					let arrValue = new history({
 						userId: userId,
-						bidId: rowId._id,
-						filterType: 3,
-						reqType: "main",
+						bidId : rowId._id,
+						filterType : 3,
+						reqType : "main",
 						previous_amount: current_amount,
 						current_amount: singleUserUpdate.wallet_balance,
 						transaction_amount: biddingPoints,
@@ -991,7 +991,7 @@ router.post("/refundAll", session, async (req, res) => {
 					// 		},
 					// 	}
 					// );
-					await gameBids.deleteOne({ _id: rowId })
+					await gameBids.deleteOne({_id: rowId})
 					let firebaseId = singleUserUpdate.firebaseId;
 					tokenArray.push(firebaseId);
 					i++;

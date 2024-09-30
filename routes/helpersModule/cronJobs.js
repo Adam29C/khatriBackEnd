@@ -17,18 +17,14 @@ const path = require("path");
 const timeHistory = require("../../model/timeHistory");
 
 const fs = require('fs');
-// const uri = process.env.DB_CONNECT;
-// const certPath = path.join(__dirname, '../../global-bundle.pem');
-// const client = new MongoClient(uri, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//     tls: true,
-//     tlsCAFile: certPath
-// });
-const client = new MongoClient(process.env.DB_CONNECT, {
+const uri = process.env.DB_CONNECT;
+const certPath = path.join(__dirname, '../../global-bundle.pem');
+const client = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-})
+    tls: true,
+    tlsCAFile: certPath
+});
 
 const chatDomain = process.env.CHAT_DOMAIN;
 module.exports = async function () {
@@ -273,7 +269,7 @@ module.exports = async function () {
 	// });
 
 	cron.schedule("1 0 * * *", async () => {
-		if (process.env.pm_id == "1") {
+		//if (process.env.pm_id == "1") {
 			try {
 				let yesterdayRegister = moment().subtract(1, 'days').format('DD/MM/YYYY');
 				const yesterdayRegistered = await users
@@ -292,7 +288,7 @@ module.exports = async function () {
 			} catch (error) {
 				console.log(error);
 			}
-		}
+		//}
 	});
 
 	async function executeQuery(todayDate0, datetime) {
@@ -594,8 +590,7 @@ module.exports = async function () {
 	async function runCleanupTasks() {
 		try {
 			await client.connect();
-			// const database = client.db("admin");
-			const database = client.db("test");
+			const database = client.db("admin");
 			let timeHistoryList = await timeHistory.find();
 			const cleanupPromises = timeHistoryList.map(details => cleanupOldEntries(database, details));
 			await Promise.all(cleanupPromises);
