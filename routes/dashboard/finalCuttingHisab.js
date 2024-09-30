@@ -430,20 +430,20 @@ async function commonQuery(providerId, startDate, endDate, session) {
 module.exports = router;
 
 async function commonQueryNew(providerId, startDate, endDate, session) {
-    const certPath = path.join(__dirname, '../../global-bundle.pem');
-    // const client = await MongoClient.connect(process.env.DB_CONNECT,{
-	// 	useNewUrlParser: true,
-	// 	useUnifiedTopology: true,
-    // });
-
-    const client = new MongoClient(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        tls: true,
-        tlsCAFile: certPath
+    // const certPath = path.join(__dirname, '../../global-bundle.pem');
+    const client = await MongoClient.connect(process.env.DB_CONNECT,{
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
     });
 
-    const db = client.db("admin")
+    // const client = new MongoClient(uri, {
+    //     useNewUrlParser: true,
+    //     useUnifiedTopology: true,
+    //     tls: true,
+    //     tlsCAFile: certPath
+    // });
+
+    const db = client.db("test")
     const allBidData = await db.collection("game_bids").aggregate([{
             $match: {
                 providerId: ObjectID(providerId),
