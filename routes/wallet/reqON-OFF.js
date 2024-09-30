@@ -8,7 +8,7 @@ const dt = dateTime.create();
 router.get("/", session, permission, async (req, res) => {
 	try {
 		//const reqdata = await requestON.find({enabled:true}).sort({ _id: 1 });
-        const reqdata = await requestON.find({isRequest:false}).sort({ _id: 1 });
+                const reqdata = await requestON.find({isRequest:false}).sort({ _id: 1 });
 		const userInfo = req.session.details;
 		const permissionArray = req.view;
 		const check = permissionArray["reqONOFF"].showStatus;
@@ -42,7 +42,7 @@ router.post("/updateReq", async (req, res) => {
 			{ _id: id },
 			{ $set: { message: message, enabled: status, updatedAt: date } }
 		);
-        let requestList = await requestON.find({isRequest:false});
+                let requestList = await requestON.find({isRequest:false});
 		// res.json(update);
 		res.json(requestList)
 	} catch (error) {

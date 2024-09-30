@@ -321,7 +321,6 @@ cron.schedule("*/1 * * * *", async (req, res) => {
 // https.createServer(app).listen(port, () => {
 //   console.log(`Running securely on PORT: ${port} Date: ${new Date().toLocaleString()}`);
 // });
-// let port = 9206
 let port = 5000
 app.listen(port, () => {
   new Date().toLocaleDateString();

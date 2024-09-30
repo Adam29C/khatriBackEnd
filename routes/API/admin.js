@@ -134,6 +134,7 @@ router.post("/loginDashboard", async (req, res) => {
 			}
 		}
 	} catch (error) {
+console.log(error)
 		//  res.render('index', {message : error});
 	}
 });
