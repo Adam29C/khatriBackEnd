@@ -262,7 +262,7 @@ router.post("/addFund", verify, async (req, res) => {
 // });
 
 router.post("/withdrawFund", async (req, res) => {
-	try{
+	try {
 		let accNumber = req.body.accNumber;
 		let ifscCode = req.body.ifscCode;
 		let bankName = req.body.bankName;
@@ -706,7 +706,7 @@ router.post("/addpoint", async (req, res) => {
 			let UPINumber = null
 			let title;
 			let body;
-            let filter= 4;
+			let filter = 4;
 			if (upiId !== null && upiId !== undefined) {
 				upiDetails = await upiIds.findOne({ _id: upiId });
 				upiObjId = upiDetails._id;
@@ -716,7 +716,7 @@ router.post("/addpoint", async (req, res) => {
 				// body = "Wallet Notification";
 				// title = `Your Credit Request Of Rs. ${amount}-/ is Approved`
 				title = `Your Credit (Deposit) Request Of Rs.${amount}/- is Approved ✔️🤑💰`;
-			    body = `Hello ${username} 🤩🤩`;
+				body = `Hello ${username} 🤩🤩`;
 				wallet_balance = wallet_balance + parseInt(amount);
 				reqType = "Credit";
 				desc = "Amount Added To Wallet By Admin";
@@ -751,7 +751,7 @@ router.post("/addpoint", async (req, res) => {
 					});
 				}
 				title = `Your Debit (Withdrawal) Request Of Rs. ${amount}/- is Approved ✔️🤑💰`;
-			    body = `Hello ${username} 🤩🤩`;
+				body = `Hello ${username} 🤩🤩`;
 				// body = "Wallet Notification";
 				// title = `Your Debit Request Of Rs. ${amount}-/ is Approved`
 				wallet_balance = wallet_balance - parseInt(amount);
@@ -899,7 +899,7 @@ router.post("/idsUpi", async (req, res) => {
 				{ _id: 1, UPI_ID: 1 }
 			);
 			if (upi) {
-				let userDetails = await Users.findOne({_id:userId},{mobile:1,username:1,wallet_balance:1});
+				let userDetails = await Users.findOne({ _id: userId }, { mobile: 1, username: 1, wallet_balance: 1 });
 				const upi_ID = upi.UPI_ID;
 				const id = upi._id;
 				let mobile = userDetails.mobile;
@@ -1088,13 +1088,13 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 		});
 	}
 });
-router.post("/completeAutoPayment",async(req,res)=>{
-	try{
-        return res.json({
+router.post("/completeAutoPayment", async (req, res) => {
+	try {
+		return res.json({
 			status: 1,
-			message: "Dear User Your Transaction is processed successfully",
+			message:"Success",
 		});
-	}catch(error){
+	} catch (error) {
 		res.json({
 			status: 0,
 			message: "Something Bad Happened Contact Support",

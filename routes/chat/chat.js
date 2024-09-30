@@ -12,8 +12,7 @@ const s3 = new S3Client({
 });
 const s3Storage = multerS3({
     s3: s3,
-    // bucket: "khatri555",
-    bucket: "khatribuckets", // change it as per your project requirement
+    bucket:"khatribuckets", // change it as per your project requirement
     acl: "public-read", // storage access type
     metadata: (req, file, cb) => {
         cb(null, { fieldname: file.fieldname });
@@ -29,7 +28,7 @@ const multerInstanceForUpload = multer({
 router.post('/sendMessage', multerInstanceForUpload.array('images', 10), async (req, res) => {
     const { sender, receiver, message } = req.body;
     let images = []
-    if (req.file) {
+    if(req.file){
         images = req.file.map(file => file.location);
     }
     if (!sender || !receiver || (!message && images.length === 0)) {
