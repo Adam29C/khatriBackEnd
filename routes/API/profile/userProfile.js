@@ -39,7 +39,7 @@ router.post("/bankdetails", async (req, res) => {
 				data: savedUser,
 			});
 		} else {
-			
+
 			let acc_no = user.account_no;
 			if (acc_no != null) {
 				let arrayOld = user.changeDetails;
@@ -101,40 +101,40 @@ router.post("/bankdetails", async (req, res) => {
 	}
 });
 
-router.post("/checkRequest", async (req, res)=>{
+router.post("/checkRequest", async (req, res) => {
 	try {
 		const userid = req.body.userid;
 		const dt = dateTime.create();
 		const todayDate = dt.format("d/m/Y");
-		const check =  await fundReq.findOne({userId : userid,reqDate : todayDate, reqType : "Debit"});
-		if(check){
+		const check = await fundReq.findOne({ userId: userid, reqDate: todayDate, reqType: "Debit" });
+		// if(check){
 
-			const mode = check.withdrawalMode
-		
-			if(mode === "Bank"){
-				return res.json({
-					status : 0,
-					message : `Hello ${check.username}
-	
-					Your Cant Change Your Account Details Right Now.
-					Please Come Back After 24 Hours.`
-				})
-			}
-			else{
-				return res.json({
-					status : 1,
-					message : "You Can Change Your Account Details"
-				})
-			}
-		}
+		// 	const mode = check.withdrawalMode
+
+		// 	if(mode === "Bank"){
+		// 		return res.json({
+		// 			status : 0,
+		// 			message : `Hello ${check.username}
+
+		// 			Your Cant Change Your Account Details Right Now.
+		// 			Please Come Back After 24 Hours.`
+		// 		})
+		// 	}
+		// 	else{
+		// 		return res.json({
+		// 			status : 1,
+		// 			message : "You Can Change Your Account Details"
+		// 		})
+		// 	}
+		// }
 		return res.json({
-			status : 1,
-			message : "You Can Change Your Account Details"
+			status: 1,
+			message: "You Can Change Your Account Details"
 		})
 	} catch (error) {
 		res.json({
-			status : 0,
-			message : `Server Error ${error}`
+			status: 0,
+			message: `Server Error ${error}`
 		})
 	}
 })
@@ -232,11 +232,11 @@ router.post("/phoneNumber", async (req, res) => {
 	}
 });
 
-router.post("/userProfile", verify,async (req, res) => {
+router.post("/userProfile", verify, async (req, res) => {
 	try {
 		const id = req.body.id;
 		const profileDetails = await profile.findOne({ userId: id });
-		if(!profileDetails){
+		if (!profileDetails) {
 			return res.status(400).json({
 				status: 0,
 				error: "Please add bank details",
@@ -244,21 +244,21 @@ router.post("/userProfile", verify,async (req, res) => {
 		}
 		let userDetails = await userFind.findOne({ _id: id }, { wallet_balance: 1, _id: 0 })
 		let finalObj = {
-			changeDetails:profileDetails.changeDetails,
+			changeDetails: profileDetails.changeDetails,
 			_id: profileDetails._id,
 			userId: profileDetails.userId,
 			address: profileDetails.address,
 			city: profileDetails.city,
 			pincode: profileDetails.pincode,
-			username:profileDetails.username,
+			username: profileDetails.username,
 			account_no: profileDetails.account_no,
-			bank_name:profileDetails.bank_name,
+			bank_name: profileDetails.bank_name,
 			ifsc_code: profileDetails.ifsc_code,
-			account_holder_name:profileDetails.account_holder_name,
+			account_holder_name: profileDetails.account_holder_name,
 			paytm_number: profileDetails.paytm_number,
 			profileChangeCounter: profileDetails.profileChangeCounter,
 			created_at: profileDetails.created_at,
-			wallet_balance:userDetails.wallet_balance
+			wallet_balance: userDetails.wallet_balance
 		}
 		res.status(200).json({
 			status: 1,
@@ -274,41 +274,41 @@ router.post("/userProfile", verify,async (req, res) => {
 	}
 });
 
-router.post("/checkAccountNumber",  async(req, res)=>{
+router.post("/checkAccountNumber", async (req, res) => {
 	try {
 		const hash = crypto.createHash("sha512");
 		const { account_name, account_number, bank_name, ifsc_code, userid, firstTime } = req.body;
-		const checkUser = await userFind.findOne({_id : userid});
+		const checkUser = await userFind.findOne({ _id: userid });
 		const accountNumberRegex = /^\d{9,18}$/;
 		const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-		
-		if(checkUser === null){
+
+		if (checkUser === null) {
 			return res.json({
-				status : 0,
-				message : "Sorry You are not a valid Khatri User"
+				status: 0,
+				message: "Sorry You are not a valid Khatri User"
 			})
 		}
 
-		if (!accountNumberRegex.test(account_number)){
+		if (!accountNumberRegex.test(account_number)) {
 			return res.json({
-				status : 0,
-				message : "Invalid Bank Account Number",
+				status: 0,
+				message: "Invalid Bank Account Number",
 			});
 		}
 
-		if (!ifscRegex.test(ifsc_code)){
+		if (!ifscRegex.test(ifsc_code)) {
 			return res.json({
-				status : 0,
-				message : "Invalid IFSC Code",
+				status: 0,
+				message: "Invalid IFSC Code",
 			});
 		}
-		
+
 		const dateUpdate = moment().format("DD/MM/YYYY");
 		const time = moment().format("hh:mm:ss a");
-		
-		if(firstTime == true){
+
+		if (firstTime == true) {
 			const ts = moment(dateUpdate, "DD/MM/YYYY").unix();
-			const {name, username, mobile} = checkUser;
+			const { name, username, mobile } = checkUser;
 			const userCheck = await userFind.findOneAndUpdate(
 				{ _id: userid },
 				{
@@ -329,11 +329,11 @@ router.post("/checkAccountNumber",  async(req, res)=>{
 				mobile: mobile,
 				reqType: "Debit",
 				reqStatus: "Approved",
-				toAccount : {
-					accNumber : account_number,
-					ifscCode : ifsc_code,
-					bankName : bank_name,
-					accName : `${account_name}`
+				toAccount: {
+					accNumber: account_number,
+					ifscCode: ifsc_code,
+					bankName: bank_name,
+					accName: `${account_name}`
 				},
 				reqDate: dateUpdate,
 				reqTime: time,
@@ -345,11 +345,11 @@ router.post("/checkAccountNumber",  async(req, res)=>{
 				timestamp: ts,
 			});
 			const saveId = await addReq.save();
-			
+
 			const point_history = new history({
 				userId: userid,
-				bidId : saveId._id,
-				filterType : 7,
+				bidId: saveId._id,
+				filterType: 7,
 				previous_amount: userCheck.wallet_balance + 5,
 				current_amount: userCheck.wallet_balance,
 				transaction_amount: 5,
@@ -364,29 +364,29 @@ router.post("/checkAccountNumber",  async(req, res)=>{
 			});
 			await point_history.save();
 			return res.json({
-				status : 1,
-				message : "API Response",
+				status: 1,
+				message: "API Response",
 				resp: {
 					data: {
 						beneficiary_name: bank_name,
-						accNumber : account_number,
-						ifscCode : ifsc_code,
-						bankName : bank_name,
-						accName : `${account_name}`
+						accNumber: account_number,
+						ifscCode: ifsc_code,
+						bankName: bank_name,
+						accName: `${account_name}`
 					}
 				}
 			})
 		} else {
 			return res.json({
-				status : 1,
-				message : "API Response",
+				status: 1,
+				message: "API Response",
 				resp: {
 					data: {
 						beneficiary_name: bank_name,
-						accNumber : account_number,
-						ifscCode : ifsc_code,
-						bankName : bank_name,
-						accName : `${account_name}`
+						accNumber: account_number,
+						ifscCode: ifsc_code,
+						bankName: bank_name,
+						accName: `${account_name}`
 					}
 				}
 			})
@@ -408,14 +408,14 @@ router.post("/checkAccountNumber",  async(req, res)=>{
 		// },
 		// body: JSON.stringify({"account_name": account_name,"account_number":account_number,"api_key":api_key,"bank_name":bank_name,"hash":hash_op,"ifsc_code":ifsc_code})
 		// };
-	
+
 		// request(options, async function (error, response) {
 		// 	if (error) return res.json({status : 0, message : "Api Error", err : error.toString()});
 		// 	let resp = JSON.parse(response.body);
 		// 	let stat = resp.data.status;
 		// 	if(stat == "SUCCESS")
 		// 	{
-				
+
 		// 	}
 		// 	return res.json({
 		// 		status : 0,
@@ -425,8 +425,8 @@ router.post("/checkAccountNumber",  async(req, res)=>{
 		// });
 	} catch (error) {
 		res.json({
-			status : 0,
-			message : `Server Error ${error.toString()}`
+			status: 0,
+			message: `Server Error ${error.toString()}`
 		})
 	}
 });
