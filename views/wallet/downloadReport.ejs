@@ -314,9 +314,6 @@
     })
       .then((res) => res.json())
       .then((json) => {
-
-
-        
         const filename = json.filename;
         const text = json.writeString;
         var element = document.createElement("a");
@@ -324,7 +321,6 @@
         element.setAttribute("download", filename);
         document.body.appendChild(element);
         element.click();
-
         document.body.removeChild(element);
         return;
       });
@@ -396,7 +392,6 @@
 
   function updateClass() {
     const div = document.getElementById("creditDebitTab");
-    console.log("divdivdiv", div);
 
     if (window.innerWidth < 620) {
       div.classList.add("table-responsive");
@@ -404,10 +399,6 @@
       div.classList.remove("table-responsive");
     }
   }
-
-  // Add event listener for window resize
   window.addEventListener("resize", updateClass);
-
-  // Call the function on page load
   updateClass();
 </script>
