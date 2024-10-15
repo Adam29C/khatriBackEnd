@@ -151,10 +151,10 @@ router.post("/getUsername", session, async (req, res) => {
 	}
 });
 
-router.post("/userReport", session, async (req, res) => {
+router.post("/userReport", async (req, res) => {
 	try {
 		const userName = req.body.userId;
-		const provider = req.body.gameId;
+		const gameId = req.body.gameId;
 		const sDate = req.body.startDate;
 		const eDate = req.body.endDate;
 
@@ -163,38 +163,43 @@ router.post("/userReport", session, async (req, res) => {
 
 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-		if (userName == "" && provider == 0) {
-			const bidsData = await bids.aggregate([
-				{
-					$match: {
-						// dateStamp: {
-						//  $gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+		if (userName == "" && gameId == 0 || gameId == 0) {
+			let providerList = await provider.find();
+			let finalArr=[];
+			if(providerList.length>0){
+				for(let providerData of providerList){
+					const bidsData = await bids.aggregate([
+						{
+							$match: {
+								providerId: providerData._id,
+								gameDate: {
+									$gte: sDate,
+									$lte: eDate,
+								},
+							},
 						},
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-
-			res.json(bidsData);
-		} else if (provider == 0) {
+						{
+							$group: {
+								_id: null,
+								GameWinPoints: { $sum: "$gameWinPoints" },
+								BiddingPoints: { $sum: "$biddingPoints" },
+							},
+						},
+					]);		
+					if(bidsData.length>0){
+						finalArr.push({_id: null,
+							GameWinPoints:bidsData[0].GameWinPoints,
+							BiddingPoints:bidsData[0].BiddingPoints,
+							providerName:providerData.providerName
+						});
+					}
+				}
+			}
+			res.json(finalArr);
+		} else if (gameId == 0) {
 			const bidsData = await bids.aggregate([
 				{
 					$match: {
-						// dateStamp: {
-						//  $gte: startDate,
-						// 	$lte: endDate,
-						// },
 						gameDate:{
 							$gte:sDate,
 							$lte:eDate
@@ -211,11 +216,11 @@ router.post("/userReport", session, async (req, res) => {
 				},
 			]);
 			res.json(bidsData);
-		} else if (provider != 0 && userName == "") {
+		} else if (gameId != 0 && userName == "") {
 			const data1 = await bids.aggregate([
 				{
 					$match: {
-						providerId: new ObjectId(provider),
+						providerId: new ObjectId(gameId),
 						// dateStamp: {
 						// 	$gte: startDate,
 						// 	$lte: endDate,
@@ -239,7 +244,7 @@ router.post("/userReport", session, async (req, res) => {
 			const bidsData = await bids.aggregate([
 				{
 					$match: {
-						providerId: new ObjectId(provider),
+						providerId: new ObjectId(gameId),
 						// dateStamp: {
 						// 	$gte: startDate,
 						// 	$lte: endDate,
@@ -269,6 +274,7 @@ router.post("/userReport", session, async (req, res) => {
 		});
 	}
 });
+
 
 router.post("/userReportStar", session, async (req, res) => {
 	try {
