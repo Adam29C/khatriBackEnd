@@ -183,6 +183,8 @@
           var i = 1;
           let total_amt = 0;
 
+          var totalPointDifference = 0;
+
           var winPoint = data[0].GameWinPoints;
           var bidPoint = data[0].BiddingPoints;
           let pf;
@@ -193,31 +195,39 @@
           }
 
           data.forEach(function (e) {
-            total_amt += e.reqAmount;
-            var bidPoint = e.BiddingPoints;
-            var winPoint = e.GameWinPoints;
-            var pointDifference = bidPoint - winPoint;
+    total_amt += e.reqAmount;
+    var bidPoint = e.BiddingPoints;
+    var winPoint = e.GameWinPoints;
+    var pointDifference = bidPoint - winPoint;
 
-            Html +=
-              "<tr><td>" + i + "</td> <td>" +  (e.providerName ? e.providerName : "-") +
-                  "</td> <td>" +
-                  StartDate +
-                  " TO " +
-                  EndDate +
-                  "</td><td>" +
-                  bidPoint +
-                  "</td><td>" +
-                  winPoint +
-                  '</td><td style="color:' +
-                  (pointDifference > 0 ? " #22b922 " : "red") +
-                  '">' +
-                  pointDifference +
-                  "</td></tr>";
-            i++;
-          });
+    // Total pointDifference ka sum add karte jao
+    totalPointDifference += pointDifference;
 
-          $("#completedata").html(Html);
+    Html +=
+      "<tr><td>" + i + "</td> <td>" + (e.providerName ? e.providerName : "-") +
+      "</td> <td>" +
+      StartDate +
+      " TO " +
+      EndDate +
+      "</td><td>" +
+      bidPoint +
+      "</td><td>" +
+      winPoint +
+      '</td><td style="color:' +
+      (pointDifference > 0 ? " #22b922 " : "red") +
+      '">' +
+      pointDifference +
+      "</td></tr>";
+    
+    i++;
+});
 
+// Table ke end mein ek nayi row add karenge
+Html += "<tr><td colspan='5' style='text-align:right; font-weight:bold;'>Total Profit/Loss:</td>";
+Html += "<td style='font-weight:bold; color:" + (totalPointDifference > 0 ? " #22b922 " : "red") + "'>" + totalPointDifference + "</td></tr>";
+
+// HTML ko update karna
+$("#completedata").html(Html);
 
             //   let Html;
             //   var winPoint = data[0].GameWinPoints;
