@@ -14,7 +14,7 @@ const session = require("../helpersModule/session");
 const permission = require("../helpersModule/permission");
 const analysisCol = require("../../model/games/Analysis");
 const moment = require("moment");
-const fundsreq =   require('../../model/API/FundRequest')
+const fundsreq = require('../../model/API/FundRequest')
 
 router.get("/", session, permission, async (req, res) => {
 	try {
@@ -151,7 +151,7 @@ router.post("/getUsername", session, async (req, res) => {
 	}
 });
 
-router.post("/userReport", async (req, res) => {
+router.post("/userReport", session,async (req, res) => {
 	try {
 		const userName = req.body.userId;
 		const gameId = req.body.gameId;
@@ -163,11 +163,11 @@ router.post("/userReport", async (req, res) => {
 
 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-		if (userName == "" && gameId == 0 || gameId == 0) {
-			let providerList = await provider.find();
-			let finalArr=[];
-			if(providerList.length>0){
-				for(let providerData of providerList){
+		let providerList = await provider.find();
+		if (userName == "" && gameId == 0) {
+			let finalArr = [];
+			if (providerList.length > 0) {
+				for (let providerData of providerList) {
 					const bidsData = await bids.aggregate([
 						{
 							$match: {
@@ -185,49 +185,63 @@ router.post("/userReport", async (req, res) => {
 								BiddingPoints: { $sum: "$biddingPoints" },
 							},
 						},
-					]);		
-					if(bidsData.length>0){
-						finalArr.push({_id: null,
-							GameWinPoints:bidsData[0].GameWinPoints,
-							BiddingPoints:bidsData[0].BiddingPoints,
-							providerName:providerData.providerName
+					]);
+					if (bidsData.length > 0) {
+						finalArr.push({
+							_id: null,
+							GameWinPoints: bidsData[0].GameWinPoints,
+							BiddingPoints: bidsData[0].BiddingPoints,
+							providerName: providerData.providerName
 						});
 					}
 				}
 			}
-			res.json(finalArr);
+			return res.json(finalArr);
 		} else if (gameId == 0) {
-			const bidsData = await bids.aggregate([
-				{
-					$match: {
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+			let finalArr = []
+			if (providerList.length > 0) {
+				for (let providerData of providerList) {
+					const bidsData = await bids.aggregate([
+						{
+
+							$match: {
+								providerId: new ObjectId(providerData._id),
+								gameDate: {
+									$gte: sDate,
+									$lte: eDate
+								},
+								userName: userName,
+							},
 						},
-						userName: userName,
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			res.json(bidsData);
+						{
+							$group: {
+								_id: null,
+								GameWinPoints: { $sum: "$gameWinPoints" },
+								BiddingPoints: { $sum: "$biddingPoints" },
+							},
+						},
+					]);
+					if (bidsData.length > 0) {
+						finalArr.push({
+							_id: null,
+							GameWinPoints: bidsData[0].GameWinPoints,
+							BiddingPoints: bidsData[0].BiddingPoints,
+							providerName: providerData.providerName
+						});
+					}
+				}
+			}
+			return res.json(finalArr);
 		} else if (gameId != 0 && userName == "") {
+			let finalArr = [];
+			let providerData = await provider.findOne({ _id: gameId }, { providerName: 1 });
 			const data1 = await bids.aggregate([
 				{
 					$match: {
 						providerId: new ObjectId(gameId),
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+						gameDate: {
+							$gte: sDate,
+							$lte: eDate
 						},
 					},
 				},
@@ -239,19 +253,25 @@ router.post("/userReport", async (req, res) => {
 					},
 				},
 			]);
-			res.json(data1);
+			if (data1.length > 0) {
+				finalArr.push({
+					_id: null,
+					GameWinPoints: data1[0].GameWinPoints,
+					BiddingPoints: data1[0].BiddingPoints,
+					providerName: providerData.providerName
+				});
+			}
+			return res.json(finalArr);
 		} else {
+			let finalArr = [];
+			let providerData = await provider.findOne({ _id: gameId }, { providerName: 1 });
 			const bidsData = await bids.aggregate([
 				{
 					$match: {
 						providerId: new ObjectId(gameId),
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+						gameDate: {
+							$gte: sDate,
+							$lte: eDate
 						},
 						userName: userName,
 					},
@@ -264,7 +284,15 @@ router.post("/userReport", async (req, res) => {
 					},
 				},
 			]);
-			res.json(bidsData);
+			if (bidsData.length > 0) {
+				finalArr.push({
+					_id: null,
+					GameWinPoints: bidsData[0].GameWinPoints,
+					BiddingPoints: bidsData[0].BiddingPoints,
+					providerName: providerData.providerName
+				});
+			}
+			return res.json(finalArr);
 		}
 	} catch (error) {
 		res.json({
@@ -275,11 +303,10 @@ router.post("/userReport", async (req, res) => {
 	}
 });
 
-
-router.post("/userReportStar", session, async (req, res) => {
+router.post("/userReportStar", session,async (req, res) => {
 	try {
 		const userName = req.body.userId;
-		const provider = req.body.gameId;
+		const gameId = req.body.gameId;
 		const sDate = req.body.startDate;
 		const eDate = req.body.endDate;
 
@@ -288,66 +315,83 @@ router.post("/userReportStar", session, async (req, res) => {
 
 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-
-		if (userName == "" && provider == 0) {
-			const bidsData = await starBids.aggregate([
-				{
-					$match: {
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+		let providerList = await starProvider.find();
+		if (userName == "" && gameId == 0) {
+			let finalArr = [];
+			if (providerList.length > 0) {
+				for (let providerData of providerList) {
+					const bidsData = await starBids.aggregate([
+						{
+							$match: {
+								providerId: providerData._id,
+								gameDate: {
+									$gte: sDate,
+									$lte: eDate
+								},
+							},
 						},
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			res.json(bidsData);
-		} else if (provider == 0) {
-			const bidsData = await starBids.aggregate([
-				{
-					$match: {
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+						{
+							$group: {
+								_id: null,
+								GameWinPoints: { $sum: "$gameWinPoints" },
+								BiddingPoints: { $sum: "$biddingPoints" },
+							},
 						},
-						userName: userName,
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			res.json(bidsData);
+					]);
+					if (bidsData.length > 0) {
+						finalArr.push({
+							_id: null,
+							GameWinPoints: bidsData[0].GameWinPoints,
+							BiddingPoints: bidsData[0].BiddingPoints,
+							providerName: providerData.providerName
+						});
+					}
+				}
+			}
+			return res.json(finalArr);
+		} else if (gameId == 0) {
+			let finalArr = []
+			if (providerList.length > 0) {
+				for (let providerData of providerList) {
+					const bidsData = await starBids.aggregate([
+						{
+							$match: {
+								gameDate: {
+									$gte: sDate,
+									$lte: eDate
+								},
+								userName: userName,
+							},
+						},
+						{
+							$group: {
+								_id: null,
+								GameWinPoints: { $sum: "$gameWinPoints" },
+								BiddingPoints: { $sum: "$biddingPoints" },
+							},
+						},
+					]);
+					if (bidsData.length > 0) {
+						finalArr.push({
+							_id: null,
+							GameWinPoints: bidsData[0].GameWinPoints,
+							BiddingPoints: bidsData[0].BiddingPoints,
+							providerName: providerData.providerName
+						});
+					}
+				}
+			}
+			return res.json(finalArr);
 		} else if (provider != 0 && userName == "") {
+			let finalArr = [];
+			let providerData = await starProvider.findOne({ _id: gameId }, { providerName: 1 });
 			const bidsData = await starBids.aggregate([
 				{
 					$match: {
-						providerId: new ObjectId(provider),
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+						providerId: new ObjectId(gameId),
+						gameDate: {
+							$gte: sDate,
+							$lte: eDate
 						},
 					},
 				},
@@ -359,19 +403,25 @@ router.post("/userReportStar", session, async (req, res) => {
 					},
 				},
 			]);
-			res.json(bidsData);
+			if (bidsData.length > 0) {
+				finalArr.push({
+					_id: null,
+					GameWinPoints: bidsData[0].GameWinPoints,
+					BiddingPoints: bidsData[0].BiddingPoints,
+					providerName: providerData.providerName
+				});
+			}
+			return res.json(finalArr);
 		} else {
+			let finalArr = [];
+			let providerData = await starProvider.findOne({ _id: gameId }, { providerName: 1 });
 			const bidsData = await starBids.aggregate([
 				{
 					$match: {
-						providerId: new ObjectId(provider),
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+						providerId: new ObjectId(gameId),
+						gameDate: {
+							$gte: sDate,
+							$lte: eDate
 						},
 						userName: userName,
 					},
@@ -385,7 +435,15 @@ router.post("/userReportStar", session, async (req, res) => {
 				},
 			]);
 
-			res.json(bidsData);
+			if (bidsData.length > 0) {
+				finalArr.push({
+					_id: null,
+					GameWinPoints: bidsData[0].GameWinPoints,
+					BiddingPoints: bidsData[0].BiddingPoints,
+					providerName: providerData.providerName
+				});
+			}
+			return res.json(finalArr);
 		}
 	} catch (error) {
 		res.json({
@@ -396,10 +454,10 @@ router.post("/userReportStar", session, async (req, res) => {
 	}
 });
 
-router.post("/userReportAB", session, async (req, res) => {
+router.post("/userReportAB", async (req, res) => {
 	try {
 		const userName = req.body.userId;
-		const provider = req.body.gameId;
+		const providerId = req.body.gameId;
 		const sDate = req.body.startDate;
 		const eDate = req.body.endDate;
 
@@ -408,18 +466,86 @@ router.post("/userReportAB", session, async (req, res) => {
 
 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+		let providerList = await abProvider.find();
 
-		if (userName == "" && provider == 0) {
+		if (userName == "" && providerId == 0) {
+			let finalArr = [];
+			if (providerList.length > 0) {
+				for (let providerData of providerList) {
+					const bidsData = await abBids.aggregate([
+						{
+							$match: {
+								providerId: providerData._id,
+								gameDate: {
+									$gte: sDate,
+									$lte: eDate
+								},
+							},
+						},
+						{
+							$group: {
+								_id: null,
+								GameWinPoints: { $sum: "$gameWinPoints" },
+								BiddingPoints: { $sum: "$biddingPoints" },
+							},
+						},
+					]);
+					if (bidsData.length > 0) {
+						finalArr.push({
+							_id: null,
+							GameWinPoints: bidsData[0].GameWinPoints,
+							BiddingPoints: bidsData[0].BiddingPoints,
+							providerName: providerData.providerName
+						});
+					}
+				}
+			}
+			return res.json(finalArr);
+		} else if (providerId == 0) {
+			let finalArr = []
+			if (providerList.length > 0) {
+				for (let providerData of providerList) {
+					const bidsData = await abBids.aggregate([
+						{
+							$match: {
+								providerId: new ObjectId(providerData._id),
+								gameDate: {
+									$gte: sDate,
+									$lte: eDate
+								},
+								userName: userName,
+							},
+						},
+						{
+							$group: {
+								_id: null,
+								GameWinPoints: { $sum: "$gameWinPoints" },
+								BiddingPoints: { $sum: "$biddingPoints" },
+							},
+						},
+					]);
+					if (bidsData.length > 0) {
+						finalArr.push({
+							_id: null,
+							GameWinPoints: bidsData[0].GameWinPoints,
+							BiddingPoints: bidsData[0].BiddingPoints,
+							providerName: providerData.providerName
+						});
+					}
+				}
+			}
+
+			return res.json(finalArr);
+		} else if (providerId != 0 && userName == "") {
+			let finalArr = [];
+			let providerDetails = await abProvider.findOne({ _id: providerId }, { providerName: 1 });
 			const bidsData = await abBids.aggregate([
 				{
 					$match: {
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+						providerId: new ObjectId(providerId),
+						gameDate: {
+							$gte: sDate,
+							$lte: eDate
 						},
 					},
 				},
@@ -431,69 +557,25 @@ router.post("/userReportAB", session, async (req, res) => {
 					},
 				},
 			]);
-			res.json(bidsData);
-		} else if (provider == 0) {
-			const bidsData = await abBids.aggregate([
-				{
-					$match: {
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
-						},
-						userName: userName,
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-
-			res.json(bidsData);
-		} else if (provider != 0 && userName == "") {
-			const bidsData = await abBids.aggregate([
-				{
-					$match: {
-						providerId: new ObjectId(provider),
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
-						},
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-
-			res.json(bidsData);
+			if (bidsData.length > 0) {
+				finalArr.push({
+					_id: null,
+					GameWinPoints: bidsData[0].GameWinPoints,
+					BiddingPoints: bidsData[0].BiddingPoints,
+					providerName: providerDetails.providerName
+				});
+			}
+			return res.json(finalArr);
 		} else {
+			let finalArr = [];
+			let providerData = await abProvider.findOne({ _id: providerId }, { providerName: 1 });
 			const bidsData = await abBids.aggregate([
 				{
 					$match: {
-						providerId: new ObjectId(provider),
-						// dateStamp: {
-						// 	$gte: startDate,
-						// 	$lte: endDate,
-						// },
-						gameDate:{
-							$gte:sDate,
-							$lte:eDate
+						providerId: new ObjectId(providerId),
+						gameDate: {
+							$gte: sDate,
+							$lte: eDate
 						},
 						userName: userName,
 					},
@@ -506,7 +588,15 @@ router.post("/userReportAB", session, async (req, res) => {
 					},
 				},
 			]);
-			res.json(bidsData);
+			if (bidsData.length > 0) {
+				finalArr.push({
+					_id: null,
+					GameWinPoints: bidsData[0].GameWinPoints,
+					BiddingPoints: bidsData[0].BiddingPoints,
+					providerName: providerData.providerName
+				});
+			}
+			return res.json(finalArr);
 		}
 	} catch (error) {
 		res.json({
@@ -534,15 +624,15 @@ router.post("/analysisReport", session, async (req, res) => {
 				$match: {
 					userName: userName
 				},
-			
+
 			},
-			{$group: { _id: null, BiddingPoints: { $sum: "$biddingPoints" } , GameWinPoints: { $sum: "$gameWinPoints" }} }
+			{ $group: { _id: null, BiddingPoints: { $sum: "$biddingPoints" }, GameWinPoints: { $sum: "$gameWinPoints" } } }
 		]);
 
 		const abBidsData = await abBids.aggregate([
 			{
 				$match: {
-				   userName: userName
+					userName: userName
 				}
 			},
 			{
@@ -568,45 +658,46 @@ router.post("/analysisReport", session, async (req, res) => {
 				},
 			},
 		]);
-		
 
-		const amountCreditDebit  = await fundsreq.aggregate([
+
+		const amountCreditDebit = await fundsreq.aggregate([
 			{
-				$match:{username:userName, reqStatus: 'Approved'}
-		   },
+				$match: { username: userName, reqStatus: 'Approved' }
+			},
 			{
-			$group: {_id:"$reqType" , totalAmount: {$sum : "$reqAmount"}}
-		   
-		}]);
+				$group: { _id: "$reqType", totalAmount: { $sum: "$reqAmount" } }
 
-		    const userData = await user.findOne({username:userName}).lean()
+			}]);
+
+		const userData = await user.findOne({ username: userName }).lean()
 
 
-        let  totalDebitAmount = 0, totalCreditAmont =0;
-	    for(let elem of amountCreditDebit){
-           if(elem['_id'] == 'Debit'){
-			totalDebitAmount = elem.totalAmount;
-		   }
+		let totalDebitAmount = 0, totalCreditAmont = 0;
+		for (let elem of amountCreditDebit) {
+			if (elem['_id'] == 'Debit') {
+				totalDebitAmount = elem.totalAmount;
+			}
 
-		   if(elem['_id'] == 'Credit'){
-			totalCreditAmont = elem.totalAmount;
-		   }
+			if (elem['_id'] == 'Credit') {
+				totalCreditAmont = elem.totalAmount;
+			}
 		}
 
-		await analysisCol.updateOne({username: userName},{
-			$set:{
-			username:userName,
-			gameBidPoint :bidsData.length ? bidsData[0].BiddingPoints : 0,
-			gameWinPoints:bidsData.length ? bidsData[0].GameWinPoints : 0,
-			AbWinPoints : abBidsData.length ? abBidsData[0].GameWinPoints : 0,
-			AbBidPoint:   abBidsData.length ? abBidsData[0].BiddingPoints : 0,
-			starWinPoints:starBidsData.length ?  starBidsData[0].GameWinPoints : 0,
-			starBidPoint:starBidsData.length ? starBidsData[0].BiddingPoints : 0,
-			totalPointsDebited:totalDebitAmount,
-			totalPointsCredited:totalCreditAmont,
-			updatedAt: userData ? userData.lastLoginDate : ''
-          }},{upsert:true})
-		
+		await analysisCol.updateOne({ username: userName }, {
+			$set: {
+				username: userName,
+				gameBidPoint: bidsData.length ? bidsData[0].BiddingPoints : 0,
+				gameWinPoints: bidsData.length ? bidsData[0].GameWinPoints : 0,
+				AbWinPoints: abBidsData.length ? abBidsData[0].GameWinPoints : 0,
+				AbBidPoint: abBidsData.length ? abBidsData[0].BiddingPoints : 0,
+				starWinPoints: starBidsData.length ? starBidsData[0].GameWinPoints : 0,
+				starBidPoint: starBidsData.length ? starBidsData[0].BiddingPoints : 0,
+				totalPointsDebited: totalDebitAmount,
+				totalPointsCredited: totalCreditAmont,
+				updatedAt: userData ? userData.lastLoginDate : ''
+			}
+		}, { upsert: true })
+
 
 
 
@@ -726,15 +817,3 @@ router.post("/analysisReport", session, async (req, res) => {
 });
 
 module.exports = router;
-
-
-
-// db.game_bids.aggregate([
-// 	{
-// 		$match: {
-// 			userName: 'testing123'
-// 		},
-	
-// 	},
-// 	{$group: { _id: null, totalBidsCount: { $sum: 1 } } }
-// ])
