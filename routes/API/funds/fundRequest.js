@@ -988,8 +988,6 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 				timestamp: ts,
 			});
 
-			await insertPayment.save();
-
 			if (status == "Approved") {
 				await User.updateOne(
 					{ _id: userId },
@@ -1000,6 +998,7 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 						},
 					}
 				);
+				await insertPayment.save();
 
 				const addReq = new fundReq({
 					userId: userId,

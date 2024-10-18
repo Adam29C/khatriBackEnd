@@ -347,48 +347,64 @@ router.get("/razorpay", session, permission, async (req, res) => {
 });
 
 // router.post("/getUPIReport", session, async (req, res) => {
-// 	try {
-// 		const id = req.body.id;
-// 		const date = req.body.date;
-// 		const dateStart = req.body.dateStart;
-// 		const startDate0 = moment(dateStart, "MM-DD-YYYY").format("DD/MM/YYYY");
-// 		const endDate0 = moment(date, "MM-DD-YYYY").format("DD/MM/YYYY");
-// 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-// 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-
-// 		let query;
-// 		if (id == "1") {
-// 			query = {
-// 				timestamp: {
-// 					$gte: startDate,
-// 					$lte: endDate,
-// 				},
-// 				reqStatus: "Approved",
-// 			};
-// 		} else {
-// 			query = {
-// 				timestamp: {
-// 					$gte: startDate,
-// 					$lte: endDate,
-// 				},
-// 				reqStatus: "Approved",
-// 				upi_name_id: id,
-// 			};
-// 		}
-
-// 		const reportData = await upi_entries.find(query).sort({ _id: -1 });
-
-// 		res.json({
-// 			status: 1,
-// 			message: "Success",
-// 			data: reportData,
-// 		});
-// 	} catch (error) {
-// 		res.json({
-// 			status: 0,
-// 			message: "Something Bad Happend Contact Support",
-// 		});
-// 	}
+//     try {
+//         const id = req.body.id;
+//         const date = req.body.date;
+//         const dateStart = req.body.dateStart;
+//         const startDate0 = moment(dateStart, "MM-DD-YYYY").format("DD/MM/YYYY");
+//         const endDate0 = moment(date, "MM-DD-YYYY").format("DD/MM/YYYY");
+//         var startDate = moment(startDate0, "DD/MM/YYYY").unix();
+//         var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+//         let query;
+//         if (id === '1') {
+//             query = {
+//                 reqType: "Credit",
+// 				particular:"UPI",
+//                 timestamp: {
+//                     $gte: startDate,
+//                     $lte: endDate,
+//                 },
+//             }
+//         } else {
+//             let upiDetails = await UPI_list.findOne({ _id: id}, { UPI_ID: 1 })
+//             query = {
+// 				particular:"UPI",
+//                 reqType: "Credit",
+//                 timestamp: {
+//                     $gte: startDate,
+//                     $lte: endDate,
+//                 },
+//                 upiId: upiDetails.UPI_ID,
+//             }
+//         }
+//         let creditAmountDetails = await history.find(query);
+//         let newArra = [];
+//         for (let details of creditAmountDetails) {
+//             newArra.push({
+//                 _id: details._id,
+//                 username: details.username,
+//                 // fullname: details.fullname || null,
+//                 mobile: details.mobile,
+//                 reqAmount: details.transaction_amount,
+//                 reqDate: details.transaction_date,
+//                 reqTime: details.transaction_time,
+//                 transaction_id: details.transaction_id || null,
+//                 upi_name: details.upiId,
+//                 upi_app_name: "googlepay",
+//                 reqStatus: details?.transaction_status
+//             })
+//         }
+//         res.json({
+//             status: 1,
+//             message: "Success",
+//             data: newArra,
+//         });
+//     } catch (error) {
+//         res.json({
+//             status: 0,
+//             message: "Something Bad Happend Contact Support",
+//         });
+//     }
 // });
 
 // router.post("/getUPIReport", async (req, res) => {
@@ -424,7 +440,6 @@ router.get("/razorpay", session, permission, async (req, res) => {
 // 		}
 // 		let creditAmountDetails = await history.find(query);
 // 		let newArra = [];
-// 		let totalCount = 0;
 // 		if (creditAmountDetails.length !== 0) {
 // 			creditAmountDetails.sort((a, b) => {
 // 				let timeA = moment(a.transaction_time, 'hh:mm:ss A');
@@ -432,11 +447,11 @@ router.get("/razorpay", session, permission, async (req, res) => {
 // 				return timeA - timeB;
 // 			});
 // 			for (let details of creditAmountDetails) {
-// 				totalCount = totalCount + details.transaction_amount
 // 				newArra.push({
-// _id: details._id,
-// username: details.username,
-// mobile: details.mobile,
+// 					_id: details._id,
+// 					username: details.username,
+// 					// fullname: details.fullname || null,
+// 					mobile: details.mobile,
 // 					reqAmount: details.transaction_amount,
 // 					reqDate: details.transaction_date,
 // 					reqTime: details.transaction_time,
@@ -447,18 +462,10 @@ router.get("/razorpay", session, permission, async (req, res) => {
 // 				})
 // 			}
 // 		}
-// 		let finalArray=[]
-// 		if(newArra.length>0){
-// 			finalArray=newArra.sort((a, b) => {
-// 				const timeA = moment(`${a.reqDate} ${a.reqTime}`, "DD/MM/YYYY hh:mm:ss A");
-// 				const timeB = moment(`${b.reqDate} ${b.reqTime}`, "DD/MM/YYYY hh:mm:ss A");
-// 				return timeA - timeB;
-// 			});
-// 		}
 // 		return res.json({
 // 			status: 1,
 // 			message: "Success",
-// 			data: finalArray,
+// 			data: newArra,
 // 			creditAmountDetails
 // 		});
 // 	} catch (error) {
@@ -480,45 +487,28 @@ router.post("/getUPIReport", async (req, res) => {
 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
 		let query;
 		if (id === '1') {
-			// query = {
-			// 	reqType: "Credit",
-			// 	particular: "UPI",
-			// 	transaction_date: {
-			// 		$gte: startDate0,
-			// 		$lte: endDate0,
-			// 	}
-			// }
 			query = {
 				reqType: "Credit",
-				paymentMode: "UPI",
-				reqDate: {
+				particular: "UPI",
+				transaction_date: {
 					$gte: startDate0,
 					$lte: endDate0,
 				}
 			}
 		} else {
 			let upiDetails = await UPI_list.findOne({ _id: id }, { UPI_ID: 1 })
-			// query = {
-			// 	particular: "UPI",
-			// 	reqType: "Credit",
-			// 	transaction_date: {
-			// 		$gte: startDate0,
-			// 		$lte: endDate0,
-			// 	},
-			// 	upiId: upiDetails.UPI_ID,
-			// }
 			query = {
-				paymentMode: "UPI",
+				particular: "UPI",
 				reqType: "Credit",
-				reqDate: {
+				transaction_date: {
 					$gte: startDate0,
 					$lte: endDate0,
 				},
-				upi_name: upiDetails.UPI_ID,
+				upiId: upiDetails.UPI_ID,
 			}
 		}
-		// let creditAmountDetails = await history.find(query);
-		let creditAmountDetails = await upi_entries.find(query)
+		let creditAmountDetails = await history.find(query);
+		// let creditAmountDetails = await upi_entries.find(query)
 		let newArra = [];
 		if (creditAmountDetails.length !== 0) {
 			creditAmountDetails.sort((a, b) => {
@@ -527,18 +517,18 @@ router.post("/getUPIReport", async (req, res) => {
 				return timeA - timeB;
 			});
 			for (let details of creditAmountDetails) {
-					newArra.push({
-						_id: details._id,
-						username: details.username,
-						mobile: details.mobile,
-						reqAmount: details.reqAmount,
-						reqDate: details.reqDate,
-						reqTime: details.reqTime,
-						transaction_id: details.transaction_id || null,
-						upi_name: details.upi_name,
-						upi_app_name: "googlepay",
-						reqStatus: details?.reqStatus
-					})
+				newArra.push({
+					_id: details._id,
+					username: details.username,
+					mobile: details.mobile,
+					reqAmount: details.transaction_amount,
+					reqDate: details.transaction_date,
+					reqTime: details.transaction_time,
+					transaction_id: details.transaction_id || null,
+					upi_name: details.upiId,
+					upi_app_name: "googlepay",
+					reqStatus: details?.transaction_status
+				})
 			}
 		}
 		let finalArray = []
