@@ -217,6 +217,7 @@ router.post("/userReport", async (req, res) => {
 			]);
 			res.json(bidsData);
 		} else if (gameId != 0 && userName == "") {
+			let providerDetails = await provider.findOne({_id:gameId},{providerName:1});
 			const data1 = await bids.aggregate([
 				{
 					$match: {
@@ -236,6 +237,7 @@ router.post("/userReport", async (req, res) => {
 						_id: null,
 						GameWinPoints: { $sum: "$gameWinPoints" },
 						BiddingPoints: { $sum: "$biddingPoints" },
+						providerName:providerDetails.providerName
 					},
 				},
 			]);
@@ -726,15 +728,3 @@ router.post("/analysisReport", session, async (req, res) => {
 });
 
 module.exports = router;
-
-
-
-// db.game_bids.aggregate([
-// 	{
-// 		$match: {
-// 			userName: 'testing123'
-// 		},
-	
-// 	},
-// 	{$group: { _id: null, totalBidsCount: { $sum: 1 } } }
-// ])
