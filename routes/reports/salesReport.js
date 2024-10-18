@@ -348,6 +348,7 @@ router.post("/userReportStar", session,async (req, res) => {
 					}
 				}
 			}
+			console.log("finalArr:::",finalArr.length)
 			return res.json(finalArr);
 		} else if (gameId == 0) {
 			let finalArr = []
