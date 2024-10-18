@@ -56,6 +56,7 @@
                 <option value="0">Kotk XLS</option>
                 <option value="6">Cash free</option>
                 <option value="8">MK.txt</option>
+                <option value="9">Gajju Bob</option>
                 <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
 								<option value="1">Tirupatie Kotk XLS</option>
 								<option value="2">Mahalaxmi Kotk XLS</option>
@@ -234,6 +235,9 @@
       return generateMKRport(reportDate, searchType);
     }
 
+    if (parseInt(reportType) === 9) {
+      return generateGajjuBOBRport(reportDate, searchType);
+    }
     let Product_Code = "RPAY";
     let Bank_Code_Indicator = "M";
     let Client_Code = "";
@@ -292,6 +296,43 @@
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
+      });
+  }
+
+
+  function generateGajjuBOBRport(id) {
+    const searchType = $("#req_status").val();
+    const reportDate = $("#datepicker-autoclose").val();
+
+    const req = {
+      reportDate: reportDate,
+      searchType: searchType,
+    };
+
+    alert("gannu report " , req)
+
+    return 
+
+    fetch("/debitReport/mkxls", {
+      method: "POST",
+      body: JSON.stringify(req),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const filename = json.filename;
+        const text = json.writeString;
+        var element = document.createElement("a");
+        element.setAttribute("href", "data:text/plain;charset=utf-8," + text);
+        element.setAttribute("download", filename);
+        document.body.appendChild(element);
+        element.click();
+
+        document.body.removeChild(element);
+        return;
       });
   }
 
