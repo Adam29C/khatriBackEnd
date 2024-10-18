@@ -70,7 +70,7 @@
                 <option value="6">Cash free</option>
                 <option value="7">Rbl.xls</option>
                 <option value="8">MK.txt</option>
-                <!-- <option value="9">Gajju Bob</option> -->
+                <option value="9">Gajju Bob</option>
 
 
                 <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
@@ -373,6 +373,7 @@
               <option value="6">Cash free</option>
               <option value="7">Rbl.xls</option>
               <option value="8">MK.txt</option>
+              <option value="9">Gajju Bob</option>
 
               <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
               <option value="1">Tirupatie Kotk XLS</option>
@@ -398,6 +399,7 @@
                 <th>Download Report(Excel Format)</th>
                 <th>Download RBL.xls Report</th>
                 <th>Download MK.txt Report</th>
+                <th>Download Gajju Report</th>
 
               </tr>
             </thead>
@@ -671,6 +673,9 @@
             id +
             ')">Download Report</button></td>\
                           <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateRport(' +
+            id +
+            ')">Download Report</button></td>\
+            <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateGajjuBOBRport(' +
             id +
             ')">Download Report</button></td>\
                       </tr>';
@@ -1364,9 +1369,9 @@
       searchType: searchType,
     };
 
-    alert("gannu report " , req)
+    // alert("gannu report " , req)
 
-    return 
+    // return 
 
     fetch("/debitReport/gajjubob", {
       method: "POST",
