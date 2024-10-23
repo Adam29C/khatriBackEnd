@@ -7,9 +7,12 @@ const user = require("../../model/API/Users");
 const provider = require("../../model/games/Games_Provider");
 const starProvider = require("../../model/starline/Starline_Provider");
 const abProvider = require("../../model/AndarBahar/ABProvider");
+const providerSetting = require("../../model/games/AddSetting")
 const bids = require("../../model/games/gameBids");
 const starBids = require("../../model/starline/StarlineBids");
+const slProviderSetting = require("../../model/starline/AddSetting")
 const abBids = require("../../model/AndarBahar/ABbids");
+const abProviderSetting = require("../../model/AndarBahar/ABAddSetting")
 const session = require("../helpersModule/session");
 const permission = require("../helpersModule/permission");
 const analysisCol = require("../../model/games/Analysis");
@@ -151,462 +154,718 @@ router.post("/getUsername", session, async (req, res) => {
 	}
 });
 
-router.post("/userReport", session,async (req, res) => {
-	try {
-		const userName = req.body.userId;
-		const gameId = req.body.gameId;
-		const sDate = req.body.startDate;
-		const eDate = req.body.endDate;
+// router.post("/userReport", session,async (req, res) => {
+// 	try {
+// 		const userName = req.body.userId;
+// 		const gameId = req.body.gameId;
+// 		const sDate = req.body.startDate;
+// 		const eDate = req.body.endDate;
 
-		const startDate0 = moment(sDate, "MM-DD-YYYY").format("DD/MM/YYYY");
-		const endDate0 = moment(eDate, "MM-DD-YYYY").format("DD/MM/YYYY");
+// 		const startDate0 = moment(sDate, "MM-DD-YYYY").format("DD/MM/YYYY");
+// 		const endDate0 = moment(eDate, "MM-DD-YYYY").format("DD/MM/YYYY");
 
-		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-		let providerList = await provider.find();
-		if (userName == "" && gameId == 0) {
-			let finalArr = [];
-			if (providerList.length > 0) {
-				for (let providerData of providerList) {
-					const bidsData = await bids.aggregate([
-						{
-							$match: {
-								providerId: providerData._id,
-								gameDate: {
-									$gte: sDate,
-									$lte: eDate,
-								},
-							},
-						},
-						{
-							$group: {
-								_id: null,
-								GameWinPoints: { $sum: "$gameWinPoints" },
-								BiddingPoints: { $sum: "$biddingPoints" },
-							},
-						},
-					]);
-					if (bidsData.length > 0) {
-						finalArr.push({
-							_id: null,
-							GameWinPoints: bidsData[0].GameWinPoints,
-							BiddingPoints: bidsData[0].BiddingPoints,
-							providerName: providerData.providerName
-						});
-					}
-				}
-			}
-			return res.json(finalArr);
-		} else if (gameId == 0) {
-			let finalArr = []
-			if (providerList.length > 0) {
-				for (let providerData of providerList) {
-					const bidsData = await bids.aggregate([
-						{
+// 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
+// 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+// 		let providerList = await provider.find();
+// 		if (userName == "" && gameId == 0) {
+// 			let finalArr = [];
+// 			if (providerList.length > 0) {
+// 				for (let providerData of providerList) {
+// 					const bidsData = await bids.aggregate([
+// 						{
+// 							$match: {
+// 								providerId: providerData._id,
+// 								gameDate: {
+// 									$gte: sDate,
+// 									$lte: eDate,
+// 								},
+// 							},
+// 						},
+// 						{
+// 							$group: {
+// 								_id: null,
+// 								GameWinPoints: { $sum: "$gameWinPoints" },
+// 								BiddingPoints: { $sum: "$biddingPoints" },
+// 							},
+// 						},
+// 					]);
+// 					if (bidsData.length > 0) {
+// 						finalArr.push({
+// 							_id: null,
+// 							GameWinPoints: bidsData[0].GameWinPoints,
+// 							BiddingPoints: bidsData[0].BiddingPoints,
+// 							providerName: providerData.providerName
+// 						});
+// 					}
+// 				}
+// 			}
+// 			return res.json(finalArr);
+// 		} else if (gameId == 0) {
+// 			let finalArr = []
+// 			if (providerList.length > 0) {
+// 				for (let providerData of providerList) {
+// 					const bidsData = await bids.aggregate([
+// 						{
 
-							$match: {
-								providerId: new ObjectId(providerData._id),
-								gameDate: {
-									$gte: sDate,
-									$lte: eDate
-								},
-								userName: userName,
-							},
-						},
-						{
-							$group: {
-								_id: null,
-								GameWinPoints: { $sum: "$gameWinPoints" },
-								BiddingPoints: { $sum: "$biddingPoints" },
-							},
-						},
-					]);
-					if (bidsData.length > 0) {
-						finalArr.push({
-							_id: null,
-							GameWinPoints: bidsData[0].GameWinPoints,
-							BiddingPoints: bidsData[0].BiddingPoints,
-							providerName: providerData.providerName
-						});
-					}
-				}
-			}
-			return res.json(finalArr);
-		} else if (gameId != 0 && userName == "") {
-			let finalArr = [];
-			let providerData = await provider.findOne({ _id: gameId }, { providerName: 1 });
-			const data1 = await bids.aggregate([
-				{
-					$match: {
-						providerId: new ObjectId(gameId),
-						gameDate: {
-							$gte: sDate,
-							$lte: eDate
-						},
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			if (data1.length > 0) {
-				finalArr.push({
-					_id: null,
-					GameWinPoints: data1[0].GameWinPoints,
-					BiddingPoints: data1[0].BiddingPoints,
-					providerName: providerData.providerName
-				});
-			}
-			return res.json(finalArr);
-		} else {
-			let finalArr = [];
-			let providerData = await provider.findOne({ _id: gameId }, { providerName: 1 });
-			const bidsData = await bids.aggregate([
-				{
-					$match: {
-						providerId: new ObjectId(gameId),
-						gameDate: {
-							$gte: sDate,
-							$lte: eDate
-						},
-						userName: userName,
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			if (bidsData.length > 0) {
-				finalArr.push({
-					_id: null,
-					GameWinPoints: bidsData[0].GameWinPoints,
-					BiddingPoints: bidsData[0].BiddingPoints,
-					providerName: providerData.providerName
-				});
-			}
-			return res.json(finalArr);
-		}
-	} catch (error) {
-		res.json({
-			status: 0,
-			message: "contact Support",
-			data: error,
-		});
-	}
+// 							$match: {
+// 								providerId: new ObjectId(providerData._id),
+// 								gameDate: {
+// 									$gte: sDate,
+// 									$lte: eDate
+// 								},
+// 								userName: userName,
+// 							},
+// 						},
+// 						{
+// 							$group: {
+// 								_id: null,
+// 								GameWinPoints: { $sum: "$gameWinPoints" },
+// 								BiddingPoints: { $sum: "$biddingPoints" },
+// 							},
+// 						},
+// 					]);
+// 					if (bidsData.length > 0) {
+// 						finalArr.push({
+// 							_id: null,
+// 							GameWinPoints: bidsData[0].GameWinPoints,
+// 							BiddingPoints: bidsData[0].BiddingPoints,
+// 							providerName: providerData.providerName
+// 						});
+// 					}
+// 				}
+// 			}
+// 			return res.json(finalArr);
+// 		} else if (gameId != 0 && userName == "") {
+// 			let finalArr = [];
+// 			let providerData = await provider.findOne({ _id: gameId }, { providerName: 1 });
+// 			const data1 = await bids.aggregate([
+// 				{
+// 					$match: {
+// 						providerId: new ObjectId(gameId),
+// 						gameDate: {
+// 							$gte: sDate,
+// 							$lte: eDate
+// 						},
+// 					},
+// 				},
+// 				{
+// 					$group: {
+// 						_id: null,
+// 						GameWinPoints: { $sum: "$gameWinPoints" },
+// 						BiddingPoints: { $sum: "$biddingPoints" },
+// 					},
+// 				},
+// 			]);
+// 			if (data1.length > 0) {
+// 				finalArr.push({
+// 					_id: null,
+// 					GameWinPoints: data1[0].GameWinPoints,
+// 					BiddingPoints: data1[0].BiddingPoints,
+// 					providerName: providerData.providerName
+// 				});
+// 			}
+// 			return res.json(finalArr);
+// 		} else {
+// 			let finalArr = [];
+// 			let providerData = await provider.findOne({ _id: gameId }, { providerName: 1 });
+// 			const bidsData = await bids.aggregate([
+// 				{
+// 					$match: {
+// 						providerId: new ObjectId(gameId),
+// 						gameDate: {
+// 							$gte: sDate,
+// 							$lte: eDate
+// 						},
+// 						userName: userName,
+// 					},
+// 				},
+// 				{
+// 					$group: {
+// 						_id: null,
+// 						GameWinPoints: { $sum: "$gameWinPoints" },
+// 						BiddingPoints: { $sum: "$biddingPoints" },
+// 					},
+// 				},
+// 			]);
+// 			if (bidsData.length > 0) {
+// 				finalArr.push({
+// 					_id: null,
+// 					GameWinPoints: bidsData[0].GameWinPoints,
+// 					BiddingPoints: bidsData[0].BiddingPoints,
+// 					providerName: providerData.providerName
+// 				});
+// 			}
+// 			return res.json(finalArr);
+// 		}
+// 	} catch (error) {
+// 		res.json({
+// 			status: 0,
+// 			message: "contact Support",
+// 			data: error,
+// 		});
+// 	}
+// });
+
+router.post("/userReport", session, async (req, res) => {
+    try {
+        const { userId, gameId, startDate, endDate } = req.body;
+
+        if (!startDate || !endDate || !moment(startDate).isValid() || !moment(endDate).isValid()) {
+            return res.status(400).json({ message: "Invalid startDate or endDate format" });
+        }
+
+        const today = moment();
+        const dayOfWeek = today.format('dddd');
+        const gameSettings = await providerSetting.find({
+            gameDay: dayOfWeek,
+            isClosed: '1'
+        }, {
+            providerId: 1,
+            OBT: 1,
+            _id: 0
+        });
+        gameSettings.sort((a, b) => moment(a.OBT, 'hh:mm A') - moment(b.OBT, 'hh:mm A'));
+
+        const providerList = await provider.find();
+
+        const arrangedProviderList = gameSettings.map(game => {
+            return providerList.find(provider => provider._id.toString() === game.providerId.toString());
+        }).filter(Boolean);
+        const fetchBidsData = async (providerId, userName = null) => {
+            const matchCriteria = {
+                providerId: new ObjectId(providerId),
+                gameDate: { $gte: startDate, $lte: endDate }
+            };
+            if (userName) {
+                matchCriteria.userName = userName;
+            }
+
+            const finalData = await bids.aggregate([
+                { $match: matchCriteria },
+                {
+                    $group: {
+                        _id: null,
+                        GameWinPoints: { $sum: "$gameWinPoints" },
+                        BiddingPoints: { $sum: "$biddingPoints" }
+                    }
+                }
+            ]);
+            return finalData;
+        };
+
+        const processProvider = async (providerData, index) => {
+            const bidData = await fetchBidsData(providerData._id, userId);
+            return {
+                index,
+                GameWinPoints: bidData.length > 0 ? bidData[0].GameWinPoints || 0 : 0,
+                BiddingPoints: bidData.length > 0 ? bidData[0].BiddingPoints || 0 : 0,
+                providerName: providerData.providerName
+            };
+        };
+
+        let finalResult = [];
+        if (!userId && gameId === "0") {
+            finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
+        } else if (gameId === "0") {
+            finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
+        } else {
+            const providerData = await provider.findOne({ _id: new ObjectId(gameId) }, { providerName: 1 });
+            if (!providerData) {
+                return res.status(404).json({ message: "Game not found" });
+            }
+            const result = await processProvider(providerData, 0);
+            finalResult.push({
+                GameWinPoints: result.GameWinPoints,
+                BiddingPoints: result.BiddingPoints,
+                providerName: result.providerName
+            });
+        }
+        finalResult.sort((a, b) => a.index - b.index);
+
+        return res.json(finalResult);
+
+    } catch (error) {
+        return res.status(500).json({
+            status: 0,
+            message: "An error occurred while generating the report. Please contact support.",
+            error: error.message,
+        });
+    }
 });
 
-router.post("/userReportStar", session,async (req, res) => {
-	try {
-		const userName = req.body.userId;
-		const gameId = req.body.gameId;
-		const sDate = req.body.startDate;
-		const eDate = req.body.endDate;
+// router.post("/userReportStar", session, async (req, res) => {
+// 	try {
+// 		const userName = req.body.userId;
+// 		const gameId = req.body.gameId;
+// 		const sDate = req.body.startDate;
+// 		const eDate = req.body.endDate;
 
-		const startDate0 = moment(sDate, "MM-DD-YYYY").format("DD/MM/YYYY");
-		const endDate0 = moment(eDate, "MM-DD-YYYY").format("DD/MM/YYYY");
+// 		const startDate0 = moment(sDate, "MM-DD-YYYY").format("DD/MM/YYYY");
+// 		const endDate0 = moment(eDate, "MM-DD-YYYY").format("DD/MM/YYYY");
 
-		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-		let providerList = await starProvider.find();
-		if (userName == "" && gameId == 0) {
-			let finalArr = [];
-			if (providerList.length > 0) {
-				for (let providerData of providerList) {
-					const bidsData = await starBids.aggregate([
-						{
-							$match: {
-								providerId: providerData._id,
-								gameDate: {
-									$gte: sDate,
-									$lte: eDate
-								},
-							},
-						},
-						{
-							$group: {
-								_id: null,
-								GameWinPoints: { $sum: "$gameWinPoints" },
-								BiddingPoints: { $sum: "$biddingPoints" },
-							},
-						},
-					]);
-					if (bidsData.length > 0) {
-						finalArr.push({
-							_id: null,
-							GameWinPoints: bidsData[0].GameWinPoints,
-							BiddingPoints: bidsData[0].BiddingPoints,
-							providerName: providerData.providerName
-						});
-					}
-				}
-			}
-			console.log("finalArr:::",finalArr.length)
-			return res.json(finalArr);
-		} else if (gameId == 0) {
-			let finalArr = []
-			if (providerList.length > 0) {
-				for (let providerData of providerList) {
-					const bidsData = await starBids.aggregate([
-						{
-							$match: {
-								gameDate: {
-									$gte: sDate,
-									$lte: eDate
-								},
-								userName: userName,
-							},
-						},
-						{
-							$group: {
-								_id: null,
-								GameWinPoints: { $sum: "$gameWinPoints" },
-								BiddingPoints: { $sum: "$biddingPoints" },
-							},
-						},
-					]);
-					if (bidsData.length > 0) {
-						finalArr.push({
-							_id: null,
-							GameWinPoints: bidsData[0].GameWinPoints,
-							BiddingPoints: bidsData[0].BiddingPoints,
-							providerName: providerData.providerName
-						});
-					}
-				}
-			}
-			return res.json(finalArr);
-		} else if (provider != 0 && userName == "") {
-			let finalArr = [];
-			let providerData = await starProvider.findOne({ _id: gameId }, { providerName: 1 });
-			const bidsData = await starBids.aggregate([
-				{
-					$match: {
-						providerId: new ObjectId(gameId),
-						gameDate: {
-							$gte: sDate,
-							$lte: eDate
-						},
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			if (bidsData.length > 0) {
-				finalArr.push({
-					_id: null,
-					GameWinPoints: bidsData[0].GameWinPoints,
-					BiddingPoints: bidsData[0].BiddingPoints,
-					providerName: providerData.providerName
-				});
-			}
-			return res.json(finalArr);
-		} else {
-			let finalArr = [];
-			let providerData = await starProvider.findOne({ _id: gameId }, { providerName: 1 });
-			const bidsData = await starBids.aggregate([
-				{
-					$match: {
-						providerId: new ObjectId(gameId),
-						gameDate: {
-							$gte: sDate,
-							$lte: eDate
-						},
-						userName: userName,
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
+// 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
+// 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+// 		let providerList = await starProvider.find();
+// 		if (userName == "" && gameId == 0) {
+// 			let finalArr = [];
+// 			if (providerList.length > 0) {
+// 				for (let providerData of providerList) {
+// 					const bidsData = await starBids.aggregate([
+// 						{
+// 							$match: {
+// 								providerId: providerData._id,
+// 								gameDate: {
+// 									$gte: sDate,
+// 									$lte: eDate
+// 								},
+// 							},
+// 						},
+// 						{
+// 							$group: {
+// 								_id: null,
+// 								GameWinPoints: { $sum: "$gameWinPoints" },
+// 								BiddingPoints: { $sum: "$biddingPoints" },
+// 							},
+// 						},
+// 					]);
+// 					if (bidsData.length > 0) {
+// 						finalArr.push({
+// 							_id: null,
+// 							GameWinPoints: bidsData[0].GameWinPoints,
+// 							BiddingPoints: bidsData[0].BiddingPoints,
+// 							providerName: providerData.providerName
+// 						});
+// 					}
+// 				}
+// 			}
+// 			return res.json(finalArr);
+// 		} else if (gameId == 0) {
+// 			let finalArr = []
+// 			if (providerList.length > 0) {
+// 				for (let providerData of providerList) {
+// 					const bidsData = await starBids.aggregate([
+// 						{
+// 							$match: {
+// 								gameDate: {
+// 									$gte: sDate,
+// 									$lte: eDate
+// 								},
+// 								userName: userName,
+// 							},
+// 						},
+// 						{
+// 							$group: {
+// 								_id: null,
+// 								GameWinPoints: { $sum: "$gameWinPoints" },
+// 								BiddingPoints: { $sum: "$biddingPoints" },
+// 							},
+// 						},
+// 					]);
+// 					if (bidsData.length > 0) {
+// 						finalArr.push({
+// 							_id: null,
+// 							GameWinPoints: bidsData[0].GameWinPoints,
+// 							BiddingPoints: bidsData[0].BiddingPoints,
+// 							providerName: providerData.providerName
+// 						});
+// 					}
+// 				}
+// 			}
+// 			return res.json(finalArr);
+// 		} else if (provider != 0 && userName == "") {
+// 			let finalArr = [];
+// 			let providerData = await starProvider.findOne({ _id: gameId }, { providerName: 1 });
+// 			const bidsData = await starBids.aggregate([
+// 				{
+// 					$match: {
+// 						providerId: new ObjectId(gameId),
+// 						gameDate: {
+// 							$gte: sDate,
+// 							$lte: eDate
+// 						},
+// 					},
+// 				},
+// 				{
+// 					$group: {
+// 						_id: null,
+// 						GameWinPoints: { $sum: "$gameWinPoints" },
+// 						BiddingPoints: { $sum: "$biddingPoints" },
+// 					},
+// 				},
+// 			]);
+// 			if (bidsData.length > 0) {
+// 				finalArr.push({
+// 					_id: null,
+// 					GameWinPoints: bidsData[0].GameWinPoints,
+// 					BiddingPoints: bidsData[0].BiddingPoints,
+// 					providerName: providerData.providerName
+// 				});
+// 			}
+// 			return res.json(finalArr);
+// 		} else {
+// 			let finalArr = [];
+// 			let providerData = await starProvider.findOne({ _id: gameId }, { providerName: 1 });
+// 			const bidsData = await starBids.aggregate([
+// 				{
+// 					$match: {
+// 						providerId: new ObjectId(gameId),
+// 						gameDate: {
+// 							$gte: sDate,
+// 							$lte: eDate
+// 						},
+// 						userName: userName,
+// 					},
+// 				},
+// 				{
+// 					$group: {
+// 						_id: null,
+// 						GameWinPoints: { $sum: "$gameWinPoints" },
+// 						BiddingPoints: { $sum: "$biddingPoints" },
+// 					},
+// 				},
+// 			]);
 
-			if (bidsData.length > 0) {
-				finalArr.push({
-					_id: null,
-					GameWinPoints: bidsData[0].GameWinPoints,
-					BiddingPoints: bidsData[0].BiddingPoints,
-					providerName: providerData.providerName
-				});
-			}
-			return res.json(finalArr);
-		}
-	} catch (error) {
-		res.json({
-			status: 0,
-			message: "contact Support",
-			data: error,
-		});
-	}
-});
+// 			if (bidsData.length > 0) {
+// 				finalArr.push({
+// 					_id: null,
+// 					GameWinPoints: bidsData[0].GameWinPoints,
+// 					BiddingPoints: bidsData[0].BiddingPoints,
+// 					providerName: providerData.providerName
+// 				});
+// 			}
+// 			return res.json(finalArr);
+// 		}
+// 	} catch (error) {
+// 		res.json({
+// 			status: 0,
+// 			message: "contact Support",
+// 			data: error,
+// 		});
+// 	}
+// });
 
-router.post("/userReportAB", async (req, res) => {
-	try {
-		const userName = req.body.userId;
-		const providerId = req.body.gameId;
-		const sDate = req.body.startDate;
-		const eDate = req.body.endDate;
+router.post("/userReportStar", session, async (req, res) => {
+    try {
+        const { userId, gameId, startDate, endDate } = req.body;
+        if (!startDate || !endDate || !moment(startDate).isValid() || !moment(endDate).isValid()) {
+            return res.status(400).json({ message: "Invalid startDate or endDate format" });
+        }
 
-		const startDate0 = moment(sDate, "MM-DD-YYYY").format("DD/MM/YYYY");
-		const endDate0 = moment(eDate, "MM-DD-YYYY").format("DD/MM/YYYY");
+        const today = moment();
+        const dayOfWeek = today.format('dddd');
 
-		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-		let providerList = await abProvider.find();
+        const gameSettings = await slProviderSetting.find({
+            gameDay: dayOfWeek,
+            isClosed: '1'
+        }, {
+            providerId: 1,
+            OBT: 1,
+            _id: 0
+        });
+        gameSettings.sort((a, b) => moment(a.OBT, 'hh:mm A') - moment(b.OBT, 'hh:mm A'));
 
-		if (userName == "" && providerId == 0) {
-			let finalArr = [];
-			if (providerList.length > 0) {
-				for (let providerData of providerList) {
-					const bidsData = await abBids.aggregate([
-						{
-							$match: {
-								providerId: providerData._id,
-								gameDate: {
-									$gte: sDate,
-									$lte: eDate
-								},
-							},
-						},
-						{
-							$group: {
-								_id: null,
-								GameWinPoints: { $sum: "$gameWinPoints" },
-								BiddingPoints: { $sum: "$biddingPoints" },
-							},
-						},
-					]);
-					if (bidsData.length > 0) {
-						finalArr.push({
-							_id: null,
-							GameWinPoints: bidsData[0].GameWinPoints,
-							BiddingPoints: bidsData[0].BiddingPoints,
-							providerName: providerData.providerName
-						});
-					}
-				}
-			}
-			return res.json(finalArr);
-		} else if (providerId == 0) {
-			let finalArr = []
-			if (providerList.length > 0) {
-				for (let providerData of providerList) {
-					const bidsData = await abBids.aggregate([
-						{
-							$match: {
-								providerId: new ObjectId(providerData._id),
-								gameDate: {
-									$gte: sDate,
-									$lte: eDate
-								},
-								userName: userName,
-							},
-						},
-						{
-							$group: {
-								_id: null,
-								GameWinPoints: { $sum: "$gameWinPoints" },
-								BiddingPoints: { $sum: "$biddingPoints" },
-							},
-						},
-					]);
-					if (bidsData.length > 0) {
-						finalArr.push({
-							_id: null,
-							GameWinPoints: bidsData[0].GameWinPoints,
-							BiddingPoints: bidsData[0].BiddingPoints,
-							providerName: providerData.providerName
-						});
-					}
-				}
-			}
+        const providerList = await starProvider.find();
 
-			return res.json(finalArr);
-		} else if (providerId != 0 && userName == "") {
-			let finalArr = [];
-			let providerDetails = await abProvider.findOne({ _id: providerId }, { providerName: 1 });
-			const bidsData = await abBids.aggregate([
-				{
-					$match: {
-						providerId: new ObjectId(providerId),
-						gameDate: {
-							$gte: sDate,
-							$lte: eDate
-						},
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			if (bidsData.length > 0) {
-				finalArr.push({
-					_id: null,
-					GameWinPoints: bidsData[0].GameWinPoints,
-					BiddingPoints: bidsData[0].BiddingPoints,
-					providerName: providerDetails.providerName
-				});
-			}
-			return res.json(finalArr);
-		} else {
-			let finalArr = [];
-			let providerData = await abProvider.findOne({ _id: providerId }, { providerName: 1 });
-			const bidsData = await abBids.aggregate([
-				{
-					$match: {
-						providerId: new ObjectId(providerId),
-						gameDate: {
-							$gte: sDate,
-							$lte: eDate
-						},
-						userName: userName,
-					},
-				},
-				{
-					$group: {
-						_id: null,
-						GameWinPoints: { $sum: "$gameWinPoints" },
-						BiddingPoints: { $sum: "$biddingPoints" },
-					},
-				},
-			]);
-			if (bidsData.length > 0) {
-				finalArr.push({
-					_id: null,
-					GameWinPoints: bidsData[0].GameWinPoints,
-					BiddingPoints: bidsData[0].BiddingPoints,
-					providerName: providerData.providerName
-				});
-			}
-			return res.json(finalArr);
-		}
-	} catch (error) {
-		res.json({
-			status: 0,
-			message: "contact Support",
-			data: error,
-		});
-	}
-});
+        const arrangedProviderList = gameSettings.map(game => {
+            return providerList.find(provider => provider._id.toString() === game.providerId.toString());
+        }).filter(Boolean);
+        const fetchBidsData = async (providerId, userName = null) => {
+            const matchCriteria = {
+                providerId: new ObjectId(providerId),
+                gameDate: { $gte: startDate, $lte: endDate }
+            };
+            if (userName) {
+                matchCriteria.userName = userName;
+            }
+
+            const finalData = await starBids.aggregate([
+                { $match: matchCriteria },
+                {
+                    $group: {
+                        _id: null,
+                        GameWinPoints: { $sum: "$gameWinPoints" },
+                        BiddingPoints: { $sum: "$biddingPoints" }
+                    }
+                }
+            ]);
+            return finalData;
+        };
+        const processProvider = async (providerData, index) => {
+            const bidData = await fetchBidsData(providerData._id, userId);
+            return {
+                index,
+                GameWinPoints: bidData.length > 0 ? bidData[0].GameWinPoints || 0 : 0,
+                BiddingPoints: bidData.length > 0 ? bidData[0].BiddingPoints || 0 : 0,
+                providerName: providerData.providerName
+            };
+        };
+        let finalResult = [];
+        if (!userId && gameId === "0") {
+            finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
+        } else if (gameId === "0") {
+            finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
+        } else {
+            const providerData = await starProvider.findOne({ _id: new ObjectId(gameId) }, { providerName: 1 });
+            if (!providerData) {
+                return res.status(404).json({ message: "Game not found" });
+            }
+            const result = await processProvider(providerData, 0);
+            finalResult.push({
+                GameWinPoints: result.GameWinPoints,
+                BiddingPoints: result.BiddingPoints,
+                providerName: result.providerName
+            });
+        }
+        finalResult.sort((a, b) => a.index - b.index);
+
+        return res.json(finalResult);
+    } catch (error) {
+        return res.status(500).json({
+            status: 0,
+            message: "An error occurred while generating the report. Please contact support.",
+            error: error.message,
+        });
+    }
+})
+
+// router.post("/userReportAB", async (req, res) => {
+// 	try {
+// 		const userName = req.body.userId;
+// 		const providerId = req.body.gameId;
+// 		const sDate = req.body.startDate;
+// 		const eDate = req.body.endDate;
+
+// 		const startDate0 = moment(sDate, "MM-DD-YYYY").format("DD/MM/YYYY");
+// 		const endDate0 = moment(eDate, "MM-DD-YYYY").format("DD/MM/YYYY");
+
+// 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
+// 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+// 		let providerList = await abProvider.find();
+
+// 		if (userName == "" && providerId == 0) {
+// 			let finalArr = [];
+// 			if (providerList.length > 0) {
+// 				for (let providerData of providerList) {
+// 					const bidsData = await abBids.aggregate([
+// 						{
+// 							$match: {
+// 								providerId: providerData._id,
+// 								gameDate: {
+// 									$gte: sDate,
+// 									$lte: eDate
+// 								},
+// 							},
+// 						},
+// 						{
+// 							$group: {
+// 								_id: null,
+// 								GameWinPoints: { $sum: "$gameWinPoints" },
+// 								BiddingPoints: { $sum: "$biddingPoints" },
+// 							},
+// 						},
+// 					]);
+// 					if (bidsData.length > 0) {
+// 						finalArr.push({
+// 							_id: null,
+// 							GameWinPoints: bidsData[0].GameWinPoints,
+// 							BiddingPoints: bidsData[0].BiddingPoints,
+// 							providerName: providerData.providerName
+// 						});
+// 					}
+// 				}
+// 			}
+// 			return res.json(finalArr);
+// 		} else if (providerId == 0) {
+// 			let finalArr = []
+// 			if (providerList.length > 0) {
+// 				for (let providerData of providerList) {
+// 					const bidsData = await abBids.aggregate([
+// 						{
+// 							$match: {
+// 								providerId: new ObjectId(providerData._id),
+// 								gameDate: {
+// 									$gte: sDate,
+// 									$lte: eDate
+// 								},
+// 								userName: userName,
+// 							},
+// 						},
+// 						{
+// 							$group: {
+// 								_id: null,
+// 								GameWinPoints: { $sum: "$gameWinPoints" },
+// 								BiddingPoints: { $sum: "$biddingPoints" },
+// 							},
+// 						},
+// 					]);
+// 					if (bidsData.length > 0) {
+// 						finalArr.push({
+// 							_id: null,
+// 							GameWinPoints: bidsData[0].GameWinPoints,
+// 							BiddingPoints: bidsData[0].BiddingPoints,
+// 							providerName: providerData.providerName
+// 						});
+// 					}
+// 				}
+// 			}
+
+// 			return res.json(finalArr);
+// 		} else if (providerId != 0 && userName == "") {
+// 			let finalArr = [];
+// 			let providerDetails = await abProvider.findOne({ _id: providerId }, { providerName: 1 });
+// 			const bidsData = await abBids.aggregate([
+// 				{
+// 					$match: {
+// 						providerId: new ObjectId(providerId),
+// 						gameDate: {
+// 							$gte: sDate,
+// 							$lte: eDate
+// 						},
+// 					},
+// 				},
+// 				{
+// 					$group: {
+// 						_id: null,
+// 						GameWinPoints: { $sum: "$gameWinPoints" },
+// 						BiddingPoints: { $sum: "$biddingPoints" },
+// 					},
+// 				},
+// 			]);
+// 			if (bidsData.length > 0) {
+// 				finalArr.push({
+// 					_id: null,
+// 					GameWinPoints: bidsData[0].GameWinPoints,
+// 					BiddingPoints: bidsData[0].BiddingPoints,
+// 					providerName: providerDetails.providerName
+// 				});
+// 			}
+// 			return res.json(finalArr);
+// 		} else {
+// 			let finalArr = [];
+// 			let providerData = await abProvider.findOne({ _id: providerId }, { providerName: 1 });
+// 			const bidsData = await abBids.aggregate([
+// 				{
+// 					$match: {
+// 						providerId: new ObjectId(providerId),
+// 						gameDate: {
+// 							$gte: sDate,
+// 							$lte: eDate
+// 						},
+// 						userName: userName,
+// 					},
+// 				},
+// 				{
+// 					$group: {
+// 						_id: null,
+// 						GameWinPoints: { $sum: "$gameWinPoints" },
+// 						BiddingPoints: { $sum: "$biddingPoints" },
+// 					},
+// 				},
+// 			]);
+// 			if (bidsData.length > 0) {
+// 				finalArr.push({
+// 					_id: null,
+// 					GameWinPoints: bidsData[0].GameWinPoints,
+// 					BiddingPoints: bidsData[0].BiddingPoints,
+// 					providerName: providerData.providerName
+// 				});
+// 			}
+// 			return res.json(finalArr);
+// 		}
+// 	} catch (error) {
+// 		res.json({
+// 			status: 0,
+// 			message: "contact Support",
+// 			data: error,
+// 		});
+// 	}
+// });
+
+router.post("/userReportAB", session, async (req, res) => {
+    try {
+        const { userId, gameId, startDate, endDate } = req.body;
+
+        if (!startDate || !endDate || !moment(startDate).isValid() || !moment(endDate).isValid()) {
+            return res.status(400).json({ message: "Invalid startDate or endDate format" });
+        }
+        const today = moment();
+        const dayOfWeek = today.format('dddd');
+        const gameSettings = await abProviderSetting.find({
+            gameDay: dayOfWeek,
+            isClosed: '1'
+        }, {
+            providerId: 1,
+            OBT: 1,
+            _id: 0
+        });
+        gameSettings.sort((a, b) => moment(a.OBT, 'hh:mm A') - moment(b.OBT, 'hh:mm A'));
+
+        const providerList = await abProvider.find();
+
+        const arrangedProviderList = gameSettings.map(game => {
+            return providerList.find(provider => provider._id.toString() === game.providerId.toString());
+        }).filter(Boolean);
+        const fetchBidsData = async (providerId, userName = null) => {
+            const matchCriteria = {
+                providerId: new ObjectId(providerId),
+                gameDate: { $gte: startDate, $lte: endDate }
+            };
+            if (userName) {
+                matchCriteria.userName = userName;
+            }
+
+            const finalData = await abBids.aggregate([
+                { $match: matchCriteria },
+                {
+                    $group: {
+                        _id: null,
+                        GameWinPoints: { $sum: "$gameWinPoints" },
+                        BiddingPoints: { $sum: "$biddingPoints" }
+                    }
+                }
+            ]);
+            return finalData;
+        };
+
+        const processProvider = async (providerData, index) => {
+            const bidData = await fetchBidsData(providerData._id, userId);
+            return {
+                index,
+                GameWinPoints: bidData.length > 0 ? bidData[0].GameWinPoints || 0 : 0,
+                BiddingPoints: bidData.length > 0 ? bidData[0].BiddingPoints || 0 : 0,
+                providerName: providerData.providerName
+            };
+        };
+
+        let finalResult = [];
+        if (!userId && gameId === "0") {
+            finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
+        } else if (gameId === "0") {
+            finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
+        } else {
+            const providerData = await abProvider.findOne({ _id: new ObjectId(gameId) }, { providerName: 1 });
+            if (!providerData) {
+                return res.status(404).json({ message: "Game not found" });
+            }
+            const result = await processProvider(providerData, 0);
+            finalResult.push({
+                GameWinPoints: result.GameWinPoints,
+                BiddingPoints: result.BiddingPoints,
+                providerName: result.providerName
+            });
+        }
+        finalResult.sort((a, b) => a.index - b.index);
+
+        return res.json(finalResult);
+
+    } catch (error) {
+        return res.status(500).json({
+            status: 0,
+            message: "An error occurred while generating the report. Please contact support.",
+            error: error.message,
+        });
+    }
+})
 
 router.post("/analysisReport", session, async (req, res) => {
 	try {
