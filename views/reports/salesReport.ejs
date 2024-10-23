@@ -116,7 +116,7 @@
     <div class="row">
       <div class="col-xl-12 col-md-12">
         <div class="card-box table-responsive">
-          <table class="table table-bordered nowrap text-center ">
+          <table class="table table-bordered nowrap text-center">
             <thead>
               <tr>
                 <th>Sr.</th>
@@ -167,67 +167,78 @@
           userId: userId,
         },
         success: function (data) {
+          $("#submitInfo").attr("disabled", false);
+          if (Object.keys(data).length === 0) {
+            toastr["warning"]("No Data Found", "Khatri Games");
+            Html = '<tr><td colspan="5">No Data Found</td></tr>';
+            $("#completedata").html(Html);
+          } else {
+            let Html;
+            var i = 1;
+            let total_amt = 0;
+
+            var totalPointDifference = 0;
+            var totalBiddingPoint = 0;
+            var totalWiningPoint = 0;
+
+            var winPoint = data[0].GameWinPoints;
+            var bidPoint = data[0].BiddingPoints;
+            let pf;
+            pf = bidPoint - winPoint;
+            let color = "red";
+            if (pf > 0) {
+              color = "#22b922";
+            }
+
+            data.forEach(function (e) {
+              total_amt += e.reqAmount;
+              var bidPoint = e.BiddingPoints;
+              var winPoint = e.GameWinPoints;
+              var pointDifference = bidPoint - winPoint;
+
+              // Total pointDifference ka sum add karte jao
+              totalPointDifference += pointDifference;
+              totalBiddingPoint += bidPoint;
+              totalWiningPoint += winPoint;
+
+              Html +=
+                "<tr><td>" +
+                i +
+                "</td> <td>" +
+                (e.providerName ? e.providerName : "-") +
+                "</td> <td>" +
+                StartDate +
+                " TO " +
+                EndDate +
+                "</td><td>" +
+                bidPoint +
+                "</td><td>" +
+                winPoint +
+                '</td><td style="color:' +
+                (pointDifference > 0 ? " #22b922 " : "red") +
+                '">' +
+                pointDifference +
+                "</td></tr>";
+
+              i++;
+            });
+
+            
+            
+              Html +=
+  "<tr><td></td><td></td><td></td><td style='font-weight:bold; color: green;'>Total - " +
+  totalBiddingPoint +
+  "</td><td style='font-weight:bold; color: green;'>Total - " +
+  totalWiningPoint +
+  "</td><td style='font-weight:bold; color:" +
+  (totalPointDifference > 0 ? "#22b922" : "red") +
+  "'>Total - " +
+  totalPointDifference +
+  "</td></tr>";
       
 
-          $("#submitInfo").attr("disabled", false);
-          if(Object.keys(data).length === 0){
-              toastr["warning"]('No Data Found', "Khatri Games");
-              Html = '<tr><td colspan="5">No Data Found</td></tr>';
-              $("#completedata").html(Html);
-          }
-          else
-          {
-
-
-            let Html;
-          var i = 1;
-          let total_amt = 0;
-
-          var totalPointDifference = 0;
-
-          var winPoint = data[0].GameWinPoints;
-          var bidPoint = data[0].BiddingPoints;
-          let pf;
-          pf = bidPoint - winPoint;
-          let color = "red";
-          if (pf > 0) {
-            color = "#22b922";
-          }
-
-          data.forEach(function (e) {
-    total_amt += e.reqAmount;
-    var bidPoint = e.BiddingPoints;
-    var winPoint = e.GameWinPoints;
-    var pointDifference = bidPoint - winPoint;
-
-    // Total pointDifference ka sum add karte jao
-    totalPointDifference += pointDifference;
-
-    Html +=
-      "<tr><td>" + i + "</td> <td>" + (e.providerName ? e.providerName : "-") +
-      "</td> <td>" +
-      StartDate +
-      " TO " +
-      EndDate +
-      "</td><td>" +
-      bidPoint +
-      "</td><td>" +
-      winPoint +
-      '</td><td style="color:' +
-      (pointDifference > 0 ? " #22b922 " : "red") +
-      '">' +
-      pointDifference +
-      "</td></tr>";
-    
-    i++;
-});
-
-// Table ke end mein ek nayi row add karenge
-Html += "<tr><td colspan='5' style='text-align:right; font-weight:bold;'>Total Profit/Loss:</td>";
-Html += "<td style='font-weight:bold; color:" + (totalPointDifference > 0 ? " #22b922 " : "red") + "'>" + totalPointDifference + "</td></tr>";
-
-// HTML ko update karna
-$("#completedata").html(Html);
+            // HTML ko update karna
+            $("#completedata").html(Html);
 
             //   let Html;
             //   var winPoint = data[0].GameWinPoints;
