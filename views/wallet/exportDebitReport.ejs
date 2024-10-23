@@ -71,7 +71,7 @@
                 <option value="7">Rbl.xls</option>
                 <option value="8">MK.txt</option>
                 <option value="9">Gajju Bob</option>
-
+                <option value="10">FINAPNB</option>
 
                 <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
 								<option value="1">Tirupatie Kotk XLS</option>
@@ -374,6 +374,7 @@
               <option value="7">Rbl.xls</option>
               <option value="8">MK.txt</option>
               <option value="9">Gajju Bob</option>
+              <option value="10">FINAPNB</option>
 
               <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
               <option value="1">Tirupatie Kotk XLS</option>
@@ -400,6 +401,7 @@
                 <th>Download RBL.xls Report</th>
                 <th>Download MK.txt Report</th>
                 <th>Download Gajju Report</th>
+                <th>Download FINA PNB Report</th>
 
               </tr>
             </thead>
@@ -557,11 +559,11 @@
       generateMKRport();
     } else if (reportType === 7 || reportType === "7") {
       generateRport();
-    } 
-    else if (reportType === 9 || reportType === "9") {
+    } else if (reportType === 9 || reportType === "9") {
       generateGajjuBOBRport();
-    }
-    else {
+    } else if (reportType === 10 || reportType === "10") {
+      generateFINAPNBRport();
+    } else {
       if (parseInt(reportType) === 4) {
         return generateAllTrakPay(reportDate, searchType);
       }
@@ -668,7 +670,7 @@
             // '</td>\<td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="getReport(' +
             // id +')">Download Report</button></td>\ <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="GenerateReport(' +id +
             // ')">Download Report</button></td>\
-                          '<td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateRport(' +
+            '<td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateRport(' +
             id +
             ')">Download Report</button></td>\
             <td><button class="btn btn-dark  waves-effect waves-light btn-xs" onclick="generateMKRport(' +
@@ -677,7 +679,7 @@
             id +
             ')">Download Report</button></td>\
                       </tr>';
-                      
+
           i++;
         });
 
@@ -1358,7 +1360,6 @@
       });
   }
 
-
   function generateGajjuBOBRport(id) {
     const searchType = $("#req_status").val();
     const reportDate = $("#datepicker-autoclose").val();
@@ -1370,9 +1371,45 @@
 
     // alert("gannu report " , req)
 
-    // return 
+    // return
 
     fetch("/debitReport/gajjubob", {
+      method: "POST",
+      body: JSON.stringify(req),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const filename = json.filename;
+        const text = json.writeString;
+        var element = document.createElement("a");
+        element.setAttribute("href", "data:text/plain;charset=utf-8," + text);
+        element.setAttribute("download", filename);
+        document.body.appendChild(element);
+        element.click();
+
+        document.body.removeChild(element);
+        return;
+      });
+  }
+
+  function generateFINAPNBRport(id) {
+    const searchType = $("#req_status").val();
+    const reportDate = $("#datepicker-autoclose").val();
+
+    const req = {
+      reportDate: reportDate,
+      searchType: searchType,
+    };
+
+    // alert("gannu report " , req)
+
+    // return
+
+    fetch("/debitReport/Finapnb", {
       method: "POST",
       body: JSON.stringify(req),
       headers: {

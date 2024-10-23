@@ -1047,12 +1047,12 @@ router.post("/gajjubob", async (req, res) => {
 			reqDate: 1,
 			toAccount: 1,
 			mobile: 1,
-			username:1
+			username: 1
 		});
 		let finalReport = "";
-		let clientAccount="33190200000689"
+		let clientAccount = "33190200000689"
 		let filename = "GAJJUBOB.TXT";
-		let count =1;
+		let count = 1;
 		for (index in userBebitReq) {
 			let bankDetails = userBebitReq[index].toAccount;
 			let ifsc = bankDetails.ifscCode;
@@ -1067,7 +1067,7 @@ router.post("/gajjubob", async (req, res) => {
 				name = name.toUpperCase();
 			}
 			finalReport += `${formattedSerial} | ${clientAccount} | ${amt} | ${ifsc} | ${accNo} | ${username} | SB \n`
-			count = count +1
+			count = count + 1
 		}
 		return res.json({
 			status: 0,
@@ -1081,4 +1081,70 @@ router.post("/gajjubob", async (req, res) => {
 		});
 	}
 })
+
+router.post("/Finapnb", async (req, res) => {
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+		console.log(formatDate, "formatDate")
+		let query = {
+			reqStatus: reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
+
+		if (reqStatus === "Pending") {
+			query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
+
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1,
+			username: 1
+		});
+
+		let finalReport = "";
+		let NFTInfo = "NFT";
+		let clientAccount = "0153001111111111";
+		let currency = "INR";
+		let filename = "FINAPNB.TXT";
+		let count = 1;
+
+		for (const index in userBebitReq) {
+			const amt = userBebitReq[index].reqAmount;
+			const bankDetails = userBebitReq[index].toAccount;
+			let ifsc = bankDetails.ifscCode;
+			let name = bankDetails.accName;
+			const accNo = bankDetails.accNumber;
+
+			const formattedSerial = count.toString().padStart(4, '0');
+
+			if (ifsc != null) {
+				ifsc = ifsc.toUpperCase();
+				name = name.replace(/\.+/g, " ").toUpperCase();
+			}
+
+			const addInfo = `TESTNFT${count}`;
+			finalReport += `${NFTInfo},${clientAccount},${amt},${currency},${accNo},${ifsc},${addInfo} \n`;
+			count++;
+		}
+
+		return res.json({
+			status: 1,
+			filename: filename,
+			writeString: finalReport,
+		});
+	} catch (error) {
+		return res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
+});
 module.exports = router;
