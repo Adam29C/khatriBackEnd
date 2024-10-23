@@ -1131,7 +1131,7 @@ router.post("/Finapnb", async (req, res) => {
 			}
 
 			const addInfo = `TESTNFT${count}`;
-			finalReport += `${NFTInfo}, ${clientAccount}, ${amt}, ${currency}, ${accNo}, ${ifsc} , ${addInfo} \n`;
+			finalReport += `${NFTInfo},${clientAccount},${amt},${currency},${accNo},${ifsc},${addInfo} \n`;
 			count++;
 		}
 
