@@ -282,15 +282,16 @@ router.post("/remaningWinnerList", async (req, res) => {
         "Full Sangam Digits": []
       };
     }
-    let providerResult = await mainGameResult.find({ providerId, resultDate: date, session });
+    let providerResult = await mainGameResult.findOne({ providerId, resultDate: date, session });
     if (!providerResult) {
       return res.json({
         status: 0,
         message: "Result Data Not Found",
       });
     }
-    let winningDigit = providerResult.winningDigit.toString();
-    let winningDigitFamily = providerResult.winningDigitFamily.toString()
+    console.log("providerResult.winningDigit:::",providerResult)
+    let winningDigit = providerResult?.winningDigit.toString();
+    let winningDigitFamily = providerResult?.winningDigitFamily.toString()
     const winnerList = await gameBids
       .find({
         $and: [{ $or: [{ bidDigit: winningDigit }, { bidDigit: winningDigitFamily }] }],
@@ -363,6 +364,7 @@ router.post("/remaningWinnerList", async (req, res) => {
       data:pageData
     })
   } catch (error) {
+    console.log(error)
     return res.json({
       status: 0,
       message: "Contact Support",
