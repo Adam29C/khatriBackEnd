@@ -31,7 +31,7 @@ router.post('/gameWinner', Loginsession, async (req, res)=>{
         let namefor = '';
         
         resultList = await gameBids.find({ $and : [
-                    { $or : [ { bidDigit : digit }, { bidDigit : digitFamily } ] }                ], providerId : provider, gameDate : gamedate, gameSession : session }).sort({ bidDigit: 1  });
+                    { $or : [ { bidDigit : digit }, { bidDigit : digitFamily } ] }], providerId : provider, gameDate : gamedate, gameSession : session }).sort({ bidDigit: 1  });
 
         calculateSum(session, provider, gamedate);
         if(session === 'Close')
@@ -76,7 +76,8 @@ router.post('/gameWinner', Loginsession, async (req, res)=>{
                     $set: {
                     winStatus: 1,
                     gameWinPoints: bal,
-                    updatedAt: formatted
+                    updatedAt: formatted,
+                    isPaymentDone:true,
                 }
             });
 

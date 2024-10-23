@@ -7,6 +7,7 @@ const gameBids = require("../../model/games/gameBids");
 const gameResult = require("../../model/games/GameResult");
 const session = require("../helpersModule/session");
 const permission = require("../helpersModule/permission");
+const mainGameResult = require("../../model/games/GameResult");
 
 router.get("/mainWinner", session, permission, async (req, res) => {
   try {
@@ -57,8 +58,8 @@ router.get("/mainWinner", session, permission, async (req, res) => {
       .sort({ bidDigit: -1 });
     let gameType = "";
     for (index in winnerList) {
-        gameType = winnerList[index].gameTypeName;
-        finalArray[gameType].push(winnerList[index]);
+      gameType = winnerList[index].gameTypeName;
+      finalArray[gameType].push(winnerList[index]);
     }
     if (session === "Close") {
       const openResult = await gameResult.findOne({
@@ -99,35 +100,35 @@ router.get("/mainWinner", session, permission, async (req, res) => {
     }
 
     const pageData = {
-        winnerList: finalArray,
-        resultId: resultId,
-        resultStatus: parseInt(resultStatus),
-        winDigit: digit,
-        digitFamily: digitFamily,
-        gameDate: gamedate,
-        provider: provider,
-        session: session,
-        jodiDigit: jodiDigit,
-        halfSangam1: halfSangam1,
-        halfSangam2: halfSangam2,
-        fullSangam: fullSangam,
-        name: providerName
+      winnerList: finalArray,
+      resultId: resultId,
+      resultStatus: parseInt(resultStatus),
+      winDigit: digit,
+      digitFamily: digitFamily,
+      gameDate: gamedate,
+      provider: provider,
+      session: session,
+      jodiDigit: jodiDigit,
+      halfSangam1: halfSangam1,
+      halfSangam2: halfSangam2,
+      fullSangam: fullSangam,
+      name: providerName
     };
 
     const check = permissionArray["gamesResult"].showStatus;
     if (check === 1) {
-        res.render("./games/winnerList", {
-            data: pageData,
-            userInfo: userInfo,
-            permission: permissionArray,
-            title: "Game Winners"
-        });
+      res.render("./games/winnerList", {
+        data: pageData,
+        userInfo: userInfo,
+        permission: permissionArray,
+        title: "Game Winners"
+      });
     } else {
-        res.render("./dashboard/starterPage", {
-            userInfo: userInfo,
-            permission: permissionArray,
-            title: "Dashboard"
-        });
+      res.render("./dashboard/starterPage", {
+        userInfo: userInfo,
+        permission: permissionArray,
+        title: "Dashboard"
+      });
     }
   } catch (error) {
     res.json({
@@ -206,7 +207,7 @@ router.get("/abWinner", session, permission, async (req, res) => {
     const resultList = await ABbids.find({
       providerId: provider,
       gameDate: date,
-      bidDigit: digit      
+      bidDigit: digit
     }).sort({ _id: -1 });
 
     const ABProvider = await abPorvider.findOne({ _id: provider });
@@ -247,5 +248,127 @@ router.get("/abWinner", session, permission, async (req, res) => {
     });
   }
 });
+
+router.post("/remaningWinnerList", async (req, res) => {
+  try {
+    const { providerId, providerName, date, session } = req.body;
+    if (!providerId || !providerName || !date || !session) {
+      return res.json({
+        status: 0,
+        message: "Data is required",
+      });
+    }
+    let jodiDigit = "";
+    let halfSangam1 = "";
+    let halfSangam2 = "";
+    let fullSangam = "";
+
+    let finalArray = {
+      "Single Pana": [],
+      "Double Pana": [],
+      "Triple Pana": [],
+      "Single Digit": [],
+    };
+
+    if (session === "Close") {
+      finalArray = {
+        "Single Pana": [],
+        "Double Pana": [],
+        "Triple Pana": [],
+        "Single Digit": [],
+        "Jodi Digit": [],
+        "Red Brackets": [],
+        "Half Sangam Digits": [],
+        "Full Sangam Digits": []
+      };
+    }
+    let providerResult = await mainGameResult.find({ providerId, resultDate: date, session });
+    if (!providerResult) {
+      return res.json({
+        status: 0,
+        message: "Result Data Not Found",
+      });
+    }
+    let winningDigit = providerResult.winningDigit.toString();
+    let winningDigitFamily = providerResult.winningDigitFamily.toString()
+    const winnerList = await gameBids
+      .find({
+        $and: [{ $or: [{ bidDigit: winningDigit }, { bidDigit: winningDigitFamily }] }],
+        providerId: providerId,
+        gameDate: date,
+        gameSession: session,
+        isPaymentDone: false
+      })
+      .sort({ bidDigit: -1 });
+    let gameType = "";
+    for (index in winnerList) {
+      gameType = winnerList[index].gameTypeName;
+      finalArray[gameType].push(winnerList[index]);
+    }
+
+    if (session === "Close") {
+      const openResult = await gameResult.findOne({
+        providerId: providerId,
+        resultDate: gamedate,
+        session: "Open"
+      });
+
+      if (openResult) {
+        const openFamily = openResult.winningDigitFamily;
+        const openPana = openResult.winningDigit;
+        jodiDigit = openFamily + providerResult.winningDigitFamily;
+        halfSangam1 = `${openFamily}-${providerResult.winningDigit}`;
+        halfSangam2 = `${openPana}-${openResult.winningDigitFamily}`;
+        fullSangam = `${openPana}-${openResult.winningDigit}`;
+        const winnerListClose = await gameBids
+          .find({
+            $and: [
+              {
+                $or: [
+                  { bidDigit: jodiDigit },
+                  { bidDigit: halfSangam1 },
+                  { bidDigit: halfSangam2 },
+                  { bidDigit: fullSangam }
+                ]
+              }
+            ],
+            providerId: providerId,
+            gameDate: gamedate,
+            gameSession: session,
+            isPaymentDone: false
+          })
+          .sort({ bidDigit: -1 });
+
+        for (index in winnerListClose) {
+          gameType = winnerListClose[index].gameTypeName;
+          finalArray[gameType].push(winnerListClose[index]);
+        }
+      }
+    }
+    const pageData = {
+      winnerList: finalArray,
+      winDigit: providerResult.winningDigit,
+      digitFamily: providerResult.winningDigitFamily,
+      gameDate: date,
+      provider: providerId,
+      session: session,
+      jodiDigit: jodiDigit,
+      halfSangam1: halfSangam1,
+      halfSangam2: halfSangam2,
+      fullSangam: fullSangam,
+      name: providerName
+    };
+    return res.json({
+      status: 1,
+      data:pageData
+    })
+  } catch (error) {
+    return res.json({
+      status: 0,
+      message: "Contact Support",
+      error: error
+    });
+  }
+})
 
 module.exports = router;
