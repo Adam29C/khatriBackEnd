@@ -71,6 +71,7 @@
                 <option value="7">Rbl.xls</option>
                 <option value="8">MK.txt</option>
                 <option value="9">Gajju Bob</option>
+                <option value="10">FINAPNB</option>
 
 
                 <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
@@ -374,6 +375,7 @@
               <option value="7">Rbl.xls</option>
               <option value="8">MK.txt</option>
               <option value="9">Gajju Bob</option>
+              <option value="10">FINAPNB</option>
 
               <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
               <option value="1">Tirupatie Kotk XLS</option>
@@ -560,6 +562,9 @@
     } 
     else if (reportType === 9 || reportType === "9") {
       generateGajjuBOBRport();
+    }
+    else if (reportType === 10 || reportType === "10") {
+      generateFINAPNBRport();
     }
     else {
       if (parseInt(reportType) === 4) {
@@ -1360,6 +1365,44 @@
 
 
   function generateGajjuBOBRport(id) {
+    const searchType = $("#req_status").val();
+    const reportDate = $("#datepicker-autoclose").val();
+
+    const req = {
+      reportDate: reportDate,
+      searchType: searchType,
+    };
+
+    // alert("gannu report " , req)
+
+    // return 
+
+    fetch("/debitReport/gajjubob", {
+      method: "POST",
+      body: JSON.stringify(req),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const filename = json.filename;
+        const text = json.writeString;
+        var element = document.createElement("a");
+        element.setAttribute("href", "data:text/plain;charset=utf-8," + text);
+        element.setAttribute("download", filename);
+        document.body.appendChild(element);
+        element.click();
+
+        document.body.removeChild(element);
+        return;
+      });
+  }
+
+
+  
+  function generateFINAPNBRport(id) {
     const searchType = $("#req_status").val();
     const reportDate = $("#datepicker-autoclose").val();
 
