@@ -1111,12 +1111,12 @@ router.post("/Finapnb", async (req, res) => {
 
         const formattedData = userBebitReq.map(item => ({
 			type: "NFT",
-			clientAcount: item.toAccount.accNumber,
+			parentAcountNo: "0153001111111111",
 			amount: item.reqAmount,
 			currency: "INR",
+			clientAcount: item.toAccount.accNumber,
             customerAccount: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
 			ifscCode : item.toAccount.ifscCode?.toUpperCase(),
-            withdrawalMode: item.withdrawalMode
         }));
 
         res.json({
