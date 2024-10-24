@@ -1416,7 +1416,6 @@
     })
       .then((res) => res.json())
       .then((json) => {
-        console.log("json" ,json);
         
         const xlsData = json.profile;
         const reportDate = json.date;
@@ -1428,6 +1427,8 @@
           "Amount",
           "Currency",
           "Destination Account Number",
+          "IFSC Code",
+          "Additional Info",
         ];
 
         var formatHeader = excel.addStyle({
@@ -1435,12 +1436,14 @@
           font: "Calibri 12 #ffff B",
         });
 
+
+
         for (var i = 0; i < headers.length; i++) {
           excel.set(0, i, 0, headers[i], formatHeader);
           excel.set(0, i, undefined, "auto");
         }
 
-        console.log("json" ,xlsData);
+        
 
         let a = 1;
         $.each(xlsData, function (key, e) {
@@ -1450,9 +1453,9 @@
           let j = 0;
           excel.set(0, 0, a, e.type);
           j++;
-          excel.set(0, j, a, e.clientAcount);
+          excel.set(0, j, a, 'tt');
           j++;
-          excel.set(0, j, a, e.amount);
+          excel.set(0, j, a, e.amount.toString());
           j++;
           excel.set(0, j, a, e.currency);
           j++;
@@ -1460,7 +1463,9 @@
           j++;
           excel.set(0, j, a, e.ifscCode);
           j++;
-        
+          excel.set(0, j, a, `TESTNFT${a}`);
+          j++;
+
           a++;
         });
         excel.generate("payout_" + reportDate + "_Batch.xlsx");
