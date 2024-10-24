@@ -1453,13 +1453,13 @@
           let j = 0;
           excel.set(0, 0, a, e.type);
           j++;
-          excel.set(0, j, a, 'tt');
+          excel.set(0, j, a, e.parentAcountNo);
           j++;
           excel.set(0, j, a, e.amount.toString());
           j++;
           excel.set(0, j, a, e.currency);
           j++;
-          excel.set(0, j, a, e.customerAccount);
+          excel.set(0, j, a, e.clientAcount);
           j++;
           excel.set(0, j, a, e.ifscCode);
           j++;
