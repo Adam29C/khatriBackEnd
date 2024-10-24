@@ -62,6 +62,10 @@ const game_bidsSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        isPaymentDone:{
+            type:Boolean,
+            default:false,
+        },
         createdAt:{
             type: String,
             required: true
