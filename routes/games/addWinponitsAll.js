@@ -404,43 +404,6 @@ router.post('/starWinners', Loginsession, async (req, res) => {
     }
 });
 
-async function calculateSum(session, providerId, gameDate) {
-    try {
-        if (session == "Open") {
-            const bids = await gameBids.find({ providerId: providerId, gameDate: gameDate, $and: [{ $or: [{ gameTypeName: "Jodi Digit" }, { gameTypeName: "Full Sangam Digits" }, { gameTypeName: "Half Sangam Digits" }] }] });
-
-            let jodiPrice = 0; let halfSangam = 0; let fullSangam = 0;
-
-            for (index in bids) {
-                let bidDigit = bids[index].bidDigit;
-                let strLength = bidDigit.length;
-                let points = bids[index].biddingPoints;
-                switch (strLength) {
-                    case 2:
-                        jodiPrice = jodiPrice + points;
-                        break;
-                    case 5:
-                        halfSangam = halfSangam + points;
-                        break;
-                    case 7:
-                        fullSangam = fullSangam + points;
-                        break;
-                }
-            }
-
-            const sum = new gameSum({
-                providerId: providerId,
-                date: gameDate,
-                half_Sangamsum: halfSangam,
-                full_Sangamsum: fullSangam,
-                Jodi_Sum: jodiPrice
-            })
-            await sum.save();
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
 router.post("/remaningGameWinner", async (req, res) => {
     try {
         const { providerId, gameDate, session } = req.body;
@@ -601,6 +564,44 @@ router.post("/remaningGameWinner", async (req, res) => {
         });
     }
 })
+
+async function calculateSum(session, providerId, gameDate) {
+    try {
+        if (session == "Open") {
+            const bids = await gameBids.find({ providerId: providerId, gameDate: gameDate, $and: [{ $or: [{ gameTypeName: "Jodi Digit" }, { gameTypeName: "Full Sangam Digits" }, { gameTypeName: "Half Sangam Digits" }] }] });
+
+            let jodiPrice = 0; let halfSangam = 0; let fullSangam = 0;
+
+            for (index in bids) {
+                let bidDigit = bids[index].bidDigit;
+                let strLength = bidDigit.length;
+                let points = bids[index].biddingPoints;
+                switch (strLength) {
+                    case 2:
+                        jodiPrice = jodiPrice + points;
+                        break;
+                    case 5:
+                        halfSangam = halfSangam + points;
+                        break;
+                    case 7:
+                        fullSangam = fullSangam + points;
+                        break;
+                }
+            }
+
+            const sum = new gameSum({
+                providerId: providerId,
+                date: gameDate,
+                half_Sangamsum: halfSangam,
+                full_Sangamsum: fullSangam,
+                Jodi_Sum: jodiPrice
+            })
+            await sum.save();
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 async function refreshEveryWhere(checkNum) {
 
