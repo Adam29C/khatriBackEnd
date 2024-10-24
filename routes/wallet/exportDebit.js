@@ -1083,68 +1083,52 @@ router.post("/gajjubob", async (req, res) => {
 })
 
 router.post("/Finapnb", async (req, res) => {
-	try {
-		const reqStatus = req.body.searchType;
-		const reportDate = req.body.reportDate;
-		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
-		console.log(formatDate, "formatDate")
-		let query = {
-			reqStatus: reqStatus,
-			reqType: "Debit",
-			reqDate: formatDate,
-			fromExport: true,
-		};
+    try {
+        const reqStatus = req.body.searchType;
+        const reportDate = req.body.reportDate;
+        const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+        
+        let query = {
+            reqStatus,
+            reqType: "Debit",
+            reqDate: formatDate,
+            fromExport: true,
+        };
 
-		if (reqStatus === "Pending") {
-			query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
-		}
+        if (reqStatus === "Pending") {
+            query = { reqStatus, reqType: "Debit", reqDate: formatDate };
+        }
 
-		const userBebitReq = await debitReq.find(query, {
-			_id: 1,
-			reqAmount: 1,
-			withdrawalMode: 1,
-			reqDate: 1,
-			toAccount: 1,
-			mobile: 1,
-			username: 1
-		});
+        const userBebitReq = await debitReq.find(query, {
+            _id: 1,
+            reqAmount: 1,
+            withdrawalMode: 1,
+            reqDate: 1,
+            toAccount: 1,
+            mobile: 1,
+            username: 1
+        });
 
-		let finalReport = "";
-		let NFTInfo = "NFT";
-		let clientAccount = "0153001111111111";
-		let currency = "INR";
-		let filename = "FINAPNB.TXT";
-		let count = 1;
+        const formattedData = userBebitReq.map(item => ({
+			type: "NFT",
+			clientAcount: item.toAccount.accNumber,
+			amount: item.reqAmount,
+			currency: "INR",
+            customerAccount: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
+			ifscCode : item.toAccount.ifscCode?.toUpperCase(),
+            withdrawalMode: item.withdrawalMode
+        }));
 
-		for (const index in userBebitReq) {
-			const amt = userBebitReq[index].reqAmount;
-			const bankDetails = userBebitReq[index].toAccount;
-			let ifsc = bankDetails.ifscCode;
-			let name = bankDetails.accName;
-			const accNo = bankDetails.accNumber;
-
-			const formattedSerial = count.toString().padStart(4, '0');
-
-			if (ifsc != null) {
-				ifsc = ifsc.toUpperCase();
-				name = name.replace(/\.+/g, " ").toUpperCase();
-			}
-
-			const addInfo = `TESTNFT${count}`;
-			finalReport += `${NFTInfo},${clientAccount},${amt},${currency},${accNo},${ifsc},${addInfo} \n`;
-			count++;
-		}
-
-		return res.json({
-			status: 1,
-			filename: filename,
-			writeString: finalReport,
-		});
-	} catch (error) {
-		return res.json({
-			status: 0,
-			error: error.message || error,
-		});
-	}
+        res.json({
+            status: 1,
+            profile: formattedData,
+            date: formatDate,
+        });
+    } catch (error) {
+        res.json({
+            status: 0,
+            error: error.message || error,
+        });
+    }
 });
 module.exports = router;
