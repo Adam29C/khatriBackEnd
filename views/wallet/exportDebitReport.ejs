@@ -1398,16 +1398,13 @@
 
   function generateFINAPNBRport(id) {
     const searchType = $("#req_status").val();
+    // const reportType = $("#report_type").val();
     const reportDate = $("#datepicker-autoclose").val();
 
     const req = {
       reportDate: reportDate,
       searchType: searchType,
     };
-
-    // alert("gannu report " , req)
-
-    // return
 
     fetch("/debitReport/Finapnb", {
       method: "POST",
@@ -1419,17 +1416,91 @@
     })
       .then((res) => res.json())
       .then((json) => {
-        const filename = json.filename;
-        const text = json.writeString;
-        var element = document.createElement("a");
-        element.setAttribute("href", "data:text/plain;charset=utf-8," + text);
-        element.setAttribute("download", filename);
-        document.body.appendChild(element);
-        element.click();
+        console.log("json" ,json);
+        
+        const xlsData = json.profile;
+        const reportDate = json.date;
 
-        document.body.removeChild(element);
-        return;
+        var excel = $JExcel.new("Calibri light 10 #333333");
+        var headers = [
+          "Payment Type",
+          "Source Account Number",
+          "Amount",
+          "Currency",
+          "Destination Account Number",
+        ];
+
+        var formatHeader = excel.addStyle({
+          border: "none,none,none,thin #333333",
+          font: "Calibri 12 #ffff B",
+        });
+
+        for (var i = 0; i < headers.length; i++) {
+          excel.set(0, i, 0, headers[i], formatHeader);
+          excel.set(0, i, undefined, "auto");
+        }
+
+        console.log("json" ,xlsData);
+
+        let a = 1;
+        $.each(xlsData, function (key, e) {
+
+        console.log("e" ,e);
+
+          let j = 0;
+          excel.set(0, 0, a, e.type);
+          j++;
+          excel.set(0, j, a, e.clientAcount);
+          j++;
+          excel.set(0, j, a, e.amount);
+          j++;
+          excel.set(0, j, a, e.currency);
+          j++;
+          excel.set(0, j, a, e.customerAccount);
+          j++;
+          excel.set(0, j, a, e.ifscCode);
+          j++;
+        
+          a++;
+        });
+        excel.generate("payout_" + reportDate + "_Batch.xlsx");
       });
+
+
+
+  //   const searchType = $("#req_status").val();
+  //   const reportDate = $("#datepicker-autoclose").val();
+
+  //   const req = {
+  //     reportDate: reportDate,
+  //     searchType: searchType,
+  //   };
+
+  //   // alert("gannu report " , req)
+
+  //   // return
+
+  //   fetch("/debitReport/Finapnb", {
+  //     method: "POST",
+  //     body: JSON.stringify(req),
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     credentials: "same-origin",
+  //   })
+  //     .then((res) => res.json())
+  //     .then((json) => {
+  //       const filename = json.filename;
+  //       const text = json.writeString;
+  //       var element = document.createElement("a");
+  //       element.setAttribute("href", "data:text/plain;charset=utf-8," + text);
+  //       element.setAttribute("download", filename);
+  //       document.body.appendChild(element);
+  //       element.click();
+
+  //       document.body.removeChild(element);
+  //       return;
+  //     });
   }
 
   // ----------------- ganpat code ----------------
