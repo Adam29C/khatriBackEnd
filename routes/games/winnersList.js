@@ -251,8 +251,8 @@ router.get("/abWinner", session, permission, async (req, res) => {
 
 router.post("/remaningWinnerList", async (req, res) => {
   try {
-    const { providerId, providerName, date, session } = req.body;
-    if (!providerId || !providerName || !date || !session) {
+    const { providerId, date, session } = req.body;
+    if (!providerId || !date || !session) {
       return res.json({
         status: 0,
         message: "Data is required",
@@ -355,7 +355,7 @@ router.post("/remaningWinnerList", async (req, res) => {
       halfSangam1: halfSangam1,
       halfSangam2: halfSangam2,
       fullSangam: fullSangam,
-      name: providerName
+      name: providerResult.providerName
     };
     return res.json({
       status: 1,
