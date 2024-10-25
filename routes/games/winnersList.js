@@ -306,6 +306,12 @@ router.post("/remaningWinnerList", async (req, res) => {
         isPaymentDone: false
       })
       .sort({ bidDigit: -1 });
+    if (winnerList.length === 0) {
+      return res.json({
+        status: 1,
+        data: []
+      })
+    }
     let gameType = "";
     for (index in winnerList) {
       gameType = winnerList[index].gameTypeName;
