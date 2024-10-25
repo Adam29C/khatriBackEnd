@@ -289,7 +289,6 @@ router.post("/remaningWinnerList", async (req, res) => {
         message: "Result Data Not Found",
       });
     }
-    console.log("providerResult.winningDigit:::",providerResult)
     let winningDigit = providerResult?.winningDigit.toString();
     let winningDigitFamily = providerResult?.winningDigitFamily.toString()
     const winnerList = await gameBids
@@ -310,14 +309,13 @@ router.post("/remaningWinnerList", async (req, res) => {
     if (session === "Close") {
       const openResult = await gameResult.findOne({
         providerId: providerId,
-        resultDate: gamedate,
+        resultDate: date,
         session: "Open"
       });
-
       if (openResult) {
         const openFamily = openResult.winningDigitFamily;
         const openPana = openResult.winningDigit;
-        jodiDigit = openFamily + providerResult.winningDigitFamily;
+        jodiDigit = `${openFamily}${providerResult.winningDigitFamily}`;
         halfSangam1 = `${openFamily}-${providerResult.winningDigit}`;
         halfSangam2 = `${openPana}-${openResult.winningDigitFamily}`;
         fullSangam = `${openPana}-${openResult.winningDigit}`;
@@ -334,7 +332,7 @@ router.post("/remaningWinnerList", async (req, res) => {
               }
             ],
             providerId: providerId,
-            gameDate: gamedate,
+            gameDate: date,
             gameSession: session,
             isPaymentDone: false
           })
@@ -361,10 +359,9 @@ router.post("/remaningWinnerList", async (req, res) => {
     };
     return res.json({
       status: 1,
-      data:pageData
+      data: pageData
     })
   } catch (error) {
-    console.log(error)
     return res.json({
       status: 0,
       message: "Contact Support",
