@@ -289,7 +289,7 @@ router.post("/remaningWinnerList", async (req, res) => {
         message: "Result Data Not Found",
       });
     }
-    console.log("providerResult.winningDigit:::",providerResult)
+    // console.log("providerResult.winningDigit:::",providerResult)
     let winningDigit = providerResult?.winningDigit.toString();
     let winningDigitFamily = providerResult?.winningDigitFamily.toString()
     const winnerList = await gameBids

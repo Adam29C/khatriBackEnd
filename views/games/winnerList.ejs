@@ -104,17 +104,53 @@
                         </table>
                     </div>
                 </div>
+  
+            </div>
+        </div>
+        <div class="col-xl-12 text-center mainWinner">
+            <a href="#custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a"> ***Confirm Payment***  </a>  
+        </div>
+    </div>
+
+<!-- ------------------------  Remaining Payment List  -->
+    <div class="container-fluid">
+        <div class="row ">
+            <div class="col-xl-12 col-md-12">
+                <div class="card-box">
+                    <div class="table-responsive" data-pattern="priority-columns">
+                        <table  class="table table-bordered dt-responsive nowrap text-center text-dark">
+                            <thead>
+                            <tr>
+                                <th>Sr.</th>
+                                <th>Winner Name</th>
+                                <th>Mobile No.</th>
+                                <th>Game</th>
+                                <th>Bid Digit</th>
+                                <th>Bid Date</th>
+                                <th>Bidding Amount</th>
+                                <th>Rate</th>
+                                <th>Total Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>     
+                           
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+  
             </div>
         </div>
         
     </div>
-
     <!-- <% if(data.resultStatus === 0){ %> -->
 
 
-        <div class="col-xl-12 text-center">
-            <a href="#custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a"> ***Confirm Payment***  </a>  
-        </div>
+        
         <input type="hidden" value="<%= data.provider %>" id="providerId" />
         <input type="hidden" value="<%= data.winDigit %>" id="digit" />
         <input type="hidden" value="<%= data.digitFamily %>" id="digitFamily" />
