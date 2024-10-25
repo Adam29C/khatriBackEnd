@@ -33,6 +33,12 @@
         <div class="row ">
             <div class="col-xl-12 col-md-12">
                 <div class="card-box">
+                <h4 class="header-title mt-0 mb-3 text-left" style="color: rgb(141, 128, 128);font-size: 21px;">
+                    All UsersList 
+                </h4>
+                    <div class="col-xl-12 text-right mainWinner">
+                        <a href="#custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a">Confirm Payment</a>  
+                    </div>
                     <div class="table-responsive" data-pattern="priority-columns">
                         <table  class="table table-bordered dt-responsive nowrap text-center text-dark">
                             <thead>
@@ -107,16 +113,23 @@
   
             </div>
         </div>
-        <div class="col-xl-12 text-center mainWinner">
-            <a href="#custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a"> ***Confirm Payment***  </a>  
-        </div>
+       
     </div>
 
 <!-- ------------------------  Remaining Payment List  -------------------->
     <div class="container-fluid">
         <div class="row ">
+          
+
             <div class="col-xl-12 col-md-12">
+                
                 <div class="card-box">
+                    <h4 class="header-title mt-0 mb-3 text-left" style="color: rgb(141, 128, 128);font-size: 21px;">
+                        Unpaid Users List
+                    </h4>
+                    <div class="col-xl-12 text-right mainWinner">
+                        <a href="#Revised-custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a"> Confirm Payment </a>  
+                    </div>
                     <div class="table-responsive" data-pattern="priority-columns">
                         <table  class="table table-bordered dt-responsive nowrap text-center text-dark">
                             <thead>
@@ -132,22 +145,56 @@
                                 <th>Total Amount</th>
                             </tr>
                             </thead>
-                            <tbody>     
-                           
+
+                            <tbody id="winnerTableBody">
                             </tbody>
+
                             <tfoot>
                                 <tr>
+                                    <th colspan="9" id="totalPayableAmount">Total Payable Amount : 0 /-</th>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
+                
   
+            </div>   
+
+            <!-- Revised Payment Modal -->
+        <div id="Revised-custom-modal" class="modal-demo" style="display: none;margin-left: 18%;">
+
+            <input type="hidden" value="<%= data.provider %>" id="providerId" />
+            <input type="hidden" value="<%= data.winDigit %>" id="digit" />
+            <input type="hidden" value="<%= data.digitFamily %>" id="digitFamily" />
+            <input type="hidden" value="<%= data.gameDate %>" id="date" />
+            <input type="hidden" value="<%= data.resultId %>" id="resultId" />
+            <input type="hidden" value="<%= data.session %>" id="session" />
+            <input type="hidden" value="<%= data.jodiDigit %>" id="jodiDigit" />
+            <input type="hidden" value="<%= data.halfSangam1 %>" id="halfSangam1" />
+            <input type="hidden" value="<%= data.halfSangam2 %>" id="halfSangam2" />
+            <input type="hidden" value="<%= data.fullSangam %>" id="fullSangam" />
+
+
+            <div class="custom-modal-text mr-2 ml-2" style="width: 75%;height: auto;background-color: #f3efe9ed;">
+                <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment1231 ?</h1>
+                <div class="row">
+                    <div class="col-xl-2" style="display: none;" id="loaderProg">
+                        <img src="../../assets/images/loader.gif" style="width: 80px;"/>
+                    </div>
+                    <div class="col-xl-10" style="margin-left: auto;">
+                        <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" onclick="Custombox.modal.close();">  Close </button>
+                        <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" id="hideRevisedIt" onclick="addRevisedPayment();">Confirm </button>
+                    </div>
+                </div>
             </div>
+        </div>
+            <!-- Revised Payment Modal -->
+
         </div>
         
     </div>
-    <!-- <% if(data.resultStatus === 0){ %> -->
+    <% if(data.resultStatus === 0){ %>
 
 
         
@@ -179,7 +226,7 @@
         <div id="LangTable">
 	    	<a href="/gameResult" id="aa"></a></div>
         </div>
-    <!-- <%  } %> -->
+    <%  } %>
 <script>
 
 const pusher = new Pusher('c5324b557c7f3a56788a', {
@@ -265,25 +312,17 @@ function  redirect()
 // <!-- ------------------------  Remaining Payment List  -------------------->
 
 
-function GetRemaningWinnerList(){
 
-let mainSplit  = location.search.split("|")
+function GetRemaningWinnerList() {
+    let mainSplit = location.search.split("|");
 
-console.log("body12121"  , mainSplit);
-
-    const providerId = mainSplit[1] ;
-    const gameDate = mainSplit[2] ;
+    const providerId = mainSplit[1];
+    const gameDate = mainSplit[2];
     const session = mainSplit[6];
 
-//     console.log("providerId" , providerId );
-
-// console.log("gameDate" , gameDate );
-// console.log("session"  , session);
-
-
     fetch("/winner/remaningWinnerList", {
-        method: 'POST', 
-        body: JSON.stringify({ providerId: providerId , date:gameDate ,session:session  }),
+        method: 'POST',
+        body: JSON.stringify({ providerId: providerId, date: gameDate, session: session }),
         headers: {
             "Content-Type": "application/json"
         },
@@ -291,18 +330,116 @@ console.log("body12121"  , mainSplit);
     })
     .then(res => res.json())
     .then(body => {
-console.log("body" ,body);
+        var mainData = body.data.winnerList;
+        var session = body.data.session
+        
+        let GameName = '';
+        let ChartName = '';
+
+const winnerList = mainData;
+        const winnerTableBody = document.getElementById('winnerTableBody');
+        let totalPayable = 0;
+        let rowIndex = 1;
 
 
+        const addRows = (gameType, entries) => {
+            if (entries.length > 0) {
+                const sectionRow = document.createElement('tr');
+                sectionRow.classList.add('section-header');
+                sectionRow.innerHTML = `<td colspan="9" class="headingText"> <h3 class="text-center headingText"> ${gameType}</h3>  </td>`;
+                winnerTableBody.appendChild(sectionRow);
+
+                entries.forEach(entry => {
+                   let abc =   (entry.biddingPoints * entry.gameTypePrice)
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${rowIndex++}</td>
+                        <td>${entry.userName}</td>
+                        <td>${entry.mobileNumber}</td>
+                        <td>${entry.gameTypeName}</td>
+                        <td><span class="badge badge-purple">${entry.bidDigit}</span></td>
+                        <td><span class="badge badge-purple">${entry.gameDate}</span></td>
+                        <td>${entry.biddingPoints}</td>
+                        <td>${entry.gameTypePrice}</td>
+                        <td>${entry.biddingPoints * entry.gameTypePrice}</td>
+                    `;
+                    winnerTableBody.appendChild(row);
+                    totalPayable += abc
+                });
+            }
+        };
+
+
+        Object.keys(winnerList).forEach(gameType => {
+            const entries = winnerList[gameType];
+            addRows(gameType, entries);
+        });
+
+        document.getElementById('totalPayableAmount').textContent = `Total Payable Amount: ₹ ${totalPayable} /-`;
+    
     })
-   
-
-
+    .catch(error => {
+        console.error('Error fetching winner list:', error);
+    });
 }
 
 
 document.addEventListener("DOMContentLoaded", GetRemaningWinnerList);
 
+
+function addRevisedPayment(){
+    $("#hideRevisedIt").attr("disabled", true);
+
+    
+    const providerId = document.getElementById('providerId').value;
+    const windigit = document.getElementById('digit').value;
+    const digitFamily = document.getElementById('digitFamily').value;
+    const gameDate = document.getElementById('date').value;
+    const resultId = document.getElementById('resultId').value;
+    const session = document.getElementById('session').value;
+    const jodiDigit = document.getElementById('jodiDigit').value;
+    const halfSangam1 = document.getElementById('halfSangam1').value;
+    const halfSangam2 = document.getElementById('halfSangam2').value;
+    const fullSangam = document.getElementById('fullSangam').value;
+
+    $("#hideRevisedIt").attr("disabled", true);
+
+    
+    fetch("/addWinpoints/remaningGameWinner", {
+        method: 'POST', 
+        body: JSON.stringify({ providerId: providerId, windigit: windigit, gameDate: gameDate,digitFamily: digitFamily, resultId: resultId, session : session, jodiDigit: jodiDigit, halfSangam1: halfSangam1,  halfSangam2: halfSangam2,fullSangam: fullSangam }),
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: 'same-origin',
+    })
+    .then(res => res.json())
+    .then(body => {
+        $("#hideRevisedIt").attr("disabled", true);
+        Custombox.modal.close();
+         ! function(t) {
+            var e = function() {};
+            e.prototype.init = function() {
+                Swal.fire({
+                    title:"Payment Done Successfully",
+                    type:"success",
+                    confirmButtonClass:"btn btn-confirm mt-2",
+                })
+            }, t.SweetAlert = new e, t.SweetAlert.Constructor = e
+        }(window.jQuery),
+            function(t) {
+                window.jQuery.SweetAlert.init()
+                var audio = new Audio('../../assets/sound/eventually.mp3');
+                audio.play();
+                $('.swal2-confirm').click(function(){
+                    document.getElementById("aa").click();
+                });
+            }();
+
+
+    })
+}
 
 
 </script>
