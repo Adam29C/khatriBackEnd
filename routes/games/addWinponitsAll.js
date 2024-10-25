@@ -419,7 +419,7 @@ router.post("/remaningGameWinner", async (req, res) => {
         let totalPoints = 0;
         let namefor = '';
 
-        let providerResult = await mainGameResult.findOne({ providerId, resultDate: gameDate, session });
+        let providerResult = await gameResult.findOne({ providerId, resultDate: gameDate, session });
         if (!providerResult) {
             return res.status(400).send({
                 status: 0,
