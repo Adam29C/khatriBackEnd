@@ -112,7 +112,7 @@
         </div>
     </div>
 
-<!-- ------------------------  Remaining Payment List  -->
+<!-- ------------------------  Remaining Payment List  -------------------->
     <div class="container-fluid">
         <div class="row ">
             <div class="col-xl-12 col-md-12">
@@ -254,5 +254,55 @@ function  redirect()
 {
     document.getElementById("aa").click();
 }
+
+
+
+
+
+
+
+
+// <!-- ------------------------  Remaining Payment List  -------------------->
+
+
+function GetRemaningWinnerList(){
+
+let mainSplit  = location.search.split("|")
+
+console.log("body12121"  , mainSplit);
+
+    const providerId = mainSplit[1] ;
+    const gameDate = mainSplit[2] ;
+    const session = mainSplit[6];
+
+//     console.log("providerId" , providerId );
+
+// console.log("gameDate" , gameDate );
+// console.log("session"  , session);
+
+
+    fetch("/winner/remaningWinnerList", {
+        method: 'POST', 
+        body: JSON.stringify({ providerId: providerId , date:gameDate ,session:session  }),
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: 'same-origin',
+    })
+    .then(res => res.json())
+    .then(body => {
+console.log("body" ,body);
+
+
+    })
+   
+
+
+}
+
+
+document.addEventListener("DOMContentLoaded", GetRemaningWinnerList);
+
+
 
 </script>
