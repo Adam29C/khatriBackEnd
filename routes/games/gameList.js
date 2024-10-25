@@ -8,7 +8,7 @@ router.get("/", session, permission, async (req, res) => {
   try {
     // Need to test
     // return res.json({ message: 'Not found' });
-    const provider = await gameList.find().sort({_id : 1});;
+    const provider = await gameList.find().sort({ _id: 1 });;
     const userInfo = req.session.details;
     const permissionArray = req.view;
     const check = permissionArray["gamesRates"].showStatus;
@@ -84,5 +84,23 @@ router.patch("/", session, async (req, res) => {
     res.json(e);
   }
 });
+
+router.get("/main_game_providerId", async (req, res) => {
+  try {
+    const providerList = await gameList.find().sort({ _id: 1 });
+    return res.status(200).send({
+      status: 1,
+      message: 'Success',
+      error: providerList
+    });
+
+  } catch (error) {
+    return res.status(500).send({
+      status: 0,
+      message: 'Contact Support',
+      error: error
+    });
+  }
+})
 
 module.exports = router;
