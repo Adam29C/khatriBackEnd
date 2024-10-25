@@ -13,7 +13,7 @@ const gameSum = require('../../model/dashBoard/BidSumGames');
 const dateTime = require('node-datetime');
 const Pusher = require('pusher');
 const mainGameResult = require("../../model/games/GameResult")
-
+const admins = require("../../model/dashBoard/AdminModel.js")
 router.post('/gameWinner', Loginsession, async (req, res) => {
     try {
         const provider = req.body.providerId;
@@ -406,7 +406,7 @@ router.post('/starWinners', Loginsession, async (req, res) => {
 
 router.post("/remaningGameWinner", async (req, res) => {
     try {
-        const { providerId, gameDate, session } = req.body;
+        const { providerId, gameDate, session, adminId } = req.body;
         if (!providerId || !gameDate || !session) {
             return res.status(400).send({
                 status: 0,
@@ -434,7 +434,10 @@ router.post("/remaningGameWinner", async (req, res) => {
         }).sort({ bidDigit: 1 });
 
         calculateSum(session, providerId, gameDate);
-
+        let adminDetails;
+        if (adminId) {
+            adminDetails = await admins.findOne({ _id: adminId })
+        }
         if (session === 'Close') {
             const jodiDigit = req.body.jodiDigit;
             const halfSangam1 = req.body.halfSangam1;
@@ -443,12 +446,12 @@ router.post("/remaningGameWinner", async (req, res) => {
 
             const winnerListJoidClose = await gameBids.find({
                 $and: [
-                    { $or: [{ bidDigit: jodiDigit }] }], providerId: provider, gameDate: gamedate, gameSession: session
+                    { $or: [{ bidDigit: jodiDigit }] }], providerId: providerId, gameDate: gameDate, gameSession: session
             }).sort({ bidDigit: 1 });
 
             const winnerListClose = await gameBids.find({
                 $and: [
-                    { $or: [{ bidDigit: halfSangam1 }, { bidDigit: halfSangam2 }, { bidDigit: fullSangam }] }], providerId: provider, gameDate: gamedate, gameSession: session
+                    { $or: [{ bidDigit: halfSangam1 }, { bidDigit: halfSangam2 }, { bidDigit: fullSangam }] }], providerId: providerId, gameDate: gameDate, gameSession: session
             }).sort({ bidDigit: 1 });
 
             if (Object.keys(resultList).length === 0) {
@@ -511,7 +514,7 @@ router.post("/remaningGameWinner", async (req, res) => {
                     reqType: "main",
                     previous_amount: previous_amount,
                     current_amount: current_amount,
-                    provider_id: provider,
+                    provider_id: providerId,
                     transaction_amount: bal,
                     username: name,
                     provider_ssession: session,
@@ -521,8 +524,8 @@ router.post("/remaningGameWinner", async (req, res) => {
                     transaction_status: "Success",
                     win_revert_status: 1,
                     transaction_time: time,
-                    admin_id: adminId,
-                    addedBy_name: adminName
+                    admin_id: adminId || null,
+                    addedBy_name: adminDetails?.adminName || null
                 }
                 historyDataArray.push(arrValue);
                 let token = {
@@ -535,11 +538,11 @@ router.post("/remaningGameWinner", async (req, res) => {
 
         await history.insertMany(historyDataArray);
         await gameResult.updateOne(
-            { _id: resultId },
+            { _id: providerResult._id },
             { $set: { status: 1 } });
 
         await gameBids.updateMany(
-            { winStatus: 0, providerId: provider, gameDate: gamedate, gameSession: session },
+            { winStatus: 0, providerId: providerId, gameDate: gameDate, gameSession: session },
             {
                 $set:
                 {
@@ -550,6 +553,7 @@ router.post("/remaningGameWinner", async (req, res) => {
         );
 
         let sumDgit = namefor;
+
         notification(req, res, sumDgit, tokenArray);
         refreshEveryWhere(5205);
         return res.status(200).send({
