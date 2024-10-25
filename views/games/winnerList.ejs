@@ -313,6 +313,11 @@ function GetRemaningWinnerList() {
 
         console.log("body" ,body.data.length === 0);
         
+if(body.data.length === 0){
+    document.getElementById('RevicedconfirmPayemt').style.display = 'none';
+}else{
+
+
         var mainData = body.data.winnerList;
         var session = body.data.session
         
@@ -360,6 +365,7 @@ const winnerList = mainData;
         });
 
         document.getElementById('totalPayableAmount').textContent = `Total Payable Amount: ₹ ${totalPayable} /-`;
+}
     
     })
     .catch(error => {
