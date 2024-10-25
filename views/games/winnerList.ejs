@@ -33,9 +33,15 @@
         <div class="row ">
             <div class="col-xl-12 col-md-12">
                 <div class="card-box">
+    <% if(data.resultStatus === 0){ %>
+
                     <div class="col-xl-12 text-right mainWinner">
                         <a href="#custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a">Confirm Payment</a>  
                     </div>
+
+                    <%  } %>
+
+
                     <div class="table-responsive" data-pattern="priority-columns">
                         <table  class="table table-bordered dt-responsive nowrap text-center text-dark">
                             <thead>
