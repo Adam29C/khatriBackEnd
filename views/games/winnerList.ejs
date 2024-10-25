@@ -120,7 +120,7 @@
             <div class="col-xl-12 col-md-12">
                 <div class="card-box">
                     <div class="col-xl-12 text-right mainWinner">
-                        <a href="#Revised-custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a">Confirm Payment</a>  
+                        <a href="#Revised-custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="RevicedconfirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a">Confirm Payment</a>  
                     </div>
                     <div class="table-responsive" data-pattern="priority-columns">
                         <table  class="table table-bordered dt-responsive nowrap text-center text-dark">
@@ -310,6 +310,9 @@ function GetRemaningWinnerList() {
     })
     .then(res => res.json())
     .then(body => {
+
+        console.log("body" ,body.data.length === 0);
+        
         var mainData = body.data.winnerList;
         var session = body.data.session
         
