@@ -33,9 +33,10 @@
         <div class="row ">
             <div class="col-xl-12 col-md-12">
                 <div class="card-box">
-                    <div class="col-xl-12 text-right mainWinner">
-                        <a href="#custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a">Confirm Payment</a>  
-                    </div>
+                <h4 class="header-title mt-0 mb-3 text-left" style="color: rgb(141, 128, 128);font-size: 21px;">
+                    All UsersList 
+                </h4>
+                   
                     <div class="table-responsive" data-pattern="priority-columns">
                         <table  class="table table-bordered dt-responsive nowrap text-center text-dark">
                             <thead>
@@ -107,20 +108,24 @@
                         </table>
                     </div>
                 </div>
-  
-            </div>
+             </div>
         </div>
        
-      
     </div>
 
 <!-- ------------------------  Remaining Payment List  -------------------->
     <div class="container-fluid">
         <div class="row ">
+          
+
             <div class="col-xl-12 col-md-12">
+                
                 <div class="card-box">
+                    <h4 class="header-title mt-0 mb-3 text-left" style="color: rgb(141, 128, 128);font-size: 21px;">
+                        Unpaid Users List
+                    </h4>
                     <div class="col-xl-12 text-right mainWinner">
-                        <a href="#Revised-custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a">Confirm Payment</a>  
+                        <a href="#Revised-custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a"> Confirm Payment </a>  
                     </div>
                     <div class="table-responsive" data-pattern="priority-columns">
                         <table  class="table table-bordered dt-responsive nowrap text-center text-dark">
@@ -153,31 +158,47 @@
   
             </div>   
 
-            <!-- Revised Payment -->
+            <!-- Revised Payment Modal -->
         <div id="Revised-custom-modal" class="modal-demo" style="display: none;margin-left: 18%;">
+
+            <input type="hidden" value="<%= data.provider %>" id="providerId" />
+            <input type="hidden" value="<%= data.winDigit %>" id="digit" />
+            <input type="hidden" value="<%= data.digitFamily %>" id="digitFamily" />
+            <input type="hidden" value="<%= data.gameDate %>" id="date" />
+            <input type="hidden" value="<%= data.resultId %>" id="resultId" />
+            <input type="hidden" value="<%= data.session %>" id="session" />
+            <input type="hidden" value="<%= data.jodiDigit %>" id="jodiDigit" />
+            <input type="hidden" value="<%= data.halfSangam1 %>" id="halfSangam1" />
+            <input type="hidden" value="<%= data.halfSangam2 %>" id="halfSangam2" />
+            <input type="hidden" value="<%= data.fullSangam %>" id="fullSangam" />
+
+
             <div class="custom-modal-text mr-2 ml-2" style="width: 75%;height: auto;background-color: #f3efe9ed;">
-                <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment?</h1>
+                <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment1231 ?</h1>
                 <div class="row">
                     <div class="col-xl-2" style="display: none;" id="loaderProg">
                         <img src="../../assets/images/loader.gif" style="width: 80px;"/>
                     </div>
                     <div class="col-xl-10" style="margin-left: auto;">
                         <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" onclick="Custombox.modal.close();">  Close </button>
-                        <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" id="hideIt" onclick="addRevisedPayment();">Confirm </button>
+                        <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" id="hideRevisedIt" onclick="addRevisedPayment();">Confirm </button>
                     </div>
                 </div>
             </div>
         </div>
+            <!-- Revised Payment Modal -->
+
         </div>
-
-            <!-- Revised Payment -->
-
         
     </div>
-    <% if(data.resultStatus === 0){ %>
+    <!-- <% if(data.resultStatus === 0){ %> -->
 
-     
-
+    
+    <div class="col-xl-12 text-right mainWinner">
+        <a href="#custom-modal" class="btn btn-dark waves-effect width-md waves-light" data-animation="flash" id="confirmPayemt" data-plugin="custommodal" data-overlaycolor="#36404a">Confirm Payment</a>  
+    </div>
+    
+       
         <input type="hidden" value="<%= data.provider %>" id="providerId" />
         <input type="hidden" value="<%= data.winDigit %>" id="digit" />
         <input type="hidden" value="<%= data.digitFamily %>" id="digitFamily" />
@@ -189,9 +210,11 @@
         <input type="hidden" value="<%= data.halfSangam2 %>" id="halfSangam2" />
         <input type="hidden" value="<%= data.fullSangam %>" id="fullSangam" />
 
+
+        
         <div id="custom-modal" class="modal-demo" style="display: none;margin-left: 18%;">
             <div class="custom-modal-text mr-2 ml-2" style="width: 75%;height: auto;background-color: #f3efe9ed;">
-                <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment?</h1>
+                <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment ?</h1>
                 <div class="row">
                     <div class="col-xl-2" style="display: none;" id="loaderProg">
                         <img src="../../assets/images/loader.gif" style="width: 80px;"/>
@@ -206,7 +229,7 @@
         <div id="LangTable">
 	    	<a href="/gameResult" id="aa"></a></div>
         </div>
-    <%  } %>
+    <!-- <%  } %> -->
 <script>
 
 const pusher = new Pusher('c5324b557c7f3a56788a', {
@@ -368,11 +391,10 @@ const winnerList = mainData;
 document.addEventListener("DOMContentLoaded", GetRemaningWinnerList);
 
 
-
-
-
 function addRevisedPayment(){
-        $("#hideRevisedIt").attr("disabled", true);
+    $("#hideRevisedIt").attr("disabled", true);
+
+    
     const providerId = document.getElementById('providerId').value;
     const windigit = document.getElementById('digit').value;
     const digitFamily = document.getElementById('digitFamily').value;
@@ -385,6 +407,7 @@ function addRevisedPayment(){
     const fullSangam = document.getElementById('fullSangam').value;
 
     $("#hideRevisedIt").attr("disabled", true);
+
     
     fetch("/addWinpoints/remaningGameWinner", {
         method: 'POST', 
@@ -416,6 +439,8 @@ function addRevisedPayment(){
                     document.getElementById("aa").click();
                 });
             }();
+
+
     })
 }
 
