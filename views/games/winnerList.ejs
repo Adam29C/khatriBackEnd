@@ -243,10 +243,28 @@ channel.bind('my-event', function(data)
     }
 });
 
-function add()
-{
 
+
+var count = 0
+function add(){
+
+console.log("test");
+
+
+    if ($("#hideIt").is(":disabled")) return;
+
+    // Disable the button to prevent multiple submissions
     $("#hideIt").attr("disabled", true);
+
+
+console.log("test1");
+
+    // count = 1 
+
+    // if(count === 1){
+
+
+    // $("#hideIt").attr("disabled", true);
 
     const providerId = document.getElementById('providerId').value;
     const windigit = document.getElementById('digit').value;
@@ -296,6 +314,7 @@ function add()
                 });
             }();
     })
+// }
 }
 
 function  redirect()
@@ -400,18 +419,9 @@ const winnerList = mainData;
 
 document.addEventListener("DOMContentLoaded", GetRemaningWinnerList);
 
-
-
-
-
 function addRevisedPayment(){
-    
-    // console.log("providerId"  , providerId);
-
-
-        $("#hideRevisedIt").attr("disabled", true);
+    $("#hideRevisedIt").attr("disabled", true);
     const providerId = document.getElementById('providerId').value;
-
 
     const windigit = document.getElementById('digit').value;
     const digitFamily = document.getElementById('digitFamily').value;

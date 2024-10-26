@@ -16,6 +16,7 @@ const mainGameResult = require("../../model/games/GameResult")
 const admins = require("../../model/dashBoard/AdminModel.js")
 router.post('/gameWinner', Loginsession, async (req, res) => {
     try {
+        console.log(req.body)
         const provider = req.body.providerId;
         const digit = req.body.windigit;
         const gamedate = req.body.gameDate;
@@ -127,6 +128,7 @@ router.post('/gameWinner', Loginsession, async (req, res) => {
                     addedBy_name: adminName
                 }
                 historyDataArray.push(arrValue);
+                console.log("historyDataArrayhistoryDataArray:::",historyDataArray.length)
                 let token = {
                     firebaseId: userToken,
                     amount: bal
