@@ -160,6 +160,21 @@
             </div>   
 
             <!-- Revised Payment -->
+
+            
+        <input type="hidden" value="<%= data.provider %>" id="providerId" />
+        <input type="hidden" value="<%= data.winDigit %>" id="digit" />
+        <input type="hidden" value="<%= data.digitFamily %>" id="digitFamily" />
+        <input type="hidden" value="<%= data.gameDate %>" id="date" />
+        <input type="hidden" value="<%= data.resultId %>" id="resultId" />
+        <input type="hidden" value="<%= data.session %>" id="session" />
+        <input type="hidden" value="<%= data.jodiDigit %>" id="jodiDigit" />
+        <input type="hidden" value="<%= data.halfSangam1 %>" id="halfSangam1" />
+        <input type="hidden" value="<%= data.halfSangam2 %>" id="halfSangam2" />
+        <input type="hidden" value="<%= data.fullSangam %>" id="fullSangam" />
+
+
+
         <div id="Revised-custom-modal" class="modal-demo" style="display: none;margin-left: 18%;">
             <div class="custom-modal-text mr-2 ml-2" style="width: 75%;height: auto;background-color: #f3efe9ed;">
                 <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment?</h1>
@@ -300,7 +315,10 @@ function  redirect()
 
 
 function GetRemaningWinnerList() {
+
     let mainSplit = location.search.split("|");
+
+    
 
     const providerId = mainSplit[1];
     const gameDate = mainSplit[2];
@@ -387,8 +405,14 @@ document.addEventListener("DOMContentLoaded", GetRemaningWinnerList);
 
 
 function addRevisedPayment(){
+    
+    // console.log("providerId"  , providerId);
+
+
         $("#hideRevisedIt").attr("disabled", true);
     const providerId = document.getElementById('providerId').value;
+
+
     const windigit = document.getElementById('digit').value;
     const digitFamily = document.getElementById('digitFamily').value;
     const gameDate = document.getElementById('date').value;
@@ -413,8 +437,10 @@ function addRevisedPayment(){
     .then(body => {
         $("#hideRevisedIt").attr("disabled", true);
         Custombox.modal.close();
+        location.reload()
          ! function(t) {
             var e = function() {};
+
             e.prototype.init = function() {
                 Swal.fire({
                     title:"Payment Done Successfully",
