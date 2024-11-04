@@ -248,11 +248,11 @@ router.post("/updateData", session, async (req, res) => {
 		);
 
 		const date2 = moment().format("DD/MM/YYYY");
-        let timestamp = moment(date2, "DD/MM/YYYY").unix();
+		let timestamp = moment(date2, "DD/MM/YYYY").unix();
 		const history = new wallet_history({
 			userId: id,
-			bidId : saveId._id,
-			filterType : filter,
+			bidId: saveId._id,
+			filterType: filter,
 			previous_amount: wallet_bal,
 			current_amount: update_bal,
 			transaction_amount: parseInt(bal),
@@ -262,8 +262,8 @@ router.post("/updateData", session, async (req, res) => {
 			transaction_status: "Success",
 			admin_id: admin_id,
 			particular: particular,
-			upiId:"null",
-            timestamp:timestamp,
+			upiId: "null",
+			timestamp: timestamp,
 			username: username,
 			reqType: reqType,
 			addedBy_name: adminName,
@@ -278,7 +278,7 @@ router.post("/updateData", session, async (req, res) => {
 			let title = "Your Credit (Deposit) Request Of Rs. " + bal + "/- is Approved ✔️🤑💰";
 			let body = "Hello " + username + " 🤩🤩";
 			notification(userToken, title, body);
-		}else{
+		} else {
 			let userToken = [];
 			userToken.push(firebaseToken);
 			let title = "Your Debit (Withdrawal) Request Of Rs. " + bal + "/- is Approved ✔️🤑💰";
@@ -464,6 +464,47 @@ router.post("/newHistroy", session, async (req, res) => {
 	}
 });
 
+// router.post("/newHistroy", session, async (req, res) => {
+// 	try {
+// 		const { page = 1, limit = 10, id, search } = req.body;
+// 		const skip = (page - 1) * limit;
+// 		const table = await wallet_history.dataTables({
+// 			find: { userId: id },
+// 			limit: parseInt(limit),
+// 			skip: parseInt(skip),
+// 			columns: req.body.columns,
+// 			search: {
+// 				value: search.value,
+// 				fields: ["username", "name", "mobile"],
+// 			},
+// 			sort: { _id: -1 },
+// 		});
+
+// 		const tabelArray = table.data.map((item, index) => {
+// 			return {
+// 				sno: skip + index + 1,
+// 				Previous_Amount: item.previous_amount,
+// 				Transaction_Amount: item.transaction_amount,
+// 				Current_Amount: item.current_amount,
+// 				Description: item.description,
+// 				Transaction_Date: `${item.transaction_date} ${item.transaction_time}`,
+// 				Transaction_Status: item.transaction_status,
+// 				Added_by: item.addedBy_name || "Auto",
+// 			};
+// 		});
+// 		return res.json({
+// 			data: tabelArray,
+// 			recordsFiltered: table.total,
+// 			recordsTotal: table.total,
+// 			currentPage: page,
+// 			totalPages: Math.ceil(table.total / limit),
+// 		});
+
+// 	} catch (error) {
+// 		console.log(error);
+// 	}
+// });
+
 router.post("/fundHis", session, async (req, res) => {
 	try {
 		let i = parseInt(req.body.start) + 1;
@@ -478,7 +519,7 @@ router.post("/fundHis", session, async (req, res) => {
 					value: req.body.search.value,
 					fields: ["username", "reqAmount", "reqType", "reqStatus"],
 				},
-				sort: { _id: -1, reqAmount :1, reqType : 1,reqStatus : 1  },
+				sort: { _id: -1, reqAmount: 1, reqType: 1, reqStatus: 1 },
 			})
 			.then(function (table) {
 				let dataTab = table.data;
@@ -527,64 +568,119 @@ router.post("/fundHis", session, async (req, res) => {
 	}
 });
 
+// router.post("/newCredit", session, async (req, res) => {
+// 	try {
+// 		let i = parseInt(req.body.start) + 1;
+// 		const id = req.body.id;
+// 		wallet_history
+// 			.dataTables({
+// 				find: { userId: id, reqType: { $in: ["Credit", "Debit"] } },
+// 				limit: req.body.length,
+// 				skip: req.body.start,
+// 				columns: req.body.columns,
+// 				search: {
+// 					value: req.body.search.value,
+// 					fields: ["username", "name", "mobile"],
+// 				},
+// 				sort: { _id: -1 },
+// 			})
+// 			.then(function (table) {
+// 				let dataTab = table.data;
+// 				let tabelArray = [];
+// 				for (index in dataTab) {
+// 					let addBy = dataTab[index].addedBy_name;
+// 					if (addBy == undefined) {
+// 						addBy = "Auto";
+// 					}
+
+// 					let dataJson = {
+// 						sno: i,
+// 						Previous_Amount: dataTab[index].previous_amount,
+// 						Transaction_Amount: dataTab[index].transaction_amount,
+// 						Current_Amount: dataTab[index].current_amount,
+// 						Description: dataTab[index].description,
+// 						Transaction_Date:
+// 							dataTab[index].transaction_date +
+// 							" " +
+// 							dataTab[index].transaction_time,
+// 						Transaction_Status: dataTab[index].transaction_status,
+// 						Added_by: addBy,
+// 					};
+// 					tabelArray.push(dataJson);
+// 					i++;
+// 				}
+
+// 				res.json({
+// 					data: tabelArray,
+// 					recordsFiltered: table.total,
+// 					recordsTotal: table.total,
+// 				});
+// 			})
+// 			.catch(function (error) {
+// 				res.json({
+// 					status: 0,
+// 					message: "Request To Large",
+// 					err: error.toString(),
+// 				});
+// 			});
+// 	} catch (error) {
+// 		console.log(error);
+// 	}
+// });
+
 router.post("/newCredit", session, async (req, res) => {
-	try {
-		let i = parseInt(req.body.start) + 1;
-		const id = req.body.id;
-		wallet_history
-			.dataTables({
-				find: { userId: id, reqType: { $in: ["Credit", "Debit"] } },
-				limit: req.body.length,
-				skip: req.body.start,
-				columns: req.body.columns,
-				search: {
-					value: req.body.search.value,
-					fields: ["username", "name", "mobile"],
-				},
-				sort: { _id: -1 },
-			})
-			.then(function (table) {
-				let dataTab = table.data;
-				let tabelArray = [];
-				for (index in dataTab) {
-					let addBy = dataTab[index].addedBy_name;
-					if (addBy == undefined) {
-						addBy = "Auto";
-					}
+    try {
+        const page = parseInt(req.body.page) || 1;
+        const limit = parseInt(req.body.length) || 10;
+        const skip = (page - 1) * limit;
 
-					let dataJson = {
-						sno: i,
-						Previous_Amount: dataTab[index].previous_amount,
-						Transaction_Amount: dataTab[index].transaction_amount,
-						Current_Amount: dataTab[index].current_amount,
-						Description: dataTab[index].description,
-						Transaction_Date:
-							dataTab[index].transaction_date +
-							" " +
-							dataTab[index].transaction_time,
-						Transaction_Status: dataTab[index].transaction_status,
-						Added_by: addBy,
-					};
-					tabelArray.push(dataJson);
-					i++;
-				}
+        const id = req.body.id;
 
-				res.json({
-					data: tabelArray,
-					recordsFiltered: table.total,
-					recordsTotal: table.total,
-				});
-			})
-			.catch(function (error) {
-				res.json({
-					status: 0,
-					message: "Request To Large",
-					err: error.toString(),
-				});
-			});
-	} catch (error) {
-		console.log(error);
-	}
+        const table = await wallet_history.dataTables({
+            find: { userId: id, reqType: { $in: ["Credit", "Debit"] } },
+            limit: limit,
+            skip: skip,
+            columns: req.body.columns,
+            search: {
+                value: req.body.search.value,
+                fields: ["username", "name", "mobile"],
+            },
+            sort: { _id: -1 },
+        });
+
+        const dataTab = table.data;
+        let tabelArray = [];
+        
+        dataTab.forEach((item, index) => {
+            let addBy = item.addedBy_name || "Auto";
+
+            let dataJson = {
+                sno: skip + index + 1,
+                Previous_Amount: item.previous_amount,
+                Transaction_Amount: item.transaction_amount,
+                Current_Amount: item.current_amount,
+                Description: item.description,
+                Transaction_Date: `${item.transaction_date} ${item.transaction_time}`,
+                Transaction_Status: item.transaction_status,
+                Added_by: addBy,
+            };
+            tabelArray.push(dataJson);
+        });
+
+        return res.json({
+            data: tabelArray,
+            recordsFiltered: table.total,
+            recordsTotal: table.total,
+            currentPage: page,
+            totalPages: Math.ceil(table.total / limit),
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 0,
+            message: "An error occurred while processing your request.",
+            err: error.toString(),
+        });
+    }
 });
 
 router.post("/accountDetails", session, async (req, res) => {
