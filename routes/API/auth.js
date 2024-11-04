@@ -326,7 +326,6 @@ router.post("/register", async (req, res) => {
 		const OTP = req.body.deviceVeriOTP;
 		let otpData = { type: 'error' };
 		otpData['type'] = OTP === 1234 || OTP === '1234' ? 'success' : 'success';
-		console.log("req.body.firebaseId::",)
 		if (otpData.type == "success") {
 			try {
 				let userMpin = req.body.mpin;
