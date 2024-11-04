@@ -248,11 +248,11 @@ router.post("/updateData", session, async (req, res) => {
 		);
 
 		const date2 = moment().format("DD/MM/YYYY");
-        let timestamp = moment(date2, "DD/MM/YYYY").unix();
+		let timestamp = moment(date2, "DD/MM/YYYY").unix();
 		const history = new wallet_history({
 			userId: id,
-			bidId : saveId._id,
-			filterType : filter,
+			bidId: saveId._id,
+			filterType: filter,
 			previous_amount: wallet_bal,
 			current_amount: update_bal,
 			transaction_amount: parseInt(bal),
@@ -262,8 +262,8 @@ router.post("/updateData", session, async (req, res) => {
 			transaction_status: "Success",
 			admin_id: admin_id,
 			particular: particular,
-			upiId:"null",
-            timestamp:timestamp,
+			upiId: "null",
+			timestamp: timestamp,
 			username: username,
 			reqType: reqType,
 			addedBy_name: adminName,
@@ -278,7 +278,7 @@ router.post("/updateData", session, async (req, res) => {
 			let title = "Your Credit (Deposit) Request Of Rs. " + bal + "/- is Approved ✔️🤑💰";
 			let body = "Hello " + username + " 🤩🤩";
 			notification(userToken, title, body);
-		}else{
+		} else {
 			let userToken = [];
 			userToken.push(firebaseToken);
 			let title = "Your Debit (Withdrawal) Request Of Rs. " + bal + "/- is Approved ✔️🤑💰";
@@ -464,6 +464,47 @@ router.post("/newHistroy", session, async (req, res) => {
 	}
 });
 
+// router.post("/newHistroy", session, async (req, res) => {
+// 	try {
+// 		const { page = 1, limit = 10, id, search } = req.body;
+// 		const skip = (page - 1) * limit;
+// 		const table = await wallet_history.dataTables({
+// 			find: { userId: id },
+// 			limit: parseInt(limit),
+// 			skip: parseInt(skip),
+// 			columns: req.body.columns,
+// 			search: {
+// 				value: search.value,
+// 				fields: ["username", "name", "mobile"],
+// 			},
+// 			sort: { _id: -1 },
+// 		});
+
+// 		const tabelArray = table.data.map((item, index) => {
+// 			return {
+// 				sno: skip + index + 1,
+// 				Previous_Amount: item.previous_amount,
+// 				Transaction_Amount: item.transaction_amount,
+// 				Current_Amount: item.current_amount,
+// 				Description: item.description,
+// 				Transaction_Date: `${item.transaction_date} ${item.transaction_time}`,
+// 				Transaction_Status: item.transaction_status,
+// 				Added_by: item.addedBy_name || "Auto",
+// 			};
+// 		});
+// 		return res.json({
+// 			data: tabelArray,
+// 			recordsFiltered: table.total,
+// 			recordsTotal: table.total,
+// 			currentPage: page,
+// 			totalPages: Math.ceil(table.total / limit),
+// 		});
+
+// 	} catch (error) {
+// 		console.log(error);
+// 	}
+// });
+
 router.post("/fundHis", session, async (req, res) => {
 	try {
 		let i = parseInt(req.body.start) + 1;
@@ -478,7 +519,7 @@ router.post("/fundHis", session, async (req, res) => {
 					value: req.body.search.value,
 					fields: ["username", "reqAmount", "reqType", "reqStatus"],
 				},
-				sort: { _id: -1, reqAmount :1, reqType : 1,reqStatus : 1  },
+				sort: { _id: -1, reqAmount: 1, reqType: 1, reqStatus: 1 },
 			})
 			.then(function (table) {
 				let dataTab = table.data;
