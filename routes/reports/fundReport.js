@@ -44,131 +44,131 @@ router.get("/", session, permission, async (req, res) => {
 });
 
 router.post("/", session, async (req, res) => {
-    const sdate = req.body.sdate;
-    const edate = req.body.edate;
-    const bankName = req.body.bankName;
-    const reqType = req.body.reqType;
-    const admin_id = req.body.admin_id;
-    const startDate0 = moment(sdate, "MM-DD-YYYY").format("DD/MM/YYYY");
-    const endDate0 = moment(edate, "MM-DD-YYYY").format("DD/MM/YYYY");
-    var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-    var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-    try {
-        if (reqType.toUpperCase() == "CREDIT") {
-            let query
-            if (bankName === '1') {
-                query = {
-                    reqType: "Credit",
-                    timestamp: {
-                        $gte: startDate,
-                        $lte: endDate,
-                    },
-                }
-            } else {
-                query = {
-                    reqType: "Credit",
-                    timestamp: {
-                        $gte: startDate,
-                        $lte: endDate,
-                    },
-                    particular: bankName,
-                }
-            }
-            let creditAmountDetails = await history.find(query);
-            let newArr = [];
-            for (let details of creditAmountDetails) {
-                newArr.push({
-                    _id: details._id,
-                    reqAmount: details.transaction_amount,
-                    username: details.username,
-                    mobile: details.mobile,
-                    withdrawalMode: details?.particular,
-                    UpdatedBy: details.addedBy_name || "By self",
-                    reqUpdatedAt: details?.transaction_date
-                })
-            }
-            if (creditAmountDetails.length > 0) {
-                res.json({
-                    status: 1,
-                    data: newArr,
-                    newdata: creditAmountDetails
-                });
-            } else {
-                res.json({
-                    status: 1,
-                    message: "No Data Found",
-                    data: [],
-                });
-            }
-        } else {
-            let query = {
-                reqType: reqType,
-                timestamp: {
-                    $gte: startDate,
-                    $lte: endDate,
-                },
-                withdrawalMode: bankName,
-                admin_id: admin_id,
-            };
-            if (admin_id == 1) {
-                query = {
-                    reqType: reqType,
-                    timestamp: {
-                        $gte: startDate,
-                        $lte: endDate,
-                    },
-                    withdrawalMode: bankName,
-                };
-            }
-            if (bankName == 1) {
-                query = {
-                    reqType: reqType,
-                    timestamp: {
-                        $gte: startDate,
-                        $lte: endDate,
-                    },
-                    UpdatedBy: { $regex: admin_id },
-                };
-            }
-            if (bankName == 1 && admin_id == 1) {
-                query = {
-                    reqType: reqType,
-                    timestamp: {
-                        $gte: startDate,
-                        $lte: endDate,
-                    },
-                };
-            }
-            const Report = await fundReport
-                .find(query, {
-                    username: 1,
-                    mobile: 1,
-                    reqUpdatedAt: 1,
-                    withdrawalMode: 1,
-                    reqAmount: 1,
-                    UpdatedBy: 1,
-                })
-                .sort({ _id: -1 });
-            if (Report) {
-                res.json({
-                    status: 1,
-                    data: Report,
-                });
-            } else {
-                res.json({
-                    status: 1,
-                    message: "No Data Found",
-                    data: [],
-                });
-            }
-        }
-    } catch (error) {
-        res.json({
-            status: 0,
-            message: "contact Support",
-            data: error,
-        });
-    }
+	const sdate = req.body.sdate;
+	const edate = req.body.edate;
+	const bankName = req.body.bankName;
+	const reqType = req.body.reqType;
+	const admin_id = req.body.admin_id;
+	const startDate0 = moment(sdate, "MM-DD-YYYY").format("DD/MM/YYYY");
+	const endDate0 = moment(edate, "MM-DD-YYYY").format("DD/MM/YYYY");
+	var startDate = moment(startDate0, "DD/MM/YYYY").unix();
+	var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+	try {
+		if (reqType.toUpperCase() == "CREDIT") {
+			let query
+			if (bankName === '1') {
+				query = {
+					reqType: "Credit",
+					timestamp: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+				}
+			} else {
+				query = {
+					reqType: "Credit",
+					timestamp: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+					particular: bankName,
+				}
+			}
+			let creditAmountDetails = await history.find(query);
+			let newArr = [];
+			for (let details of creditAmountDetails) {
+				newArr.push({
+					_id: details._id,
+					reqAmount: details.transaction_amount,
+					username: details.username,
+					mobile: details.mobile,
+					withdrawalMode: details?.particular,
+					UpdatedBy: details.addedBy_name || "By self",
+					reqUpdatedAt: details?.transaction_date
+				})
+			}
+			if (creditAmountDetails.length > 0) {
+				res.json({
+					status: 1,
+					data: newArr,
+					newdata: creditAmountDetails
+				});
+			} else {
+				res.json({
+					status: 1,
+					message: "No Data Found",
+					data: [],
+				});
+			}
+		} else {
+			let query = {
+				reqType: reqType,
+				timestamp: {
+					$gte: startDate,
+					$lte: endDate,
+				},
+				withdrawalMode: bankName,
+				admin_id: admin_id,
+			};
+			if (admin_id == 1) {
+				query = {
+					reqType: reqType,
+					timestamp: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+					withdrawalMode: bankName,
+				};
+			}
+			if (bankName == 1) {
+				query = {
+					reqType: reqType,
+					timestamp: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+					UpdatedBy: { $regex: admin_id },
+				};
+			}
+			if (bankName == 1 && admin_id == 1) {
+				query = {
+					reqType: reqType,
+					timestamp: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+				};
+			}
+			const Report = await fundReport
+				.find(query, {
+					username: 1,
+					mobile: 1,
+					reqUpdatedAt: 1,
+					withdrawalMode: 1,
+					reqAmount: 1,
+					UpdatedBy: 1,
+				})
+				.sort({ _id: -1 });
+			if (Report) {
+				res.json({
+					status: 1,
+					data: Report,
+				});
+			} else {
+				res.json({
+					status: 1,
+					message: "No Data Found",
+					data: [],
+				});
+			}
+		}
+	} catch (error) {
+		res.json({
+			status: 0,
+			message: "contact Support",
+			data: error,
+		});
+	}
 });
 router.get("/dailyReport", session, permission, async (req, res) => {
 	try {
@@ -346,67 +346,6 @@ router.get("/razorpay", session, permission, async (req, res) => {
 	}
 });
 
-// router.post("/getUPIReport", session, async (req, res) => {
-//     try {
-//         const id = req.body.id;
-//         const date = req.body.date;
-//         const dateStart = req.body.dateStart;
-//         const startDate0 = moment(dateStart, "MM-DD-YYYY").format("DD/MM/YYYY");
-//         const endDate0 = moment(date, "MM-DD-YYYY").format("DD/MM/YYYY");
-//         var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-//         var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-//         let query;
-//         if (id === '1') {
-//             query = {
-//                 reqType: "Credit",
-// 				particular:"UPI",
-//                 timestamp: {
-//                     $gte: startDate,
-//                     $lte: endDate,
-//                 },
-//             }
-//         } else {
-//             let upiDetails = await UPI_list.findOne({ _id: id}, { UPI_ID: 1 })
-//             query = {
-// 				particular:"UPI",
-//                 reqType: "Credit",
-//                 timestamp: {
-//                     $gte: startDate,
-//                     $lte: endDate,
-//                 },
-//                 upiId: upiDetails.UPI_ID,
-//             }
-//         }
-//         let creditAmountDetails = await history.find(query);
-//         let newArra = [];
-//         for (let details of creditAmountDetails) {
-//             newArra.push({
-//                 _id: details._id,
-//                 username: details.username,
-//                 // fullname: details.fullname || null,
-//                 mobile: details.mobile,
-//                 reqAmount: details.transaction_amount,
-//                 reqDate: details.transaction_date,
-//                 reqTime: details.transaction_time,
-//                 transaction_id: details.transaction_id || null,
-//                 upi_name: details.upiId,
-//                 upi_app_name: "googlepay",
-//                 reqStatus: details?.transaction_status
-//             })
-//         }
-//         res.json({
-//             status: 1,
-//             message: "Success",
-//             data: newArra,
-//         });
-//     } catch (error) {
-//         res.json({
-//             status: 0,
-//             message: "Something Bad Happend Contact Support",
-//         });
-//     }
-// });
-
 // router.post("/getUPIReport", async (req, res) => {
 // 	try {
 // 		const id = req.body.id;
@@ -476,15 +415,96 @@ router.get("/razorpay", session, permission, async (req, res) => {
 // 	}
 // });
 
+// router.post("/getUPIReport", async (req, res) => {
+// 	try {
+// 		const id = req.body.id;
+// 		const date = req.body.date;
+// 		const dateStart = req.body.dateStart;
+// 		const startDate0 = moment(dateStart, "MM-DD-YYYY").format("DD/MM/YYYY");
+// 		const endDate0 = moment(date, "MM-DD-YYYY").format("DD/MM/YYYY");
+// 		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
+// 		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+// 		let query;
+// 		if (id === '1') {
+// 			query = {
+// 				reqType: "Credit",
+// 				particular: "UPI",
+// 				transaction_date: {
+// 					$gte: startDate0,
+// 					$lte: endDate0,
+// 				}
+// 			}
+// 		} else {
+// 			let upiDetails = await UPI_list.findOne({ _id: id }, { UPI_ID: 1 })
+// 			query = {
+// 				particular: "UPI",
+// 				reqType: "Credit",
+// 				transaction_date: {
+// 					$gte: startDate0,
+// 					$lte: endDate0,
+// 				},
+// 				upiId: upiDetails.UPI_ID,
+// 			}
+// 		}
+// 		let creditAmountDetails = await history.find(query);
+// 		// let creditAmountDetails = await upi_entries.find(query)
+// 		let newArra = [];
+// 		if (creditAmountDetails.length !== 0) {
+// 			creditAmountDetails.sort((a, b) => {
+// 				let timeA = moment(a.reqDate, 'hh:mm:ss A');
+// 				let timeB = moment(b.reqDate, 'hh:mm:ss A');
+// 				return timeA - timeB;
+// 			});
+// 			for (let details of creditAmountDetails) {
+// 				newArra.push({
+// 					_id: details._id,
+// 					username: details.username,
+// 					mobile: details.mobile,
+// 					reqAmount: details.transaction_amount,
+// 					reqDate: details.transaction_date,
+// 					reqTime: details.transaction_time,
+// 					transaction_id: details.transaction_id || null,
+// 					upi_name: details.upiId,
+// 					upi_app_name: "googlepay",
+// 					reqStatus: details?.transaction_status
+// 				})
+// 			}
+// 		}
+// 		let finalArray = []
+// 		if (newArra.length > 0) {
+// 			finalArray = newArra.sort((a, b) => {
+// 				const timeA = moment(`${a.reqDate} ${a.reqTime}`, "DD/MM/YYYY hh:mm:ss A");
+// 				const timeB = moment(`${b.reqDate} ${b.reqTime}`, "DD/MM/YYYY hh:mm:ss A");
+// 				return timeA - timeB;
+// 			});
+// 		}
+// 		return res.json({
+// 			status: 1,
+// 			message: "Success",
+// 			data: finalArray,
+// 			creditAmountDetails
+// 		});
+// 	} catch (error) {
+// 		res.json({
+// 			status: 0,
+// 			message: "Something Bad Happend Contact Support",
+// 		});
+// 	}
+// });
+
 router.post("/getUPIReport", async (req, res) => {
 	try {
 		const id = req.body.id;
 		const date = req.body.date;
 		const dateStart = req.body.dateStart;
+		const page = parseInt(req.body.page) || 1;  // Default to page 1 if not provided
+		const limit = parseInt(req.body.limit) || 10; // Default to 10 items per page if not provided
+
 		const startDate0 = moment(dateStart, "MM-DD-YYYY").format("DD/MM/YYYY");
 		const endDate0 = moment(date, "MM-DD-YYYY").format("DD/MM/YYYY");
-		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+		const startDate = moment(startDate0, "DD/MM/YYYY").unix();
+		const endDate = moment(endDate0, "DD/MM/YYYY").unix();
+
 		let query;
 		if (id === '1') {
 			query = {
@@ -494,9 +514,9 @@ router.post("/getUPIReport", async (req, res) => {
 					$gte: startDate0,
 					$lte: endDate0,
 				}
-			}
+			};
 		} else {
-			let upiDetails = await UPI_list.findOne({ _id: id }, { UPI_ID: 1 })
+			let upiDetails = await UPI_list.findOne({ _id: id }, { UPI_ID: 1 });
 			query = {
 				particular: "UPI",
 				reqType: "Credit",
@@ -505,19 +525,21 @@ router.post("/getUPIReport", async (req, res) => {
 					$lte: endDate0,
 				},
 				upiId: upiDetails.UPI_ID,
-			}
+			};
 		}
+
 		let creditAmountDetails = await history.find(query);
-		// let creditAmountDetails = await upi_entries.find(query)
-		let newArra = [];
+		let newArray = [];
+
 		if (creditAmountDetails.length !== 0) {
 			creditAmountDetails.sort((a, b) => {
 				let timeA = moment(a.reqDate, 'hh:mm:ss A');
 				let timeB = moment(b.reqDate, 'hh:mm:ss A');
 				return timeA - timeB;
 			});
+
 			for (let details of creditAmountDetails) {
-				newArra.push({
+				newArray.push({
 					_id: details._id,
 					username: details.username,
 					mobile: details.mobile,
@@ -528,27 +550,37 @@ router.post("/getUPIReport", async (req, res) => {
 					upi_name: details.upiId,
 					upi_app_name: "googlepay",
 					reqStatus: details?.transaction_status
-				})
+				});
 			}
 		}
-		let finalArray = []
-		if (newArra.length > 0) {
-			finalArray = newArra.sort((a, b) => {
+
+		// Pagination
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+		const paginatedData = newArray.slice(startIndex, endIndex);
+
+		// Sort the paginated data if necessary
+		let finalArray = [];
+		if (paginatedData.length > 0) {
+			finalArray = paginatedData.sort((a, b) => {
 				const timeA = moment(`${a.reqDate} ${a.reqTime}`, "DD/MM/YYYY hh:mm:ss A");
 				const timeB = moment(`${b.reqDate} ${b.reqTime}`, "DD/MM/YYYY hh:mm:ss A");
 				return timeA - timeB;
 			});
 		}
+
 		return res.json({
 			status: 1,
 			message: "Success",
 			data: finalArray,
-			creditAmountDetails
+			totalItems: newArray.length,
+			totalPages: Math.ceil(newArray.length / limit),
+			currentPage: page,
 		});
 	} catch (error) {
 		res.json({
 			status: 0,
-			message: "Something Bad Happend Contact Support",
+			message: "Something Bad Happened, Contact Support",
 		});
 	}
 });
@@ -586,42 +618,42 @@ router.post("/getUPIReport", async (req, res) => {
 // });
 
 router.post("/trakReport", session, async (req, res) => {
-    try {
-        const date = req.body.edate;
-        const dateStart = req.body.sdate;
-        const startDate0 = moment(dateStart, "MM-DD-YYYY").format("DD/MM/YYYY");
-        const endDate0 = moment(date, "MM-DD-YYYY").format("DD/MM/YYYY");
-        var startDate = moment(startDate0, "DD/MM/YYYY").unix();
-        var endDate = moment(endDate0, "DD/MM/YYYY").unix();
-        query = {
-            timestamp: {
-                $gte: startDate,
-                $lte: endDate,
-            },
-            particular: 'razorpay'
-        };
-        let creditAmountDetails = await history.find(query);
-        let newArra = [];
-        for (let details of creditAmountDetails) {
-            newArra.push({
-                username:details.username,
-                mobile:details.mobile,
-                reqAmount:details.transaction_amount,
-                reqDate:details.transaction_date,
-                transaction_id:details.transaction_id,
-            })
-        }
-        res.json({
-            status: 1,
-            message: "Success",
-            data: newArra,
-        });
-    } catch (error) {
-        res.json({
-            status: 0,
-            message: "Something Bad Happend Contact Support",
-        });
-    }
+	try {
+		const date = req.body.edate;
+		const dateStart = req.body.sdate;
+		const startDate0 = moment(dateStart, "MM-DD-YYYY").format("DD/MM/YYYY");
+		const endDate0 = moment(date, "MM-DD-YYYY").format("DD/MM/YYYY");
+		var startDate = moment(startDate0, "DD/MM/YYYY").unix();
+		var endDate = moment(endDate0, "DD/MM/YYYY").unix();
+		query = {
+			timestamp: {
+				$gte: startDate,
+				$lte: endDate,
+			},
+			particular: 'razorpay'
+		};
+		let creditAmountDetails = await history.find(query);
+		let newArra = [];
+		for (let details of creditAmountDetails) {
+			newArra.push({
+				username: details.username,
+				mobile: details.mobile,
+				reqAmount: details.transaction_amount,
+				reqDate: details.transaction_date,
+				transaction_id: details.transaction_id,
+			})
+		}
+		res.json({
+			status: 1,
+			message: "Success",
+			data: newArra,
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			message: "Something Bad Happend Contact Support",
+		});
+	}
 });
 
 router.post("/razorpayReport", session, async (req, res) => {
@@ -639,7 +671,7 @@ router.post("/razorpayReport", session, async (req, res) => {
 				$lte: endDate,
 			},
 			reqStatus: 0,
-			mode:'razorpay'
+			mode: 'razorpay'
 
 		};
 
