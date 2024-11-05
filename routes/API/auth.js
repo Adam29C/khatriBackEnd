@@ -68,6 +68,68 @@ const chatDomain = process.env.CHAT_DOMAIN;
 // 	);
 // })
 
+router.post("/userExistOtpVerifyDevice", async (req, res) => {
+	try {
+		const { mobileNumber, otp, deviceId } = req.body;
+		if (!mobileNumber || !otp || !deviceId) {
+			return res.status(400).json({
+				status: 0,
+				message: "Mobile number, OTP, and device ID are required.",
+			});
+		}
+
+		let userDetails = await initialInfo.findOne({ mobileNumber });
+		if (!userDetails) {
+			return res.status(400).json({
+				status: 0,
+				message: "User details not found.",
+			});
+		}
+
+		let newTimestamp = moment(userDetails.forgotOtpTime).add(2, 'minutes').valueOf();
+		let currentTime = Date.now();
+		if (currentTime > newTimestamp) {
+			return res.status(400).json({
+				status: 0,
+				message: "OTP has expired. Please try again.",
+			});
+		}
+
+		let userDetailsInfo = await User.findOne({ mobile: mobileNumber });
+		if (!userDetailsInfo) {
+			return res.status(400).json({
+				status: 0,
+				message: "User details not found.",
+			});
+		}
+		if (userDetails.Otp !== parseInt(otp)) {
+			return res.status(400).json({
+				status: 0,
+				message: "Invalid OTP. Please try again.",
+			});
+		}
+		await User.updateOne({ mobile: mobileNumber }, { $set: { deviceId } });
+		const token = jwt.sign(
+			{
+				key: User.deviceId,
+				deviceId
+			},
+			process.env.jsonSecretToken
+		);
+		return res.status(200).send({
+			status: 1,
+			message: "OTP verified successfully.",
+			token: token
+		});
+	} catch (error) {
+		return res.status(400).json({
+			status: 0,
+			message: "Something bad happened. Please contact support.",
+			error: error.message,
+		});
+	}
+});
+
 router.post("/checkUsername", async (req, res) => {
 	try {
 		const { mobileNumber, otp, username } = req.body;
@@ -264,7 +326,6 @@ router.post("/register", async (req, res) => {
 		const OTP = req.body.deviceVeriOTP;
 		let otpData = { type: 'error' };
 		otpData['type'] = OTP === 1234 || OTP === '1234' ? 'success' : 'success';
-
 		if (otpData.type == "success") {
 			try {
 				let userMpin = req.body.mpin;
@@ -991,7 +1052,7 @@ async function otpSend(mobileNumber) {
 		// 	to: mobileNumber
 		// });
 		// let message = `Dear user,\n${generateOTP} is your OTP ( One time Password ) For Verification Valid For 5 Mins.\nRegards,\nKhatri555.com`;
-		let message= `Your one time verification code is ${generateOTP}. Verification code is valid for 30 min., We have never ask for verification code or pin.`
+		let message = `Your one time verification code is ${generateOTP}. Verification code is valid for 30 min., We have never ask for verification code or pin.`
 		const url = `https://sms.par-ken.com/api/smsapi?key=${account_key}&route=${route}&sender=${sender_id}&number=${mobileNumber}&sms=${message}&templateid=${template_id}`
 		const response = await axios.post(url);
 		console.log('SMS sent successfully:', response.data);
