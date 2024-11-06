@@ -258,11 +258,101 @@
             <tbody id="table-body"></tbody>
           </table>
 
-          <nav>
-            <ul class="pagination justify-content-end" id="pagination">
-              <!-- Pagination buttons will be generated here by JavaScript -->
-            </ul>
-          </nav>
+          <div class="d-flex justify-content-between">
+            <span class="d-flex align-items-center"
+              >Show
+              <select
+                class="custom-select form-control form-control-sm custom-select123"
+                aria-label="Default select example"
+                id="perPageData"
+                >
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              Entries</span
+            >
+
+            <nav>
+              <ul class="pagination justify-content-end" id="pagination">
+                <!-- Pagination buttons will be generated here by JavaScript -->
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cres -->
+
+<div
+  class="modal fade bs-example-modal-xl show"
+  id="exampleModalScrollable"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="myExtraLargeModalLabel"
+  aria-modal="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myExtraLargeModalLabel">
+          Transaction History12231
+        </h4>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-hidden="true"
+        >
+          ×
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive" data-pattern="priority-columns">
+          <table
+            id="historyTable1231"
+            class="table table-bordered dt-responsive nowrap text-center"
+          >
+            <thead>
+              <tr>
+                <th>sno</th>
+                <th>Previous Amount</th>
+                <th>Transaction Amount</th>
+                <th>Current Amount</th>
+                <th>Description</th>
+                <th>Transaction Date</th>
+                <th>Transaction Status</th>
+                <th>Added by</th>
+              </tr>
+            </thead>
+            <!-- <tbody id="historyData"></tbody> -->
+            <tbody id="table-body123"></tbody>
+          </table>
+
+          <div class="d-flex justify-content-between">
+            <span class="d-flex align-items-center"
+              >Show
+              <select
+                class="custom-select form-control form-control-sm custom-select123"
+                aria-label="Default select example"
+                id="perPageData123"
+              >
+                <option value="10" >10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              Entries</span
+            >
+
+            <nav>
+              <ul class="pagination justify-content-end" id="pagination">
+                <!-- Pagination buttons will be generated here by JavaScript -->
+              </ul>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
@@ -564,21 +654,16 @@
     $("#userid").val(id);
   }
 
- 
+  // ---------------------------------------------------------------  for Get Credit Customer History -------------------------
 
-
-  // ---------------------------------------------------------------  for Get History ----------------------------
- 
- 
-  var currentPage1 = 1;
-  let totalPages1 = 1;
+  var currentPage = 1;
   let rowsPerPage1 = 10;
+  let Data1 = [];
   var globalId = null;
   var globalUsername = null;
-  let Data1 = [];
 
   function displayTableData(page, rowsPerPage, data) {
-    const tableBody = document.getElementById("table-body");
+    const tableBody = document.getElementById("table-body123");
     tableBody.innerHTML = "";
 
     const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -594,7 +679,6 @@
       tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
       return;
     }
-
     paginatedData.forEach((row) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -656,32 +740,25 @@
     pagination.appendChild(nextButton);
   }
 
-  function getCred(id, username, page = 1) {
+  function getCred(id, username, page = 1, perpageData) {
     globalId = id;
     globalUsername = username;
     document.getElementById("myExtraLargeModalLabel").innerHTML =
       "Transaction History of : " + username;
 
-    // Show loading message
-    const tableBody = document.getElementById("table-body");
+    let d = perpageData || 10;
 
     $.ajax({
       type: "post",
       url: "/customerBalance/newCredit",
-      data: JSON.stringify({
-        page: page,
-        limit: rowsPerPage,
-        id: id,
-        search: "",
-      }),
+      data: JSON.stringify({ page: page, limit: d, id: id, search: "" }),
       contentType: "application/json",
       dataType: "json",
       success: function (data) {
         Data1 = data.data;
         totalPages = data.totalPages;
 
-        // Display the data and render pagination after data is loaded
-        displayTableData(page, rowsPerPage, Data1);
+        displayTableData(page, d, Data1);
         renderPagination(totalPages);
       },
       error: function (e) {
@@ -693,167 +770,324 @@
   function changePage(page) {
     if (page >= 1 && page <= totalPages) {
       currentPage = page;
-
-      // Call history to load the data for the selected page
-      history(globalId, globalUsername, currentPage);
+      getCred(globalId, globalUsername, currentPage, rowsPerPage1);
     }
   }
 
-  $(document).ready(function () {
-    $("#myExtraLargeModalLabel").on("hidden.bs.modal", function () {
-      location.reload(); // Reload the page
+  document
+    .getElementById("perPageData123")
+    .addEventListener("change", function () {
+      getPerPageCount(this.value);
     });
 
-    $(".modal").on("click", function (e) {
-      if ($(e.target).is(".modal")) {
-        location.reload();
-      }
-    });
-  });
+  function getPerPageCount(value) {
+
+    console.log("value" ,value);
+    
+    getCred(globalId, globalUsername, currentPage, parseInt(value || 10));
+  }
+
+  // const rowsPerPage1 = document.getElementById("rowPerPage").value;
+
+  // var currentPage1 = 1;
+  // let totalPages1 = 1;
+  // let rowsPerPage1 = perPageData;
+  // var globalId = null;
+  // var globalUsername = null;
+  // let Data1 = [];
+
+  // function displayTableData(page, rowsPerPage, data) {
+  //   const tableBody = document.getElementById("table-body");
+  //   tableBody.innerHTML = "";
+
+  //   const totalPages = Math.ceil(data.length / rowsPerPage);
+  //   if (page > totalPages) {
+  //     page = totalPages;
+  //   }
+
+  //   const start = (page - 1) * rowsPerPage;
+  //   const end = start + rowsPerPage;
+  //   const paginatedData = data.slice(start, end);
+
+  //   if (paginatedData.length === 0) {
+  //     tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
+  //     return;
+  //   }
+
+  //   paginatedData.forEach((row) => {
+  //     const tr = document.createElement("tr");
+  //     tr.innerHTML = `
+  //     <td>${row.sno}</td>
+  //     <td>${row.Previous_Amount}</td>
+  //     <td>${row.Transaction_Amount}</td>
+  //     <td>${row.Current_Amount}</td>
+  //     <td>${row.Description}</td>
+  //     <td>${row.Transaction_Date}</td>
+  //     <td>${row.Transaction_Status}</td>
+  //     <td>${row.Added_by}</td>`;
+  //     tableBody.appendChild(tr);
+  //   });
+  // }
+
+  // function renderPagination(totalPages) {
+  //   const pagination = document.getElementById("pagination");
+  //   pagination.innerHTML = "";
+
+  //   const prevButton = document.createElement("li");
+  //   prevButton.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+  //   prevButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+  //     currentPage - 1
+  //   })">Previous</a>`;
+  //   pagination.appendChild(prevButton);
+
+  //   const maxVisiblePages = 1;
+  //   let startPage = Math.max(1, currentPage - maxVisiblePages);
+  //   let endPage = Math.min(totalPages, currentPage + maxVisiblePages);
+
+  //   if (startPage > 1) {
+  //     pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
+  //     if (startPage > 2) {
+  //       pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  //     }
+  //   }
+
+  //   for (let i = startPage; i <= endPage; i++) {
+  //     const pageItem = document.createElement("li");
+  //     pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
+  //     pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+  //     pagination.appendChild(pageItem);
+  //   }
+
+  //   if (endPage < totalPages) {
+  //     if (endPage < totalPages - 1) {
+  //       pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  //     }
+  //     pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`;
+  //   }
+
+  //   const nextButton = document.createElement("li");
+  //   nextButton.className = `page-item ${
+  //     currentPage === totalPages ? "disabled" : ""
+  //   }`;
+  //   nextButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+  //     currentPage + 1
+  //   })">Next</a>`;
+  //   pagination.appendChild(nextButton);
+  // }
+
+  // function getCred(id, username, page = 1) {
+  //   globalId = id;
+  //   globalUsername = username;
+  //   document.getElementById("myExtraLargeModalLabel").innerHTML =
+  //     "Transaction History of : " + username;
+
+  //   // Show loading message
+  //   const tableBody = document.getElementById("table-body");
+
+  //   $.ajax({
+  //     type: "post",
+  //     url: "/customerBalance/newCredit",
+  //     data: JSON.stringify({
+  //       page: page,
+  //       limit: rowsPerPage,
+  //       id: id,
+  //       search: "",
+  //     }),
+  //     contentType: "application/json",
+  //     dataType: "json",
+  //     success: function (data) {
+  //       Data1 = data.data;
+  //       totalPages = data.totalPages;
+
+  //       // Display the data and render pagination after data is loaded
+  //       displayTableData(page, rowsPerPage, Data1);
+  //       renderPagination(totalPages);
+  //     },
+  //     error: function (e) {
+  //       alert("error: " + JSON.stringify(e));
+  //     },
+  //   });
+  // }
+
+
+
+  // function changePage(page) {
+  //   if (page >= 1 && page <= totalPages) {
+  //     currentPage = page;
+
+  //     // Call history to load the data for the selected page
+  //     history(globalId, globalUsername, currentPage);
+  //   }
+  // }
+
+  
+  // document
+  //   .getElementById("perPageData123")
+  //   .addEventListener("change", function () {
+  //     getPerPageCount(this.value);
+  //   });
+
+  // function getPerPageCount(value) {
+  //   getCred(globalId, globalUsername, currentPage, parseInt(value || 10));
+  // }
+
+
+  // $(document).ready(function () {
+  //   $("#myExtraLargeModalLabel").on("hidden.bs.modal", function () {
+  //     location.reload(); // Reload the page
+  //   });
+
+  //   $(".modal").on("click", function (e) {
+  //     if ($(e.target).is(".modal")) {
+  //       location.reload();
+  //     }
+  //   });
+  // });
+
+  // ---------------------------------------------------------------  for Get Credit Customer History ----------------------------
 
   // ---------------------------------------------------------------  for Get History ----------------------------
 
-  // ---------------------------------------------------------------  for Get History ----------------------------
-  var currentPage = 1;
-  let totalPages = 1;
-  let rowsPerPage = 10;
-  var globalId = null;
-  var globalUsername = null;
-  let Data = [];
+  // var currentPage = 1;
+  // let rowsPerPage = 10;
+  // let Data = [];
+  // var globalId = null;
+  // var globalUsername = null;
 
-  function displayTableData(page, rowsPerPage, data) {
-    const tableBody = document.getElementById("table-body");
-    tableBody.innerHTML = "";
+  // function displayTableData(page, rowsPerPage, data) {
+  //   const tableBody = document.getElementById("table-body");
+  //   tableBody.innerHTML = "";
 
-    const totalPages = Math.ceil(data.length / rowsPerPage);
-    if (page > totalPages) {
-      page = totalPages;
-    }
+  //   const totalPages = Math.ceil(data.length / rowsPerPage);
+  //   if (page > totalPages) {
+  //     page = totalPages;
+  //   }
 
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    const paginatedData = data.slice(start, end);
+  //   const start = (page - 1) * rowsPerPage;
+  //   const end = start + rowsPerPage;
+  //   const paginatedData = data.slice(start, end);
 
-    if (paginatedData.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
-      return;
-    }
+  //   if (paginatedData.length === 0) {
+  //     tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
+  //     return;
+  //   }
 
-    paginatedData.forEach((row) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-      <td>${row.sno}</td>
-      <td>${row.Previous_Amount}</td>
-      <td>${row.Transaction_Amount}</td>
-      <td>${row.Current_Amount}</td>
-      <td>${row.Description}</td>
-      <td>${row.Transaction_Date}</td>
-      <td>${row.Transaction_Status}</td>
-      <td>${row.Added_by}</td>`;
-      tableBody.appendChild(tr);
-    });
-  }
+  //   paginatedData.forEach((row) => {
+  //     const tr = document.createElement("tr");
+  //     tr.innerHTML = `
+  //     <td>${row.sno}</td>
+  //     <td>${row.Previous_Amount}</td>
+  //     <td>${row.Transaction_Amount}</td>
+  //     <td>${row.Current_Amount}</td>
+  //     <td>${row.Description}</td>
+  //     <td>${row.Transaction_Date}</td>
+  //     <td>${row.Transaction_Status}</td>
+  //     <td>${row.Added_by}</td>`;
+  //     tableBody.appendChild(tr);
+  //   });
+  // }
 
-  function renderPagination(totalPages) {
-    const pagination = document.getElementById("pagination");
-    pagination.innerHTML = "";
+  // function renderPagination(totalPages) {
+  //   const pagination = document.getElementById("pagination");
+  //   pagination.innerHTML = "";
 
-    const prevButton = document.createElement("li");
-    prevButton.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-    prevButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
-      currentPage - 1
-    })">Previous</a>`;
-    pagination.appendChild(prevButton);
+  //   const prevButton = document.createElement("li");
+  //   prevButton.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+  //   prevButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+  //     currentPage - 1
+  //   })">Previous</a>`;
+  //   pagination.appendChild(prevButton);
 
-    const maxVisiblePages = 1;
-    let startPage = Math.max(1, currentPage - maxVisiblePages);
-    let endPage = Math.min(totalPages, currentPage + maxVisiblePages);
+  //   const maxVisiblePages = 1;
+  //   let startPage = Math.max(1, currentPage - maxVisiblePages);
+  //   let endPage = Math.min(totalPages, currentPage + maxVisiblePages);
 
-    if (startPage > 1) {
-      pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
-      if (startPage > 2) {
-        pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-      }
-    }
+  //   if (startPage > 1) {
+  //     pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
+  //     if (startPage > 2) {
+  //       pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  //     }
+  //   }
 
-    for (let i = startPage; i <= endPage; i++) {
-      const pageItem = document.createElement("li");
-      pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
-      pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
-      pagination.appendChild(pageItem);
-    }
+  //   for (let i = startPage; i <= endPage; i++) {
+  //     const pageItem = document.createElement("li");
+  //     pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
+  //     pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+  //     pagination.appendChild(pageItem);
+  //   }
 
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-      }
-      pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`;
-    }
+  //   if (endPage < totalPages) {
+  //     if (endPage < totalPages - 1) {
+  //       pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  //     }
+  //     pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`;
+  //   }
 
-    const nextButton = document.createElement("li");
-    nextButton.className = `page-item ${
-      currentPage === totalPages ? "disabled" : ""
-    }`;
-    nextButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
-      currentPage + 1
-    })">Next</a>`;
-    pagination.appendChild(nextButton);
-  }
+  //   const nextButton = document.createElement("li");
+  //   nextButton.className = `page-item ${
+  //     currentPage === totalPages ? "disabled" : ""
+  //   }`;
+  //   nextButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+  //     currentPage + 1
+  //   })">Next</a>`;
+  //   pagination.appendChild(nextButton);
+  // }
 
-  function history(id, username, page = 1) {
-    globalId = id;
-    globalUsername = username;
-    document.getElementById("myExtraLargeModalLabel").innerHTML =
-      "Transaction History of : " + username;
+  // function history(id, username, page = 1, perpageData) {
+  //   globalId = id;
+  //   globalUsername = username;
+  //   document.getElementById("myExtraLargeModalLabel").innerHTML =
+  //     "Transaction History of : " + username;
 
-    // Show loading message
-    const tableBody = document.getElementById("table-body");
+  //   let d = perpageData || 10;
 
-    $.ajax({
-      type: "post",
-      url: "/customerBalance/newHistroy",
-      data: JSON.stringify({
-        page: page,
-        limit: rowsPerPage,
-        id: id,
-        search: "",
-      }),
-      contentType: "application/json",
-      dataType: "json",
-      success: function (data) {
-        Data = data.data;
-        totalPages = data.totalPages;
+  //   $.ajax({
+  //     type: "post",
+  //     url: "/customerBalance/newHistroy",
+  //     data: JSON.stringify({ page: page, limit: d, id: id, search: "" }),
+  //     contentType: "application/json",
+  //     dataType: "json",
+  //     success: function (data) {
+  //       Data = data.data;
+  //       totalPages = data.totalPages;
 
-        // Display the data and render pagination after data is loaded
-        displayTableData(page, rowsPerPage, Data);
-        renderPagination(totalPages);
-      },
-      error: function (e) {
-        alert("error: " + JSON.stringify(e));
-      },
-    });
-  }
+  //       displayTableData(page, d, Data);
+  //       renderPagination(totalPages);
+  //     },
+  //     error: function (e) {
+  //       alert("error: " + JSON.stringify(e));
+  //     },
+  //   });
+  // }
 
-  function changePage(page) {
-    if (page >= 1 && page <= totalPages) {
-      currentPage = page;
+  // function changePage(page) {
+  //   if (page >= 1 && page <= totalPages) {
+  //     currentPage = page;
+  //     history(globalId, globalUsername, currentPage, rowsPerPage);
+  //   }
+  // }
 
-      // Call history to load the data for the selected page
-      history(globalId, globalUsername, currentPage);
-    }
-  }
+  // document
+  //   .getElementById("perPageData")
+  //   .addEventListener("change", function () {
+  //     getPerPageCount(this.value);
+  //   });
 
-  $(document).ready(function () {
-    $("#exampleModalScrollable").on("hidden.bs.modal", function () {
-      location.reload(); // Reload the page
-    });
+  // function getPerPageCount(value) {
+  //   history(globalId, globalUsername, currentPage, parseInt(value || 10));
+  // }
 
-    $(".modal").on("click", function (e) {
-      if ($(e.target).is(".modal")) {
-        location.reload();
-      }
-    });
-  });
+  // $(document).ready(function () {
+  //   $("#exampleModalScrollable").on("hidden.bs.modal", function () {
+  //     location.reload(); // Reload the page
+  //   });
+
+  //   $(".modal").on("click", function (e) {
+  //     if ($(e.target).is(".modal")) {
+  //       location.reload();
+  //     }
+  //   });
+  // });
 
   // ---------------------------------------------------------------  for Get History ----------------------------
 
