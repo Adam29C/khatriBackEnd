@@ -375,7 +375,7 @@
             >
 
             <nav>
-              <ul class="pagination justify-content-end" id="pagination123">
+              <ul class="pagination justify-content-end" id="pagination">
                 <!-- Pagination buttons will be generated here by JavaScript -->
               </ul>
             </nav>
@@ -879,7 +879,7 @@
   }
 
   function renderPagination(totalPages) {
-    const pagination = document.getElementById("pagination123");
+    const pagination = document.getElementById("pagination");
     pagination.innerHTML = "";
 
     const prevButton = document.createElement("li");
@@ -965,9 +965,6 @@
     });
 
   function getPerPageCount1231(value) {
-
-    console.log("value" ,value);
-    
     getCred(globalId, globalUsername, currentPage, parseInt(value || 10));
   }
 
