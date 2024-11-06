@@ -571,7 +571,7 @@ router.post("/newHistroy", session, async (req, res) => {
 router.post("/newCredit", session, async (req, res) => {
 	try {
 		const page = parseInt(req.body.page) || 1;
-		const limit = parseInt(req.body.length) || 10;
+		const limit = parseInt(req.body.limit) || 10;
 		const skip = (page - 1) * limit;
 
 		const id = req.body.id;
