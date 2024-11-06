@@ -274,87 +274,11 @@
               Entries</span
             >
 
-            <nav>
-              <ul class="pagination justify-content-end" id="pagination">
-                <!-- Pagination buttons will be generated here by JavaScript -->
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Cres -->
-
-<div
-  class="modal fade bs-example-modal-xl-123 show"
-  id="exampleModalScrollable"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="myExtraLargeModalLabel"
-  aria-modal="true"
->
-  <div class="modal-dialog modal-dialog-scrollable modal-xl">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="myExtraLargeModalLabel">
-          Transaction History12231
-        </h4>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-hidden="true"
-        >
-          ×
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="table-responsive" data-pattern="priority-columns">
-          <table
-            id="historyTable1231"
-            class="table table-bordered dt-responsive nowrap text-center"
-          >
-            <thead>
-              <tr>
-                <th>sno</th>
-                <th>Previous Amount</th>
-                <th>Transaction Amount</th>
-                <th>Current Amount</th>
-                <th>Description</th>
-                <th>Transaction Date</th>
-                <th>Transaction Status</th>
-                <th>Added by</th>
-              </tr>
-            </thead>
-
-            <tbody id="table-body123"></tbody>
-          </table>
-
-          <div class="d-flex justify-content-between">
-            <span class="d-flex align-items-center"
-              >Show
-              <select
-                class="custom-select form-control form-control-sm custom-select123"
-                aria-label="Default select example"
-                id="perPageData123"
-              >
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-              </select>
-              Entries</span
-            >
-
-            <nav>
-              <ul
-                class="pagination justify-content-end"
-                id="pagination123"
-              ></ul>
-            </nav>
-          </div>
+          <nav>
+            <ul class="pagination justify-content-end" id="pagination">
+              <!-- Pagination buttons will be generated here by JavaScript -->
+            </ul>
+          </nav>
         </div>
       </div>
     </div>
@@ -660,12 +584,12 @@
 
   var currentPage = 1;
   let rowsPerPage1 = 10;
+  var globalId = null;
+  var globalUsername = null;
   let Data1 = [];
-  // var globalId = null;
-  // var globalUsername = null;
 
-  function displayTableData123(page, rowsPerPage, data) {
-    const tableBody = document.getElementById("table-body123");
+  function displayTableData(page, rowsPerPage, data) {
+    const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = "";
 
     const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -760,8 +684,9 @@
         Data1 = data.data;
         totalPages = data.totalPages;
 
-        displayTableData123(page, d, Data1);
-        renderPagination123(totalPages);
+        // Display the data and render pagination after data is loaded
+        displayTableData(page, rowsPerPage, Data1);
+        renderPagination(totalPages);
       },
       error: function (e) {
         alert("error: " + JSON.stringify(e));
@@ -772,19 +697,23 @@
   function changePage123(page) {
     if (page >= 1 && page <= totalPages) {
       currentPage = page;
-      getCred(globalId, globalUsername, currentPage, rowsPerPage1);
+
+      // Call history to load the data for the selected page
+      history(globalId, globalUsername, currentPage);
     }
   }
 
-  document
-    .getElementById("perPageData123")
-    .addEventListener("change", function () {
-      getPerPageCount123(this.value);
+  $(document).ready(function () {
+    $("#myExtraLargeModalLabel").on("hidden.bs.modal", function () {
+      location.reload(); // Reload the page
     });
 
-  function getPerPageCount123(value) {
-    getCred(globalId, globalUsername, currentPage, parseInt(value || 10));
-  }
+    $(".modal").on("click", function (e) {
+      if ($(e.target).is(".modal")) {
+        location.reload();
+      }
+    });
+  });
 
   // ---------------------------------------------------------------  for Get Credit Customer History ----------------------------
 
