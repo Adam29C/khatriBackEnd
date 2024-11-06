@@ -131,7 +131,7 @@
               <ul class="pagination justify-content-end" id="pagination"></ul>
             </nav>
 
-            <!-- <h3 id="totalAmt"></h3> -->
+            <h3 id="totalAmt"></h3>
           </div>
         </div>
       </div>
@@ -382,6 +382,7 @@
         success: function (data) {
           Data = data.data;
           totalPages = data.totalPages;
+              $("#totalAmt").html("Total Amount : " + data.totalAmount + "/-");
 
           // Display the data and render pagination after data is loaded
           displayTableData(page, rowsPerPage, Data);
