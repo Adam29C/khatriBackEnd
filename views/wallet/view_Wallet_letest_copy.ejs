@@ -212,40 +212,10 @@
   </div>
 </div>
 
-<!-- ------------  test ganpat  -->
-
-<div
-  id="custom-modal-edit"
-  class="modal fade"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="exampleModalScrollableTitle"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-dialog-scrollable123" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="exampleModalScrollableTitle">ganpat</h4>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ------------  test ganpat  -->
-
 <!--history modal-->
 <div
   class="modal fade bs-example-modal-xl show"
-  id="exampleModalScrollable1123"
+  id="exampleModalScrollable1"
   tabindex="-1"
   role="dialog"
   aria-labelledby="myExtraLargeModalLabel"
@@ -284,6 +254,7 @@
                 <th>Added by</th>
               </tr>
             </thead>
+            <!-- <tbody id="historyData"></tbody> -->
             <tbody id="table-body"></tbody>
           </table>
 
@@ -303,7 +274,9 @@
             >
 
             <nav>
-              <ul class="pagination justify-content-end" id="pagination"></ul>
+              <ul class="pagination justify-content-end" id="pagination">
+                <!-- Pagination buttons will be generated here by JavaScript -->
+              </ul>
             </nav>
           </div>
         </div>
@@ -315,8 +288,8 @@
 <!-- Cres -->
 
 <div
-  class="modal fade bs-example-modal-xl-123 show"
-  id="exampleModalScrollable123"
+  class="modal fade bs-example-modal-xl show"
+  id="exampleModalScrollable"
   tabindex="-1"
   role="dialog"
   aria-labelledby="myExtraLargeModalLabel1234"
@@ -375,7 +348,7 @@
             >
 
             <nav>
-              <ul class="pagination justify-content-end" id="pagination123">
+              <ul class="pagination justify-content-end" id="pagination">
                 <!-- Pagination buttons will be generated here by JavaScript -->
               </ul>
             </nav>
@@ -385,9 +358,6 @@
     </div>
   </div>
 </div>
-
-<!-- ------------  test ganpat 
-  -->
 
 <!--fund req modal-->
 <div
@@ -846,7 +816,7 @@
   var globalUsername = null;
 
   function displayTableData(page, rowsPerPage, data) {
-    const tableBody = document.getElementById("table-body123");
+    const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = "";
 
     const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -879,7 +849,7 @@
   }
 
   function renderPagination(totalPages) {
-    const pagination = document.getElementById("pagination123");
+    const pagination = document.getElementById("pagination");
     pagination.innerHTML = "";
 
     const prevButton = document.createElement("li");
@@ -965,9 +935,6 @@
     });
 
   function getPerPageCount1231(value) {
-
-    console.log("value" ,value);
-    
     getCred(globalId, globalUsername, currentPage, parseInt(value || 10));
   }
 
