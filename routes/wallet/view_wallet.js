@@ -127,7 +127,7 @@ router.post("/user_ajax", session, async (req, res) => {
 							">" +
 							dataTab[index].wallet_bal_updated_at +
 							"</span>",
-						creditDebit: '<button class="btn btn-dark waves-effect waves-light btn-xs" data-toggle="modal" data-target=".bs-example-modal-xl" onclick="getCred(' +
+						creditDebit: '<button class="btn btn-dark waves-effect waves-light btn-xs" data-toggle="modal" data-target=".bs-example-modal-xl-123" onclick="getCred(' +
 							id +
 							", " +
 							username1 +
