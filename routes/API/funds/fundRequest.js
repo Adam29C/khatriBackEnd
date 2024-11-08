@@ -15,6 +15,7 @@ const upiIds = require("../../../model/upi_ids");
 const moment = require("moment");
 const dateTime = require("node-datetime");
 const Users = require("../../../model/API/Users");
+const onlineUpiPayment = require("../../../model/onlineUpiPayment")
 
 router.get("/", (req, res) => {
 	res.json({ status: 0, message: "Access Denied" });
@@ -1044,6 +1045,31 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 				});
 				await wallet_his.save();
 
+				const online_Payment = new onlineUpiPayment({
+					userId: userId,
+					bidId: saveId._id,
+					filterType: 4,
+					previous_amount: userBalance,
+					current_amount: updatedBal,
+					transaction_amount: amount,
+					description:
+						amount +
+						"/- Added To Wallet By UPI, Transaction Id : " +
+						transaction_id,
+					transaction_date: dateUpdate,
+					transaction_time: time,
+					transaction_status: "Success",
+					particular: "UPI",
+					reqType: "Credit",
+					username: username,
+					mobile: mobile,
+					addedBy_name: "Auto/Self",
+					upiId: upi_name,
+					timestamp: moment().startOf('day').valueOf(),
+					transaction_id,
+				});
+				await online_Payment.save();
+
 				let userToken = [];
 				userToken.push(firebaseToken);
 				let title = "Your Credit Request Of Rs. " + amount + " is Approved";
@@ -1091,7 +1117,7 @@ router.post("/completeAutoPayment", async (req, res) => {
 	try {
 		return res.json({
 			status: 1,
-			message:"Success",
+			message: "Success",
 		});
 	} catch (error) {
 		res.json({
