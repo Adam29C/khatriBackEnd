@@ -969,7 +969,6 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 
 			let updatedBal = userBalance + amount;
 
-
 			const insertPayment = new upi({
 				userId: userId,
 				fullname: fullName,
