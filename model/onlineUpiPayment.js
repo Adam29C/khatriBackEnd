@@ -88,7 +88,7 @@ const onlineUpiPaymentSchema = new mongoose.Schema({
         required: false
     },
     transaction_id: {
-        type: Number,
+        type: String,
         required: false
     }
 },
