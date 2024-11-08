@@ -1,4 +1,4 @@
-const router = require("express").Router();
+const                                                                                                                                                                                                                                                                                                                                                                                                                                                              router = require("express").Router();
 const bank = require("../../model/bank");
 const userInfo = require("../../model/API/Users");
 const fundReport = require("../../model/API/FundRequest");
@@ -301,6 +301,31 @@ router.get("/upiReport", session, permission, async (req, res) => {
 	}
 });
 
+
+router.get("/new_upi_list", session, permission, async (req, res) => {
+	try {
+		const upiList = await UPI_list.find();
+		const userInfo = req.session.details;
+		const permissionArray = req.view;
+		const check = permissionArray["fundReport"].showStatus;
+		if (check === 1) {
+			res.render("./reports/new_upi_list", {
+				userInfo: userInfo,
+				permission: permissionArray,
+				upiList: upiList,
+				title: "UPI Report",
+			});
+		} else {
+			res.render("./dashboard/starterPage", {
+				userInfo: userInfo,
+				permission: permissionArray,
+				title: "Dashboard",
+			});
+		}
+	} catch (error) {
+		res.json(error);
+	}
+});
 router.get("/trakpay", session, permission, async (req, res) => {
 	try {
 		const userInfo = req.session.details;
