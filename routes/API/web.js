@@ -61,10 +61,9 @@ router.get("/web/allgames", async (req, res) => {
       const timeB = moment(b.OBT, 'hh:mm A');
       return timeA - timeB;
     });
-    // res.json({ data: providersWithOBT});
-    res.send({ data: providersWithOBT});
+    return res.send({ data: providersWithOBT });
   } catch (e) {
-    res.json({ message: e.message });
+    return res.json({ message: e.message });
   }
 });
 
@@ -114,14 +113,14 @@ router.get("/web/allgames", async (req, res) => {
 //       const todayDayName = moment().format("dddd");
 //       const providers = await gamesProvider.find({}).sort({ _id: 1 });
 //       const nowTime = moment();
-  
+
 //       const finalArr = await Promise.all(
 //         providers.map(async (provider) => {
 //           const id = mongoose.Types.ObjectId(provider._id);
 //           const settings = await gamesSetting
 //             .find({ providerId: id, gameDay: todayDayName })
 //             .sort({ _id: 1 });
-  
+
 //           const updatedSettings = settings.map((gameDetail) => {
 //             const obtTime = moment(gameDetail.OBT, "hh:mm A");
 //             const cbtTime = moment(gameDetail.CBT, "hh:mm A");
@@ -211,13 +210,13 @@ router.get("/web/games", async (req, res) => {
     const parseTime = (timeStr) => {
       const [time, modifier] = timeStr.split(' ');
       let [hours, minutes] = time.split(':').map(Number);
-      
+
       if (modifier === 'PM' && hours !== 12) hours += 12;
       if (modifier === 'AM' && hours === 12) hours = 0;
-    
+
       return new Date(0, 0, 0, hours, minutes);
     };
-    
+
     finalArr.sort((a, b) => {
       const timeA = parseTime(a.gameDetails[0].OBT);
       const timeB = parseTime(b.gameDetails[0].OBT);
@@ -236,118 +235,219 @@ router.get("/web/games", async (req, res) => {
   }
 });
 
+// router.get("/web/startline", async (req, res) => {
+//   try {
+//     let finalArr = {};
+//     const provider1 = await starProvider.find().sort({ providerName: 1 }); // Sort by providerName field
+//     const todayDayName = moment().format("dddd");
+//     for (let index in provider1) {
+//       let id = provider1[index]._id;
+//       const settings = await starSettings
+//         .find({ providerId: id, gameDay: todayDayName })
+//         .sort({ _id: 1 });
+//        const currentTime = moment();
+//        const updatedSettings = settings.map((setting) => {
+//         const obt = moment(setting.OBT, "HH:mm A");
+//         const cbt = moment(setting.CBT, "HH:mm A");
+//         let message;
+//         if (currentTime.isBetween(obt, cbt) && setting.isClosed === "1") {
+//           message = "Betting is running";
+//         } else {
+//           message = "Close for today";
+//         }
+
+//         return {
+//           ...setting.toObject(), // Convert to plain object if setting is a mongoose document
+//           message: message,
+//         };
+//       });
+
+//       finalArr[id] = {
+//         _id: id,
+//         providerName: provider1[index].providerName,
+//         providerResult: provider1[index].providerResult,
+//         modifiedAt: provider1[index].modifiedAt,
+//         resultStatus: provider1[index].resultStatus,
+//         gameDetails: updatedSettings,
+//       };
+//     }
+
+//     let finalNew = Object.values(finalArr); // Convert object values to array
+//     let appVersionInfo = await AppVersion.findOne();
+//     let appInfo;
+//     if (!appVersionInfo.maintainence) {
+//       appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
+//     } else {
+//       appInfo = "Maintenance";
+//     }
+//     res.send({ data: finalNew, status: true, appInfo });
+//   } catch (e) {
+//     res.json({ message: e.message });
+//   }
+// });
+
 router.get("/web/startline", async (req, res) => {
   try {
-    let finalArr = {};
-    const provider1 = await starProvider.find().sort({ providerName: 1 }); // Sort by providerName field
     const todayDayName = moment().format("dddd");
-    for (let index in provider1) {
-      let id = provider1[index]._id;
-      const settings = await starSettings
-        .find({ providerId: id, gameDay: todayDayName })
-        .sort({ _id: 1 });
-       const currentTime = moment();
-       const updatedSettings = settings.map((setting) => {
-        const obt = moment(setting.OBT, "HH:mm A");
-        const cbt = moment(setting.CBT, "HH:mm A");
-        let message;
-        if (currentTime.isBetween(obt, cbt) && setting.isClosed === "1") {
-          message = "Betting is running";
-        } else {
-          message = "Close for today";
-        }
+    const currentTime = moment();
 
-        return {
-          ...setting.toObject(), // Convert to plain object if setting is a mongoose document
-          message: message,
-        };
-      });
+    const providers = await starProvider.find().sort({ providerName: 1 });
+    const providerIds = providers.map(provider => provider._id);
 
-      finalArr[id] = {
-        _id: id,
-        providerName: provider1[index].providerName,
-        providerResult: provider1[index].providerResult,
-        modifiedAt: provider1[index].modifiedAt,
-        resultStatus: provider1[index].resultStatus,
-        gameDetails: updatedSettings,
-      };
-    }
+    const settings = await starSettings
+      .find({ providerId: { $in: providerIds }, gameDay: todayDayName })
+      .sort({ _id: 1 });
 
-    let finalNew = Object.values(finalArr); // Convert object values to array
-    let appVersionInfo = await AppVersion.findOne();
-    let appInfo;
-    if (!appVersionInfo.maintainence) {
-      appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
-    } else {
-      appInfo = "Maintenance";
-    }
-    res.send({ data: finalNew, status: true, appInfo });
+    const settingsByProviderId = settings.reduce((acc, setting) => {
+      const obt = moment(setting.OBT, "HH:mm A");
+      const cbt = moment(setting.CBT, "HH:mm A");
+      let message = (currentTime.isBetween(obt, cbt) && setting.isClosed === "1")
+        ? "Betting is running"
+        : "Close for today";
+
+      const settingWithMessage = { ...setting.toObject(), message };
+      acc[setting.providerId] = acc[setting.providerId] || [];
+      acc[setting.providerId].push(settingWithMessage);
+      return acc;
+    }, {});
+
+    const finalArr = providers.map(provider => ({
+      _id: provider._id,
+      providerName: provider.providerName,
+      providerResult: provider.providerResult,
+      modifiedAt: provider.modifiedAt,
+      resultStatus: provider.resultStatus,
+      gameDetails: settingsByProviderId[provider._id] || []
+    }));
+
+    const appVersionInfo = await AppVersion.findOne();
+    const appInfo = !appVersionInfo.maintainence
+      ? `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`
+      : "Maintenance";
+
+    return res.send({ data: finalArr, status: true, appInfo });
+
   } catch (e) {
-    res.json({ message: e.message });
+    return res.json({ message: e.message });
   }
 });
 
+// router.get("/web/AbList", async (req, res) => {
+//   try {
+//     let finalArr = {};
+//     let provider1 = await AB_provider.find();
+//     //
+//     const providerData = provider1.sort((a, b) => {
+//       // Function to convert time in "HH:MM AM/PM" format to 24-hour format in minutes
+//       const toMinutes = (time) => {
+//         const [timePart, modifier] = time.split(' ');
+//         let [hours, minutes] = timePart.split(':').map(Number);
+//         // Convert to 24-hour format
+//         if (modifier === 'PM' && hours !== 12) hours += 12;
+//         if (modifier === 'AM' && hours === 12) hours = 0;
+//         return hours * 60 + minutes;
+//       };
+
+//       return toMinutes(a.providerName) - toMinutes(b.providerName);
+//     });
+//     //
+//     const todayDayName = moment().format("dddd");
+//     for (let AbDetails of providerData) {
+//       let id = AbDetails._id;
+//       const settings = await AbGame.find({
+//         providerId: AbDetails._id,
+//         gameDay: todayDayName,
+//       }).sort({ _id: 1 });
+//       const currentTime = moment();
+//       const updatedSettings = settings.map((setting) => {
+//         const obt = moment(setting.OBT, "HH:mm A");
+//         const cbt = moment(setting.CBT, "HH:mm A");
+//         let message;
+//         if (currentTime.isBetween(obt, cbt) && setting.isClosed === "1") {
+//           message = "Betting is running";
+//         } else {
+//           message = "Close for today";
+//         }
+
+//         return {
+//           ...setting.toObject(), // Convert to plain object if setting is a mongoose document
+//           message: message,
+//         };
+//       });
+//       finalArr[id] = {
+//         _id: id,
+//         providerName: AbDetails.providerName,
+//         providerResult: AbDetails.providerResult,
+//         modifiedAt: AbDetails.modifiedAt,
+//         resultStatus: AbDetails.resultStatus,
+//         gameDetails: updatedSettings,
+//       };
+//     }
+
+//     let finalNew = Object.values(finalArr); // Convert object values to array
+//     let appVersionInfo = await AppVersion.findOne();
+//     let appInfo;
+//     if (!appVersionInfo.maintainence) {
+//       appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
+//     } else {
+//       appInfo = "Maintenance";
+//     }
+//     res.send({ data: finalNew, status: true, appInfo });
+//   } catch (e) {
+//     res.json({ message: e.message });
+//   }
+// });
+
 router.get("/web/AbList", async (req, res) => {
   try {
-    let finalArr = {};
-    let provider1 = await AB_provider.find();
-    //
-    const providerData = provider1.sort((a, b) => {
-      // Function to convert time in "HH:MM AM/PM" format to 24-hour format in minutes
-      const toMinutes = (time) => {
-        const [timePart, modifier] = time.split(' ');
-        let [hours, minutes] = timePart.split(':').map(Number);
-        // Convert to 24-hour format
-        if (modifier === 'PM' && hours !== 12) hours += 12;
-        if (modifier === 'AM' && hours === 12) hours = 0;
-        return hours * 60 + minutes;
-      };
-
-      return toMinutes(a.providerName) - toMinutes(b.providerName);
-    });
-    //
     const todayDayName = moment().format("dddd");
-    for (let AbDetails of providerData) {
-      let id = AbDetails._id;
-      const settings = await AbGame.find({
-        providerId: AbDetails._id,
-        gameDay: todayDayName,
-      }).sort({ _id: 1 });
-      const currentTime = moment();
-      const updatedSettings = settings.map((setting) => {
-        const obt = moment(setting.OBT, "HH:mm A");
-        const cbt = moment(setting.CBT, "HH:mm A");
-        let message;
-        if (currentTime.isBetween(obt, cbt) && setting.isClosed === "1") {
-          message = "Betting is running";
-        } else {
-          message = "Close for today";
-        }
+    const currentTime = moment();
 
-        return {
-          ...setting.toObject(), // Convert to plain object if setting is a mongoose document
-          message: message,
-        };
-      });
-      finalArr[id] = {
-        _id: id,
-        providerName: AbDetails.providerName,
-        providerResult: AbDetails.providerResult,
-        modifiedAt: AbDetails.modifiedAt,
-        resultStatus: AbDetails.resultStatus,
-        gameDetails: updatedSettings,
-      };
-    }
+    // Fetch providers and sort by providerName as needed
+    let providers = await AB_provider.find().sort({ providerName: 1 });
 
-    let finalNew = Object.values(finalArr); // Convert object values to array
-    let appVersionInfo = await AppVersion.findOne();
-    let appInfo;
-    if (!appVersionInfo.maintainence) {
-      appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
-    } else {
-      appInfo = "Maintenance";
-    }
-    res.send({ data: finalNew, status: true, appInfo });
+    // Extract provider IDs for batch query in AbGame
+    const providerIds = providers.map(provider => provider._id);
+
+    // Fetch all settings for these providers at once
+    const settings = await AbGame
+      .find({ providerId: { $in: providerIds }, gameDay: todayDayName })
+      .sort({ _id: 1 });
+
+    // Group settings by providerId for efficient access
+    const settingsByProviderId = settings.reduce((acc, setting) => {
+      const obt = moment(setting.OBT, "HH:mm A");
+      const cbt = moment(setting.CBT, "HH:mm A");
+      const message = (currentTime.isBetween(obt, cbt) && setting.isClosed === "1")
+        ? "Betting is running"
+        : "Close for today";
+
+      // Convert setting to object and add message
+      const settingWithMessage = { ...setting.toObject(), message };
+      acc[setting.providerId] = acc[setting.providerId] || [];
+      acc[setting.providerId].push(settingWithMessage);
+      return acc;
+    }, {});
+
+    // Build the response array with relevant data and grouped settings
+    const finalArr = providers.map(provider => ({
+      _id: provider._id,
+      providerName: provider.providerName,
+      providerResult: provider.providerResult,
+      modifiedAt: provider.modifiedAt,
+      resultStatus: provider.resultStatus,
+      gameDetails: settingsByProviderId[provider._id] || []
+    }));
+
+    // Fetch app version info and check maintenance status
+    const appVersionInfo = await AppVersion.findOne();
+    const appInfo = !appVersionInfo.maintainence
+      ? `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`
+      : "Maintenance";
+
+    // Send response
+    res.send({ data: finalArr, status: true, appInfo });
+
   } catch (e) {
     res.json({ message: e.message });
   }
@@ -2066,7 +2166,7 @@ router.get("/web/startline_pana_chart/all", async (req, res) => {
 
     function sortByTime(a, b) {
       const timeA = new Date('1970/01/01 ' + a.providerName);
-      const timeB = new Date('1970/01/01 ' + b.providerName); 
+      const timeB = new Date('1970/01/01 ' + b.providerName);
       return timeA - timeB;
     }
 
@@ -2089,7 +2189,7 @@ router.get("/web/startline_pana_chart/all", async (req, res) => {
             providerName: item.providerName,
             resultDate: item.resultDate,
             winningDigit: item.winningDigit || "***",
-            winningDigitFamily:item.winningDigitFamily === 0 ? 0 : item.winningDigitFamily || "*",
+            winningDigitFamily: item.winningDigitFamily === 0 ? 0 : item.winningDigitFamily || "*",
             status: item.status || "0",
           }))
       })
@@ -2097,7 +2197,7 @@ router.get("/web/startline_pana_chart/all", async (req, res) => {
 
     res.send({ data: formattedData, status: true });
   } catch (e) {
-    res.json({  
+    res.json({
       status: 0,
       message: e.message,
     });
@@ -2121,7 +2221,7 @@ router.get("/web/jackpot_jodi_chart/all", async (req, res) => {
       let [hours, minutes] = time.split(":").map(Number);
       if (period === "PM" && hours !== 12) hours += 12;
       if (period === "AM" && hours === 12) hours = 0;
-      return hours * 60 + minutes; 
+      return hours * 60 + minutes;
     };
 
     const formattedData = Object.entries(groupedDataByDate).map(
