@@ -127,7 +127,7 @@ router.post("/user_ajax", session, async (req, res) => {
 							">" +
 							dataTab[index].wallet_bal_updated_at +
 							"</span>",
-						creditDebit: '<button class="btn btn-dark waves-effect waves-light btn-xs" data-toggle="modal" data-target=".bs-example-modal-xl-123" onclick="getCred(' +
+						creditDebit: '<button class="btn btn-dark waves-effect waves-light btn-xs" data-toggle="modal" data-target=".bs-example-modal-xl" onclick="getCred(' +
 							id +
 							", " +
 							username1 +
@@ -404,222 +404,123 @@ router.post("/getHistory", session, async (req, res) => {
 		});
 	}
 });
-//old api 
-// router.post("/newHistroy", session, async (req, res) => {
-// 	try {
-// 		let i = parseInt(req.body.start) + 1;
-// 		const id = req.body.id;
-// 		wallet_history
-// 			.dataTables({
-// 				find: { userId: id },
-// 				limit: req.body.length,
-// 				skip: req.body.start,
-// 				columns: req.body.columns,
-// 				search: {
-// 					value: req.body.search.value,
-// 					fields: ["username", "name", "mobile"],
-// 				},
-// 				sort: { _id: -1 },
-// 			})
-// 			.then(function (table) {
-// 				let dataTab = table.data;
-// 				let tabelArray = [];
-// 				for (index in dataTab) {
-// 					let addBy = dataTab[index].addedBy_name;
-// 					if (addBy == undefined) {
-// 						addBy = "Auto";
-// 					}
 
-// 					let dataJson = {
-// 						sno: i,
-// 						Previous_Amount: dataTab[index].previous_amount,
-// 						Transaction_Amount: dataTab[index].transaction_amount,
-// 						Current_Amount: dataTab[index].current_amount,
-// 						Description: dataTab[index].description,
-// 						Transaction_Date:
-// 							dataTab[index].transaction_date +
-// 							" " +
-// 							dataTab[index].transaction_time,
-// 						Transaction_Status: dataTab[index].transaction_status,
-// 						Added_by: addBy,
-// 					};
-// 					tabelArray.push(dataJson);
-// 					i++;
-// 				}
-
-// 				res.json({
-// 					data: tabelArray,
-// 					recordsFiltered: table.total,
-// 					recordsTotal: table.total,
-// 				});
-// 			})
-// 			.catch(function (error) {
-// 				res.json({
-// 					status: 0,
-// 					message: "Request To Large",
-// 				});
-// 			});
-// 	} catch (error) {
-// 		console.log(error);
-// 	}
-// });
-
-// new api
 router.post("/newHistroy", session, async (req, res) => {
 	try {
-		const { page = 1, limit = 10, id, search } = req.body;
-		const skip = (page - 1) * limit;
-		const table = await wallet_history.dataTables({
-			find: { userId: id },
-			limit: parseInt(limit),
-			skip: parseInt(skip),
-			columns: req.body.columns,
-			search: {
-				value: search.value,
-				fields: ["username", "name", "mobile"],
-			},
-			sort: { _id: -1 },
-		});
+		let i = parseInt(req.body.start) + 1;
+		const id = req.body.id;
+		wallet_history
+			.dataTables({
+				find: { userId: id },
+				limit: req.body.length,
+				skip: req.body.start,
+				columns: req.body.columns,
+				search: {
+					value: req.body.search.value,
+					fields: ["username", "name", "mobile"],
+				},
+				sort: { _id: -1 },
+			})
+			.then(function (table) {
+				let dataTab = table.data;
+				let tabelArray = [];
+				for (index in dataTab) {
+					let addBy = dataTab[index].addedBy_name;
+					if (addBy == undefined) {
+						addBy = "Auto";
+					}
 
-		const tabelArray = table.data.map((item, index) => {
-			return {
-				sno: skip + index + 1,
-				Previous_Amount: item.previous_amount,
-				Transaction_Amount: item.transaction_amount,
-				Current_Amount: item.current_amount,
-				Description: item.description,
-				Transaction_Date: `${item.transaction_date} ${item.transaction_time}`,
-				Transaction_Status: item.transaction_status,
-				Added_by: item.addedBy_name || "Auto",
-			};
-		});
-		return res.json({
-			data: tabelArray,
-			recordsFiltered: table.total,
-			recordsTotal: table.total,
-			currentPage: page,
-			totalPages: Math.ceil(table.total / limit),
-		});
+					let dataJson = {
+						sno: i,
+						Previous_Amount: dataTab[index].previous_amount,
+						Transaction_Amount: dataTab[index].transaction_amount,
+						Current_Amount: dataTab[index].current_amount,
+						Description: dataTab[index].description,
+						Transaction_Date:
+							dataTab[index].transaction_date +
+							" " +
+							dataTab[index].transaction_time,
+						Transaction_Status: dataTab[index].transaction_status,
+						Added_by: addBy,
+					};
+					tabelArray.push(dataJson);
+					i++;
+				}
 
+				res.json({
+					data: tabelArray,
+					recordsFiltered: table.total,
+					recordsTotal: table.total,
+				});
+			})
+			.catch(function (error) {
+				res.json({
+					status: 0,
+					message: "Request To Large",
+				});
+			});
 	} catch (error) {
 		console.log(error);
 	}
 });
 
-// old api
-// router.post("/newCredit", session, async (req, res) => {
-// 	try {
-// 		let i = parseInt(req.body.start) + 1;
-// 		const id = req.body.id;
-// 		wallet_history
-// 			.dataTables({
-// 				find: { userId: id, reqType: { $in: ["Credit", "Debit"] } },
-// 				limit: req.body.length,
-// 				skip: req.body.start,
-// 				columns: req.body.columns,
-// 				search: {
-// 					value: req.body.search.value,
-// 					fields: ["username", "name", "mobile"],
-// 				},
-// 				sort: { _id: -1 },
-// 			})
-// 			.then(function (table) {
-// 				let dataTab = table.data;
-// 				let tabelArray = [];
-// 				for (index in dataTab) {
-// 					let addBy = dataTab[index].addedBy_name;
-// 					if (addBy == undefined) {
-// 						addBy = "Auto";
-// 					}
-
-// 					let dataJson = {
-// 						sno: i,
-// 						Previous_Amount: dataTab[index].previous_amount,
-// 						Transaction_Amount: dataTab[index].transaction_amount,
-// 						Current_Amount: dataTab[index].current_amount,
-// 						Description: dataTab[index].description,
-// 						Transaction_Date:
-// 							dataTab[index].transaction_date +
-// 							" " +
-// 							dataTab[index].transaction_time,
-// 						Transaction_Status: dataTab[index].transaction_status,
-// 						Added_by: addBy,
-// 					};
-// 					tabelArray.push(dataJson);
-// 					i++;
-// 				}
-
-// 				res.json({
-// 					data: tabelArray,
-// 					recordsFiltered: table.total,
-// 					recordsTotal: table.total,
-// 				});
-// 			})
-// 			.catch(function (error) {
-// 				res.json({
-// 					status: 0,
-// 					message: "Request To Large",
-// 					err: error.toString(),
-// 				});
-// 			});
-// 	} catch (error) {
-// 		console.log(error);
-// 	}
-// });
-
-// new api
 router.post("/newCredit", session, async (req, res) => {
 	try {
-		const page = parseInt(req.body.page) || 1;
-		const limit = parseInt(req.body.limit) || 10;
-		const skip = (page - 1) * limit;
-
+		let i = parseInt(req.body.start) + 1;
 		const id = req.body.id;
+		wallet_history
+			.dataTables({
+				find: { userId: id, reqType: { $in: ["Credit", "Debit"] } },
+				limit: req.body.length,
+				skip: req.body.start,
+				columns: req.body.columns,
+				search: {
+					value: req.body.search.value,
+					fields: ["username", "name", "mobile"],
+				},
+				sort: { _id: -1 },
+			})
+			.then(function (table) {
+				let dataTab = table.data;
+				let tabelArray = [];
+				for (index in dataTab) {
+					let addBy = dataTab[index].addedBy_name;
+					if (addBy == undefined) {
+						addBy = "Auto";
+					}
 
-		const table = await wallet_history.dataTables({
-			find: { userId: id, reqType: { $in: ["Credit", "Debit"] } },
-			limit: limit,
-			skip: skip,
-			columns: req.body.columns,
-			search: {
-				value: req.body.search.value,
-				fields: ["username", "name", "mobile"],
-			},
-			sort: { _id: -1 },
-		});
+					let dataJson = {
+						sno: i,
+						Previous_Amount: dataTab[index].previous_amount,
+						Transaction_Amount: dataTab[index].transaction_amount,
+						Current_Amount: dataTab[index].current_amount,
+						Description: dataTab[index].description,
+						Transaction_Date:
+							dataTab[index].transaction_date +
+							" " +
+							dataTab[index].transaction_time,
+						Transaction_Status: dataTab[index].transaction_status,
+						Added_by: addBy,
+					};
+					tabelArray.push(dataJson);
+					i++;
+				}
 
-		const dataTab = table.data;
-		let tabelArray = [];
-
-		dataTab.forEach((item, index) => {
-			let addBy = item.addedBy_name || "Auto";
-
-			let dataJson = {
-				sno: skip + index + 1,
-				Previous_Amount: item.previous_amount,
-				Transaction_Amount: item.transaction_amount,
-				Current_Amount: item.current_amount,
-				Description: item.description,
-				Transaction_Date: `${item.transaction_date} ${item.transaction_time}`,
-				Transaction_Status: item.transaction_status,
-				Added_by: addBy,
-			};
-			tabelArray.push(dataJson);
-		});
-
-		return res.json({
-			data: tabelArray,
-			recordsFiltered: table.total,
-			recordsTotal: table.total,
-			currentPage: page,
-			totalPages: Math.ceil(table.total / limit),
-		});
+				res.json({
+					data: tabelArray,
+					recordsFiltered: table.total,
+					recordsTotal: table.total,
+				});
+			})
+			.catch(function (error) {
+				res.json({
+					status: 0,
+					message: "Request To Large",
+					err: error.toString(),
+				});
+			});
 	} catch (error) {
-		return res.status(500).json({
-			status: 0,
-			message: "An error occurred while processing your request.",
-			err: error.toString(),
-		});
+		console.log(error);
 	}
 });
 
