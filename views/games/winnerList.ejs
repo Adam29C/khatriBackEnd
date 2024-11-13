@@ -253,10 +253,11 @@ channel.bind('my-event', function(data)
 
 var count = 0
 function add(){
+
     $("#hideIt123").hide(); 
     $("#disabledBtn").removeClass('d-none');
 
-       
+
        const providerId = document.getElementById('providerId').value;
     const windigit = document.getElementById('digit').value;
     const digitFamily = document.getElementById('digitFamily').value;
@@ -270,7 +271,11 @@ function add(){
 
     document.getElementById('loaderPro123g').style.display = 'block';
 
-   fetch("/addWinpoints/gameWinner", {
+
+
+
+    fetch("/addWinpoints/gameWinner", {
+
         method: 'POST', 
         body: JSON.stringify({ providerId: providerId, windigit: windigit, gameDate: gameDate,digitFamily: digitFamily, resultId: resultId, session : session, jodiDigit: jodiDigit, halfSangam1: halfSangam1,  halfSangam2: halfSangam2,fullSangam: fullSangam }),
         headers: {
@@ -301,6 +306,7 @@ function add(){
             });
         }();
     })
+
 }
 
 function  redirect()
