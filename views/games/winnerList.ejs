@@ -181,13 +181,15 @@
             <div class="custom-modal-text mr-2 ml-2" style="width: 75%;height: auto;background-color: #f3efe9ed;">
                 <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment?</h1>
                 <div class="row">
-                    <div class="col-xl-2" style="display: none;" id="loaderProg">
+                    <!-- <div class="col-xl-2" style="display: none;" id="loaderProg">
                         <img src="../../assets/images/loader.gif" style="width: 80px;"/>
-                    </div>
+                    </div> -->
                     <div class="col-xl-10" style="margin-left: auto;">
                         <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" onclick="Custombox.modal.close();">  Close </button>
                         <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" id="hideIt" onclick="addRevisedPayment();">Confirm </button>
-                        <button type="button" class="btn btn-dark  mx-2 d-none " style="float: right;margin-top: 10%;" id="desableRevisedButton" >Confirm </button>
+                        <button type="button" class="btn btn-dark  mx-2 d-none " style="float: right;margin-top: 10%;" id="desableRevisedButton" >
+                            <img src="../../assets/images/tube-spinner.svg" style="width: 25px;"/>
+                            Confirm </button>
                     </div>
                 </div>
             </div>
@@ -199,9 +201,6 @@
         
     </div>
     <% if(data.resultStatus === 0){ %>
-
-     
-
         <input type="hidden" value="<%= data.provider %>" id="providerId" />
         <input type="hidden" value="<%= data.winDigit %>" id="digit" />
         <input type="hidden" value="<%= data.digitFamily %>" id="digitFamily" />
@@ -217,14 +216,16 @@
             <div class="custom-modal-text mr-2 ml-2" style="width: 75%;height: auto;background-color: #f3efe9ed;">
                 <h1 style="font-size: medium;color: #3e6a6b;"> Are You Sure Want To Confirm Payment?</h1>
                 <div class="row">
-                    <div class="col-xl-2" style="display: none;" id="loaderPro123g">
+                    <!-- <div class="col-xl-2" style="display: none;" id="loaderPro123g">
                         <img src="../../assets/images/loader.gif" style="width: 80px;"/>
-                    </div>
+                    </div> -->
                     <div class="col-xl-10" style="margin-left: auto;">
                         <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" onclick="Custombox.modal.close();">  Close </button>
                         <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" id="hideIt123" onclick="add();">Confirm</button>
 
-                        <button type="disabled" class="btn btn-dark  mx-2  d-none" style="float: right;margin-top: 10%;" id="disabledBtn">Confirm</button>
+                        <button type="disabled" class="btn btn-primary  mx-2 d-none " style="float: right;margin-top: 10%;" id="disabledBtn">
+                            <img src="../../assets/images/tube-spinner.svg" style="width: 25px;"/>    Confirm
+                        </button>
 
                     </div>
                 </div>
@@ -258,6 +259,8 @@ function add(){
     $("#disabledBtn").removeClass('d-none');
 
 
+
+    return
        const providerId = document.getElementById('providerId').value;
     const windigit = document.getElementById('digit').value;
     const digitFamily = document.getElementById('digitFamily').value;
