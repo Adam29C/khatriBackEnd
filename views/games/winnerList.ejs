@@ -224,7 +224,7 @@
                         <button type="button" class="btn btn-dark  mx-2 " style="float: right;margin-top: 10%;" id="hideIt123" onclick="add();">Confirm</button>
 
                         <button type="disabled" class="btn btn-primary  mx-2 d-none " style="float: right;margin-top: 10%;" id="disabledBtn">
-                            <img src="../../assets/images/tube-spinner.svg" style="width: 25px;"/>    Confirm
+                            <img src="../../assets/images/tube-spinner.svg" style="width: 25px;"/>Confirm
                         </button>
 
                     </div>
@@ -272,7 +272,7 @@ function add(){
     const halfSangam2 = document.getElementById('halfSangam2').value;
     const fullSangam = document.getElementById('fullSangam').value;
 
-    document.getElementById('loaderPro123g').style.display = 'block';
+    // document.getElementById('loaderPro123g').style.display = 'block';
 
 
 
@@ -288,7 +288,7 @@ function add(){
     })
     .then(res => res.json())
     .then(body => {
-        document.getElementById('loaderPro123g').style.display = 'none';
+        // document.getElementById('loaderPro123g').style.display = 'none';
         Custombox.modal.close();
         !function(t) {
             var e = function() {};
