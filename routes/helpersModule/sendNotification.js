@@ -1,7 +1,6 @@
 const user = require('../../model/API/Users');
 const chunks = require('array.chunk');
 const messaging = require("../../firebase");
-const moment=require("moment")
 module.exports = async function (req, res, sumDgit, uesrtoken) {
     try {
         const x = req.body.gameId;
@@ -14,30 +13,29 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
         let body = '';
         let token = uesrtoken;
         let notificationType = '';
-        let notiSendUsers = moment().subtract(30, 'days').valueOf();
         if (x == '1' || x == '2' || x == '3' || x == '4') {
             switch (x) {
                 case '1':
-                    token = await user.find({ banned: false, andarBaharNotification: true, lastLoginTime: {$gte:notiSendUsers} }, { firebaseId: 1, _id: 0 });
+                    token = await user.find({ banned: false, andarBaharNotification: true }, { firebaseId: 1, _id: 0 });
                     title = name;
                     body = winningDigit;
                     notificationType = "Result";
                     break;
                 case '2':
-                    token = await user.find({ banned: false, starLineNotification: true, lastLoginTime: {$gte:notiSendUsers} }, { firebaseId: 1, _id: 0 });;
+                    token = await user.find({ banned: false, starLineNotification: true }, { firebaseId: 1, _id: 0 });;
                     title = name;
                     body = winningDigit;
                     notificationType = "Result";
                     break;
                 case '3':
-                    token = await user.find({ banned: false, gameNotification: true, lastLoginTime: {$gte:notiSendUsers} }, { firebaseId: 1, _id: 0 });;
+                    token = await user.find({ banned: false, gameNotification: true }, { firebaseId: 1, _id: 0 });;
                     title = name;
                     body = winningDigit;
                     notificationType = "Result";
 
                     break;
                 case '4':
-                    token = await user.find({ banned: false, mainNotification: true, lastLoginTime: {$gte:notiSendUsers} }, { firebaseId: 1, _id: 0 });
+                    token = await user.find({ banned: false, mainNotification: true }, { firebaseId: 1, _id: 0 });
                     title = req.body.title;
                     body = req.body.message;
                     notificationType = "Notification";
@@ -50,12 +48,12 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
                 let newLength = finalToken.length;
                 for (j = 0; j < newLength; j++) {
                     let tokenArr = finalToken[j];
-                    // sendMutipalNotification(tokenArr, title, body, notificationType)
+                    sendMutipalNotification(tokenArr, title, body, notificationType)
                 }
             }
             else {
-                const userToken = token.map(token => token.firebaseId);
-                // sendMutipalNotification(userToken, title, body, notificationType)
+                const userToken = token.map(token => token.firebaseId).filter(firebaseId => firebaseId !== "");
+                sendMutipalNotification(userToken, title, body, notificationType)
             }
         } else {
             for (let i = 0; i < token.length; i++) {
@@ -86,13 +84,12 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
     }
     catch (e) {
         console.log(e)
-        //    return e;
     }
 };
 
 const sendMutipalNotification = async (tokenArr, title, body, notificationType) => {
-    let message = {
-        android: {
+      let message = {
+         android: {
             priority: 'high',
         },
         data: {
@@ -101,10 +98,12 @@ const sendMutipalNotification = async (tokenArr, title, body, notificationType) 
             icon: 'ic_launcher',
             type: notificationType,
         },
-        tokens: tokenArr,
     };
     try {
-        const response = await messaging.sendMulticast(message);
+        const response = await messaging.sendEachForMulticast({
+            tokens: tokenArr,
+            ...message,
+        });
         if (response.failureCount > 0) {
             response.responses.forEach((resp, idx) => {
                 if (!resp.success) {

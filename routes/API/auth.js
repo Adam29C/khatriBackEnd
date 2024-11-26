@@ -245,7 +245,7 @@ router.post("/register", async (req, res) => {
 		let username = req.body.username;
 		let trimusername = username.toLowerCase().replace(/\s/g, "");
 		const userExist = await User.findOne({ username: trimusername });
-		let lastLoginTime = moment().valueOf();
+		// let lastLoginTime = moment().valueOf();
 		if (userExist) {
 			let salt = await bcrypt.genSalt(10);
 			let userMpin = req.body.mpin;
@@ -319,7 +319,7 @@ router.post("/register", async (req, res) => {
 					andarBaharNotification: true,
 					time: time,
 					timestamp: ts,
-					lastLoginTime
+					// lastLoginTime
 				});
 
 				const savedUser = await user.save();
@@ -593,7 +593,7 @@ router.post("/mpinLogin", async (req, res) => {
 					message: "MPIN Not Available, Generate Mpin First",
 				});
 			}
-			let lastLoginTime = moment().valueOf();
+			// let lastLoginTime = moment().valueOf();
 			if (banned === false) {
 				if (req.body.isMpin) {
 					const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
@@ -604,7 +604,7 @@ router.post("/mpinLogin", async (req, res) => {
 						});
 					}
 				} else {
-					await User.findByIdAndUpdate({ _id: user._id }, { fingerPrint: req.body.mpin, lastLoginTime });
+					await User.findByIdAndUpdate({ _id: user._id }, { fingerPrint: req.body.mpin });
 				}
 				// const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
 				// if (!validPass) {
@@ -635,10 +635,9 @@ router.post("/mpinLogin", async (req, res) => {
 				if (mpin === null) {
 					mpinGen = 0;
 				}
-
 				await User.updateOne(
 					{ _id: user._id },
-					{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY'), lastLoginTime } }
+					{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
 				);
 
 				return res.header("auth-token", token).send({
