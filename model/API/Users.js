@@ -139,10 +139,6 @@ const userSchema = new mongoose.Schema(
 		withdrawalTime:{
 			type:Date,
 			default:Date.now
-		},
-		lastLoginTime:{
-			type:Number,
-			default:0
 		}
 	},
 	{

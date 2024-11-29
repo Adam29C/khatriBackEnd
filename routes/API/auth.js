@@ -72,41 +72,40 @@ router.post("/checkUsername", async (req, res) => {
 	try {
 		const { mobileNumber, otp, username } = req.body;
 		if (!mobileNumber || !otp || !username) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "Number, otp, username  Is Require",
-			});
+			})
 		}
 		let userInitialInfo = await initialInfo.findOne({ mobileNumber, status: 0 }, { Otp: 1, status: 1, currentTime: 1 });
 		if (!userInitialInfo) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "Data Not Found",
-			});
+			})
 		}
 		let newTimestamp = moment(userInitialInfo.currentTime).add(2, 'minutes').valueOf();
 		let currentTime = Date.now();
 		if (currentTime > newTimestamp) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "OTP has expired. Please try again.",
-			});
+			})
 		}
 		if (userInitialInfo.Otp !== parseInt(otp)) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
-				message: "Invalid OTP. Please try again.",
-			});
-		} else {
-			await initialInfo.updateOne({ mobileNumber }, { status: 1 })
+				message: "Invalid OTP. Please try again."
+			})
 		}
-		let check = await User.findOne({ username: username })
+		let check = await User.findOne({ username: username });
 		if (check) {
 			return res.json({
 				status: 0,
 				message: `The username ${username} already exists. Please use a different username`
 			})
 		}
+		await initialInfo.updateOne({ mobileNumber }, { status: 1 })
 		return res.status(200).send({
 			status: 1,
 			message: "OTP verified successfully.",
@@ -246,7 +245,7 @@ router.post("/register", async (req, res) => {
 		let username = req.body.username;
 		let trimusername = username.toLowerCase().replace(/\s/g, "");
 		const userExist = await User.findOne({ username: trimusername });
-		let lastLoginTime = moment().valueOf();
+		// let lastLoginTime = moment().valueOf();
 		if (userExist) {
 			let salt = await bcrypt.genSalt(10);
 			let userMpin = req.body.mpin;
@@ -258,9 +257,29 @@ router.post("/register", async (req, res) => {
 					mpin: hashedMpin
 				}
 			);
+			const token = jwt.sign(
+				{ key: userExist.deviceId },
+				process.env.jsonSecretToken,
+				{ expiresIn: "1h" }
+			);
+			const userData = {
+				token: token,
+				mobile: userExist.mobile,
+				username: userExist.username,
+				wallet_balance: userExist.wallet_balance,
+				userId: userExist._id,
+				name: userExist.name,
+				mainNotification: userExist.mainNotification,
+				gameNotification: userExist.gameNotification,
+				starLineNotification: userExist.starLineNotification,
+				andarBaharNotification: userExist.andarBaharNotification,
+			};
 			return res.status(200).send({
-				status: 0,
-				message: "User Already Registered",
+				status: 1,
+				message: "Registered Successfully",
+				data: userData,
+				mpinGenerated: 0,
+				welcome_message: "🙏",
 			});
 		}
 
@@ -300,7 +319,7 @@ router.post("/register", async (req, res) => {
 					andarBaharNotification: true,
 					time: time,
 					timestamp: ts,
-					lastLoginTime
+					// lastLoginTime
 				});
 
 				const savedUser = await user.save();
@@ -329,7 +348,6 @@ router.post("/register", async (req, res) => {
 						starLineNotification: user.starLineNotification,
 						andarBaharNotification: user.andarBaharNotification,
 					};
-
 					return res.status(200).send({
 						status: 1,
 						message: "Registered Successfully",
@@ -575,7 +593,7 @@ router.post("/mpinLogin", async (req, res) => {
 					message: "MPIN Not Available, Generate Mpin First",
 				});
 			}
-			let lastLoginTime= moment().valueOf();
+			// let lastLoginTime = moment().valueOf();
 			if (banned === false) {
 				if (req.body.isMpin) {
 					const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
@@ -586,7 +604,7 @@ router.post("/mpinLogin", async (req, res) => {
 						});
 					}
 				} else {
-					await User.findByIdAndUpdate({ _id: user._id }, { fingerPrint: req.body.mpin,lastLoginTime });
+					await User.findByIdAndUpdate({ _id: user._id }, { fingerPrint: req.body.mpin });
 				}
 				// const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
 				// if (!validPass) {
@@ -617,10 +635,9 @@ router.post("/mpinLogin", async (req, res) => {
 				if (mpin === null) {
 					mpinGen = 0;
 				}
-
 				await User.updateOne(
 					{ _id: user._id },
-					{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY'),lastLoginTime } }
+					{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
 				);
 
 				return res.header("auth-token", token).send({
@@ -815,18 +832,17 @@ router.post("/userExistOtpVerifyDevice", async (req, res) => {
 		const { mobileNumber, otp, deviceId } = req.body;
 		// Validate request body
 		if (!mobileNumber || !otp || !deviceId) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "Mobile number, OTP, and device ID are required.",
-			});
+			})
 		}
-
 		let userDetails = await initialInfo.findOne({ mobileNumber });
 		if (!userDetails) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "User details not found.",
-			});
+			})
 		}
 
 		let newTimestamp = moment(userDetails.forgotOtpTime)
@@ -834,27 +850,25 @@ router.post("/userExistOtpVerifyDevice", async (req, res) => {
 			.valueOf();
 		let currentTime = Date.now();
 		if (currentTime > newTimestamp) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "OTP has expired. Please try again.",
-			});
+			})
 		}
-
 		let userDetailsInfo = await User.findOne({ mobile: mobileNumber });
 
 		if (!userDetailsInfo) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "User details not found.",
-			});
+			})
 		}
 		if (userDetails.Otp !== parseInt(otp)) {
-			return res.status(400).json({
+			return res.json({
 				status: 0,
 				message: "Invalid OTP. Please try again.",
-			});
+			})
 		}
-		// Update device ID upon successful verification
 		await User.updateOne({ mobile: mobileNumber }, { $set: { deviceId } });
 		const token = jwt.sign(
 			{ key: User.deviceId, deviceId },
