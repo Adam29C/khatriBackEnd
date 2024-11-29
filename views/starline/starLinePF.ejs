@@ -195,6 +195,7 @@
                     totalBidSum = totalBidPanaSum + e.countBid;
                 }
             });
+            
             $("#groupData").html(html);
             $("#tfoot").html('<tr><th>Grand Total</th><th >'+ totalBidSum +'</th><th>'+ totalSum +'</th></tr>');
                 
@@ -250,27 +251,10 @@
             });
            
             let  mergeHtml = '';
-            data.pana.forEach(function(e){
-                let tabDigit = e.Digit;
-                let bidCount = "No Bids";
-                let amountToPay = 0;
-                let SumDigit = 0;
-                let profit = PanaProfit;
-                let loss = 0;
-                if(pannaArr[tabDigit] ){
-                    bidCount = pannaArr[tabDigit].bidCount;
-                    amountToPay = pannaArr[tabDigit].amountToPay;
-                    SumDigit = pannaArr[tabDigit].sumDigit;
-                    profit = pannaArr[tabDigit].profit;
-                    loss = pannaArr[tabDigit].Loss;
-                }
-                mergeHtml += '<tr><td>'+ tabDigit +'-'+ e.DigitFamily +'</td>\
-                    <td>'+ bidCount +'</td>\
-                    <td>'+ SumDigit +'</td>\
-                    <td>'+ amountToPay +'</td>\
-                    <td style="color:#22b922">'+ profit +'</td>\
-                    <td style="color:red">'+ loss +'</td></tr>'
-            });
+
+            
+          
+            
             $('#bodyTab6').html(mergeHtml);
             $('#datatable6').dataTable({
                     "pageLength": 50
