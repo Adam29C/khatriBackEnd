@@ -8,6 +8,7 @@ const session = require("../helpersModule/session");
 const bank = require("../../model/bank");
 const dateTime = require("node-datetime");
 const notification = require("../helpersModule/creditDebitNotification");
+const moment = require("moment")
 
 router.get("/", session, permission, async (req, res) => {
   const dt = dateTime.create();
@@ -39,17 +40,48 @@ router.get("/", session, permission, async (req, res) => {
 router.get("/pendingBank", session, permission, async (req, res) => {
   const dt = dateTime.create();
   const formatted = dt.format("d/m/Y");
-  const pendingCredit = await fundReq
+  const pendingCreditList = await fundReq
     .find({ reqStatus: "Pending", reqType: "Debit",withdrawalMode: "Bank", reqDate: formatted })
     .sort({ _id: -1 });
 
   const userInfo = req.session.details;
   const permissionArray = req.view;
-
+  let finalArray=[]
+  if(pendingCreditList.length>0){
+    for (let pendingCredit of pendingCreditList) {
+      let reqTime = moment(pendingCredit.reqTime);
+      finalArray.push({
+        toAccount: pendingCredit.toAccount,
+        _id: pendingCredit._id,
+        userId: pendingCredit.userId,
+        reqAmount: pendingCredit.reqAmount,
+        fullname: pendingCredit.fullname,
+        username: pendingCredit.username,
+        mobile: pendingCredit.mobile,
+        reqType: pendingCredit.reqType,
+        reqStatus: pendingCredit.reqStatus,
+        reqDate: pendingCredit.reqDate,
+        reqTime: reqTime.format('DD/MM/YYYY hh:mm A'),
+        withdrawalMode: pendingCredit.withdrawalMode,
+        UpdatedBy: pendingCredit.UpdatedBy,
+        reqUpdatedAt: pendingCredit.reqUpdatedAt,
+        timestamp: pendingCredit.timestamp,
+        createTime: pendingCredit.createTime,
+        updatedTime: pendingCredit.updatedTime,
+        adminId: pendingCredit.adminId,
+        from: pendingCredit.from,
+        fromExport: pendingCredit.fromExport
+      })
+    }
+    finalArray.sort((a, b) => {
+      return new Date(a.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + a.reqTime.split(' ').slice(1).join(' ')) -
+        new Date(b.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + b.reqTime.split(' ').slice(1).join(' '));
+    });
+  }
   const check = permissionArray["fundRequest"].showStatus;
   if (check === 1) {
     res.render("./wallet/pendingDebit", {
-      data: pendingCredit,
+      data: finalArray,
       userInfo: userInfo,
       permission: permissionArray,
       title: "Pending Request(Bank)"
@@ -282,7 +314,6 @@ router.post("/getBal", session, async (req, res) => {
   try {
     const user_id = req.body.id;
     const userbal = await User.findOne({ _id: user_id }, { username: 1, wallet_balance: 1, _id: 0 })
-    // const paytmNumebr = await Userprofile.findOne({ userId: user_id },{paytm_number : 1});
     let data = {
       username: userbal.username,
       wallet_balance: userbal.wallet_balance

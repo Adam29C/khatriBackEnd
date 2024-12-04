@@ -15,12 +15,13 @@ const upiIds = require("../../../model/upi_ids");
 const moment = require("moment");
 const dateTime = require("node-datetime");
 const Users = require("../../../model/API/Users");
+const onlineUpiPayment = require("../../../model/onlineUpiPayment")
 
 router.get("/", (req, res) => {
 	res.json({ status: 0, message: "Access Denied" });
 });
 
-router.post("/addFund", verify, async (req, res) => {
+router.post("/addFund", verify,async (req, res) => {
 	try {
 		const userId = req.body.user_id;
 		const user = await User.findOne({ _id: userId });
@@ -36,6 +37,7 @@ router.post("/addFund", verify, async (req, res) => {
 				reqType: "Credit",
 			});
 			if (findAlreadyPending === null) {
+				const dt = dateTime.create();
 				const formatted = dt.format("d/m/Y");
 				const ts = moment(formatted, "DD/MM/YYYY").unix();
 
@@ -69,6 +71,7 @@ router.post("/addFund", verify, async (req, res) => {
 			}
 		}
 	} catch (e) {
+		console.log(e)
 		res.status(400).json({
 			status: 0,
 			message: "Something Bad Happened Please Contact Support",
@@ -1044,6 +1047,31 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 					transaction_id,
 				});
 				await wallet_his.save();
+
+                const online_Payment = new onlineUpiPayment({
+					userId: userId,
+					bidId: saveId._id,
+					filterType: 4,
+					previous_amount: userBalance,
+					current_amount: updatedBal,
+					transaction_amount: amount,
+					description:
+						amount +
+						"/- Added To Wallet By UPI, Transaction Id : " +
+						transaction_id,
+					transaction_date: dateUpdate,
+					transaction_time: time,
+					transaction_status: "Success",
+					particular: "UPI",
+					reqType: "Credit",
+					username: username,
+					mobile: mobile,
+					addedBy_name: "Auto/Self",
+					upiId: upi_name,
+					timestamp: moment().startOf('day').valueOf(),
+					transaction_id,
+				});
+				await online_Payment.save();
 
 				let userToken = [];
 				userToken.push(firebaseToken);

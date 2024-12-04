@@ -248,11 +248,11 @@ router.post("/updateData", session, async (req, res) => {
 		);
 
 		const date2 = moment().format("DD/MM/YYYY");
-        let timestamp = moment(date2, "DD/MM/YYYY").unix();
+		let timestamp = moment(date2, "DD/MM/YYYY").unix();
 		const history = new wallet_history({
 			userId: id,
-			bidId : saveId._id,
-			filterType : filter,
+			bidId: saveId._id,
+			filterType: filter,
 			previous_amount: wallet_bal,
 			current_amount: update_bal,
 			transaction_amount: parseInt(bal),
@@ -262,8 +262,8 @@ router.post("/updateData", session, async (req, res) => {
 			transaction_status: "Success",
 			admin_id: admin_id,
 			particular: particular,
-			upiId:"null",
-            timestamp:timestamp,
+			upiId: "null",
+			timestamp: timestamp,
 			username: username,
 			reqType: reqType,
 			addedBy_name: adminName,
@@ -278,7 +278,7 @@ router.post("/updateData", session, async (req, res) => {
 			let title = "Your Credit (Deposit) Request Of Rs. " + bal + "/- is Approved ✔️🤑💰";
 			let body = "Hello " + username + " 🤩🤩";
 			notification(userToken, title, body);
-		}else{
+		} else {
 			let userToken = [];
 			userToken.push(firebaseToken);
 			let title = "Your Debit (Withdrawal) Request Of Rs. " + bal + "/- is Approved ✔️🤑💰";
@@ -464,69 +464,6 @@ router.post("/newHistroy", session, async (req, res) => {
 	}
 });
 
-router.post("/fundHis", session, async (req, res) => {
-	try {
-		let i = parseInt(req.body.start) + 1;
-		const id = req.body.id;
-		fundReq
-			.dataTables({
-				find: { userId: id },
-				limit: req.body.length,
-				skip: req.body.start,
-				columns: req.body.columns,
-				search: {
-					value: req.body.search.value,
-					fields: ["username", "reqAmount", "reqType", "reqStatus"],
-				},
-				sort: { _id: -1, reqAmount :1, reqType : 1,reqStatus : 1  },
-			})
-			.then(function (table) {
-				let dataTab = table.data;
-				let tabelArray = [];
-				for (index in dataTab) {
-					let addBy = dataTab[index].addedBy_name;
-					if (addBy == undefined) {
-						addBy = "Auto";
-					}
-
-					let date = dataTab[index].reqUpdatedAt;
-					// let format = moment(date, 'MM/DD/YYYY hh:mm:ss a').format("DD/MM/YYYY hh:mm:ss a")
-					// if(format == "Invalid date"){
-					// 	format = date
-					// }
-
-					let dataJson = {
-						sno: i,
-						_id: dataTab[index]._id,
-						username: dataTab[index].username,
-						reqAmount: dataTab[index].reqAmount,
-						reqType: dataTab[index].reqType,
-						reqStatus: dataTab[index].reqStatus,
-						reqUpdatedAt: date,
-						withdrawalMode: dataTab[index].withdrawalMode,
-						UpdatedBy: dataTab[index].UpdatedBy,
-					};
-					tabelArray.push(dataJson);
-					i++;
-				}
-
-				res.json({
-					data: tabelArray,
-					recordsFiltered: table.total,
-					recordsTotal: table.total,
-				});
-			})
-			.catch(function (error) {
-				res.json({
-					status: 0,
-					message: "Request To Large",
-				});
-			});
-	} catch (error) {
-		console.log(error);
-	}
-});
-
 router.post("/newCredit", session, async (req, res) => {
 	try {
 		let i = parseInt(req.body.start) + 1;
@@ -580,6 +517,69 @@ router.post("/newCredit", session, async (req, res) => {
 					status: 0,
 					message: "Request To Large",
 					err: error.toString(),
+				});
+			});
+	} catch (error) {
+		console.log(error);
+	}
+});
+
+router.post("/fundHis", session, async (req, res) => {
+	try {
+		let i = parseInt(req.body.start) + 1;
+		const id = req.body.id;
+		fundReq
+			.dataTables({
+				find: { userId: id },
+				limit: req.body.length,
+				skip: req.body.start,
+				columns: req.body.columns,
+				search: {
+					value: req.body.search.value,
+					fields: ["username", "reqAmount", "reqType", "reqStatus"],
+				},
+				sort: { _id: -1, reqAmount: 1, reqType: 1, reqStatus: 1 },
+			})
+			.then(function (table) {
+				let dataTab = table.data;
+				let tabelArray = [];
+				for (index in dataTab) {
+					let addBy = dataTab[index].addedBy_name;
+					if (addBy == undefined) {
+						addBy = "Auto";
+					}
+
+					let date = dataTab[index].reqUpdatedAt;
+					// let format = moment(date, 'MM/DD/YYYY hh:mm:ss a').format("DD/MM/YYYY hh:mm:ss a")
+					// if(format == "Invalid date"){
+					// 	format = date
+					// }
+
+					let dataJson = {
+						sno: i,
+						_id: dataTab[index]._id,
+						username: dataTab[index].username,
+						reqAmount: dataTab[index].reqAmount,
+						reqType: dataTab[index].reqType,
+						reqStatus: dataTab[index].reqStatus,
+						reqUpdatedAt: date,
+						withdrawalMode: dataTab[index].withdrawalMode,
+						UpdatedBy: dataTab[index].UpdatedBy,
+					};
+					tabelArray.push(dataJson);
+					i++;
+				}
+
+				res.json({
+					data: tabelArray,
+					recordsFiltered: table.total,
+					recordsTotal: table.total,
+				});
+			})
+			.catch(function (error) {
+				res.json({
+					status: 0,
+					message: "Request To Large",
 				});
 			});
 	} catch (error) {

@@ -56,6 +56,8 @@
                 <option value="0">Kotk XLS</option>
                 <option value="6">Cash free</option>
                 <option value="8">MK.txt</option>
+                <option value="9">Gajju Bob</option>
+                <option value="10">FINA PNB</option>
                 <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
 								<option value="1">Tirupatie Kotk XLS</option>
 								<option value="2">Mahalaxmi Kotk XLS</option>
@@ -234,6 +236,12 @@
       return generateMKRport(reportDate, searchType);
     }
 
+    if (parseInt(reportType) === 9) {
+      return generateGajjuBOBRport(reportDate, searchType);
+    }
+    if (parseInt(reportType) === 10) {
+      return generateFINAPNBRport(reportDate, searchType);
+    }
     let Product_Code = "RPAY";
     let Bank_Code_Indicator = "M";
     let Client_Code = "";
@@ -292,6 +300,114 @@
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
+      });
+  }
+
+
+  function generateFINAPNBRport(id) {
+    const searchType = $("#req_status").val();
+    // const reportType = $("#report_type").val();
+    const reportDate = $("#datepicker-autoclose").val();
+
+    const req = {
+      reportDate: reportDate,
+      searchType: searchType,
+    };
+
+    fetch("/debitReport/Finapnb", {
+      method: "POST",
+      body: JSON.stringify(req),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        
+        const xlsData = json.profile;
+        const reportDate = json.date;
+
+        var excel = $JExcel.new("Calibri light 10 #333333");
+        var headers = [
+          "Payment Type",
+          "Source Account Number",
+          "Amount",
+          "Currency",
+          "Destination Account Number",
+          "IFSC Code",
+          "Additional Info",
+        ];
+
+        var formatHeader = excel.addStyle({
+          border: "none,none,none,thin #333333",
+          font: "Calibri 12 #ffff B",
+        });
+
+
+
+        for (var i = 0; i < headers.length; i++) {
+          excel.set(0, i, 0, headers[i], formatHeader);
+          excel.set(0, i, undefined, "auto");
+        }
+
+        
+
+        let a = 1;
+        $.each(xlsData, function (key, e) {
+          let j = 0;
+          excel.set(0, 0, a, e.type);
+          j++;
+          excel.set(0, j, a, e.parentAcountNo);
+          j++;
+          excel.set(0, j, a, e.amount.toString());
+          j++;
+          excel.set(0, j, a, e.currency);
+          j++;
+          excel.set(0, j, a, e.clientAcount);
+          j++;
+          excel.set(0, j, a, e.ifscCode);
+          j++;
+          excel.set(0, j, a, `TESTNFT${a}`);
+          j++;
+
+          a++;
+        });
+        excel.generate("payout_" + reportDate + "_Batch.xlsx");
+      });
+
+
+  }
+
+  function generateGajjuBOBRport(id) {
+    const searchType = $("#req_status").val();
+    const reportDate = $("#datepicker-autoclose").val();
+
+    const req = {
+      reportDate: reportDate,
+      searchType: searchType,
+    };
+
+    fetch("/debitReport/gajjubob", {
+      method: "POST",
+      body: JSON.stringify(req),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const filename = json.filename;
+        const text = json.writeString;
+        var element = document.createElement("a");
+        element.setAttribute("href", "data:text/plain;charset=utf-8," + text);
+        element.setAttribute("download", filename);
+        document.body.appendChild(element);
+        element.click();
+
+        document.body.removeChild(element);
+        return;
       });
   }
 
@@ -396,8 +512,6 @@
 
   function updateClass() {
     const div = document.getElementById("creditDebitTab");
-    console.log("divdivdiv", div);
-
     if (window.innerWidth < 620) {
       div.classList.add("table-responsive");
     } else {

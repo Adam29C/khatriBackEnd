@@ -14,4 +14,6 @@ lib/
 khatri-dc19d-firebase-adminsdk-rwip0-524330e408.json
 khatri555-firebase-adminsdk-n0lyi-afc7af4bfd.json
 public/apk
+public/localApk
+public/tempDirectory
 global-bundle.pem

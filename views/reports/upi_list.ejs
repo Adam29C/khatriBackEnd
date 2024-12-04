@@ -1,166 +1,701 @@
 <% layout('../layout') %>
 <div class="content">
-    <div class="container-fluid">
-        <div class="row ">
-            <div class="col-xl-12 col-md-12">
-                <div class="card-box pt-0 pb-0">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item " aria-current="page"><a href="/"> Home </a></li>
-                            <li class="breadcrumb-item active" aria-current="page">UPI Report</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12 col-md-12">
+        <div class="card-box pt-0 pb-0">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item" aria-current="page">
+                <a href="/"> Home </a>
+              </li>
+              <li class="breadcrumb-item active" aria-current="page">
+                UPI Report
+              </li>
+            </ol>
+          </nav>
         </div>
+      </div>
     </div>
+  </div>
 
-    <div class="col-xl-12">
+  <div class="col-xl-12">
+    <div class="card-box">
+      <h4 class="header-title mt-0 mb-3">UPI Fund Report</h4>
+      <div class="row">
+        <div class="col-md-3">
+          <label class="col-form-label">Start Date</label>
+          <div class="form-group">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control datepicker"
+                placeholder="mm/dd/yyyy"
+                id="datepicker-autoclose1"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="col-form-label">End Date</label>
+          <div class="form-group">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control datepicker"
+                placeholder="mm/dd/yyyy"
+                id="datepicker-autoclose"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="col-form-label">Select UPI ID</label>
+          <div class="form-group">
+            <select id="inputState" class="form-control">
+              <option selected="selected" value="1">Select Type</option>
+              <% for(index in upiList) { %>
+              <option value="<%= upiList[index]._id %>">
+                <%= upiList[index].UPI_ID %>
+              </option>
+              <%}%>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-3" style="margin-top: 38px">
+          <button class="btn btn-danger waves-effect waves-light btn-sm">
+            <span>Cancel&nbsp;</span>
+          </button>
+          <button
+            class="btn btn-dark button-color waves-effect waves-light btn-sm"
+            id="sbmitInfo"
+            onclick="getUPI()"
+          >
+            <span>Submit&nbsp;</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-12 col-md-12">
         <div class="card-box">
-            <h4 class="header-title mt-0 mb-3">UPI Fund Report</h4>
-            <div class="row">
+          <div class="table-responsive" data-pattern="priority-columns">
+            <!-- <table
+              id="fundTable"
+              class="table table-bordered text-center dt-responsive nowrap"
+            >
+              <thead>
+                <tr>
+                  <th>Sr.</th>
+                  <th>Username</th>
+                  <th>Name</th>
+                  <th>Mobile</th>
+                  <th>Added Amount</th>
+                  <th>Date</th>
+                  <th>Transaction Id</th>
+                  <th>UPI Name</th>
+                  <th>App Name</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tabody"></tbody>
+            </table> -->
 
-                <div class="col-md-3">
-                    <label class="col-form-label" >Start Date</label>
-                    <div class="form-group">
-                        <div class="input-group">
-                            <input type="text" class="form-control datepicker" placeholder="mm/dd/yyyy" id="datepicker-autoclose1" autocomplete="off">
-                        </div>
-                    </div>
-                </div>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Sr.</th>
+                  <th>Username</th>
+                  <!-- <th>Name</th> -->
+                  <th>Mobile</th>
+                  <th>Added Amount</th>
+                  <th>Date</th>
+                  <th>Transaction Id</th>
+                  <th>UPI Name</th>
+                  <th>App Name</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-body"></tbody>
+            </table>
 
-                <div class="col-md-3">
-                    <label class="col-form-label" >End Date</label>
-                    <div class="form-group">
-                        <div class="input-group">
-                            <input type="text" class="form-control datepicker" placeholder="mm/dd/yyyy" id="datepicker-autoclose" autocomplete="off">
-                        </div>
-                    </div>
-                </div>
+            <div class="d-flex justify-content-between">
+              <span class="align-items-center" id="showwwww"
+                >Show
+                <select
+                  class="custom-select form-control form-control-sm custom-select123"
+                  aria-label="Default select example"
+                  id="perPageData"
+                >
+                  <option value="10" selected>10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                </select>
+                Entries</span
+              >
 
-                <div class="col-md-3">
-                    <label class="col-form-label">Select UPI ID</label>
-                    <div class="form-group">
-                        <select  id="inputState" class="form-control">
-                            <option selected="selected" value="1">Select Type</option>
-                            <% for(index in upiList) { %>
-                                <option value="<%= upiList[index]._id %>">
-                                    <%= upiList[index].UPI_ID %>
-                                </option>
-                            <%}%>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-3" style="margin-top: 38px;">
-                    <button class="btn btn-danger waves-effect waves-light btn-sm"> <span>Cancel&nbsp;</span></button>
-                    <button class="btn btn-dark  button-color  waves-effect waves-light btn-sm" id="sbmitInfo"  onclick="getUPI()"> <span>Submit&nbsp;</span></button>
-                </div>
+              <nav>
+                <ul class="pagination justify-content-end" id="pagination">
+                  <!-- Pagination buttons will be generated here by JavaScript -->
+                </ul>
+              </nav>
             </div>
-        </div>
-    </div>
 
-    <div class="container-fluid">
-        <div class="row ">
-            <div class="col-xl-12 col-md-12">
-                <div class="card-box">
-                    <div class="table-responsive" data-pattern="priority-columns">
-                        <table id="fundTable" class="table table-bordered text-center dt-responsive nowrap">
-                            <thead>
-                            <tr>
-                                <th>Sr.</th>
-                                <th>Username</th>
-                                <!-- <th>Name</th> -->
-                                <th>Mobile</th>
-                                <th>Added Amount</th>
-                                <th>Date</th>
-                                <th>Transaction Id</th>
-                                <th>UPI Name</th>
-                                <th>App Name</th>
-                                <th>Status</th>
-                            </tr>
-                            </thead>
-                            <tbody id="tabody">
-                            </tbody>
-                            
+            <!-- <nav>
+              <ul class="pagination justify-content-end" id="pagination"></ul>
+            </nav> -->
 
-                        </table>
-                        <h3 id="totalAmt"></h3>
-                    </div>
-                </div>
-            </div>
+            <h3 id="totalAmt"></h3>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<script>
+<!-- <script>
+  //   function getUPI() {
+  const id = $("#inputState").val();
+  const date = $("#datepicker-autoclose").val();
+  const dateStart = $("#datepicker-autoclose1").val();
 
-    function getUPI()
-    {
-        $("#sbmitInfo").attr("disabled", true);
-        const id = $("#inputState").val();;
-        const date = $("#datepicker-autoclose").val();
-        const dateStart = $("#datepicker-autoclose1").val();
+  var currentPage = 1;
+  let totalPages = 1;
+  let rowsPerPage = 10;
+  //   let page = 1;
 
-        $("#fundTable").DataTable().destroy();;
-        fetch('/fundReport/getUPIReport', {
-            method: 'POST', 
-            body: JSON.stringify({ id: id, date: date, dateStart : dateStart}),
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: 'same-origin',
-        })
-        .then(res => res.json())
-        .then(body => {
-            
-            if(body.status === 1){
-                let data = body.data;
-                if(Object.keys(data).length > 0)
-                {
-                    let html;
-                    let total= 0;
-                    let i = 1;
-                    data.forEach(e => {
-                        total += e.reqAmount;
-                        html += '<tr><td>'+ i +'</td>\
-                                <td>'+ e.username +'</td>\
-                                <td>'+ e.mobile +'</td>\
-                                <td>'+ e.reqAmount +'</td>\
-                                <td>'+ e.reqDate +'  '+ e.reqTime +'</td>\
-                                <td>'+ e.transaction_id +'</td>\
-                                <td>'+ e.upi_name +'</td>\
-                                <td>'+ e.upi_app_name +'</td>\
-                                <td>'+e.reqStatus+'</td></tr>';
-                            i++;
-                    });
-                    $("#tabody").html(html);
-                    
-                    $('#fundTable').dataTable({
-                        "pageLength": 50,
-                        aLengthMenu: [
-                                [25, 50, 100, 200, -1],
-                                [25, 50, 100, 200, "All"]
-                            ],
-                            iDisplayLength: -1
-                    });
-                    $("#totalAmt").html('Total Amount : '+total+'/-');
-                    $("#sbmitInfo").attr("disabled", false);
-                }
-                else{
-                    $("#sbmitInfo").attr("disabled", false);
-                    toastr["info"]("No Upi Fund History Found","Khatri Games");
-                    $("#fundTable").DataTable().clear().draw();
-                    $("#totalAmt").html('Total Amount : 0/-');
-                }
-            }
-            else
-            {
-                toastr["info"](body.message,"Khatri Games");
-                $("#fundTable").DataTable().clear().draw();
-                $("#totalAmt").html('Total Amount : 0/-');
-            }
+  let Data = [];
 
-        })
+  //     function history(page = 1) {
+  //       // Show loading message
+  //       const tableBody = document.getElementById("table-body");
+
+  //       $.ajax({
+  //         type: "post",
+  //         url: "/fundReport/getUPIReport",
+  //         data: JSON.stringify({
+  //           page: 1,
+  //           limit: rowsPerPage,
+  //           date: "29/10/2024",
+  //           dateStart: "01/10/2022",
+  //           id: id,
+  //         }),
+  //         contentType: "application/json",
+  //         dataType: "json",
+  //         success: function (data) {
+  //           Data = data.data;
+  //           totalPages = data.totalPages;
+
+  //           // Display the data and render pagination after data is loaded
+  //           displayTableData(page, rowsPerPage, Data);
+  //           renderPagination(totalPages);
+  //         },
+  //         error: function (e) {
+  //           alert("error: " + JSON.stringify(e));
+  //         },
+  //       });
+  //     }
+
+  //     function changePage(page) {
+  //       if (page >= 1 && page <= totalPages) {
+  //         currentPage = page;
+
+  //         // Call history to load the data for the selected page
+  //         history(currentPage);
+  //       }
+  //     }
+
+  //     function displayTableData(page, rowsPerPage, data) {
+  //       const tableBody = document.getElementById("table-body");
+  //       tableBody.innerHTML = "";
+
+  //       const totalPages = Math.ceil(data.length / rowsPerPage);
+  //       if (page > totalPages) {
+  //         page = totalPages;
+  //       }
+
+  //       const start = (page - 1) * rowsPerPage;
+  //       const end = start + rowsPerPage;
+  //       const paginatedData = data.slice(start, end);
+
+  //       if (paginatedData.length === 0) {
+  //         tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
+  //         return;
+  //       }
+
+  //       paginatedData.forEach((row, INDEX) => {
+  //         const tr = document.createElement("tr");
+  //         tr.innerHTML = `
+  //         <td>${INDEX + 1}</td>
+  //         <td>${row.username}</td>
+  //         <td>${row.mobile}</td>
+  //         <td>${row.reqAmount} </td>
+  //         <td>${row.reqDate} ${row.reqTime}</td>
+  //         <td>${row.transaction_id}</td>
+  //         <td>${row.upi_name}</td>
+  //         <td>${row.upi_app_name}</td>
+  //         <td>${row.reqStatus}</td>`;
+  //         tableBody.appendChild(tr);
+  //       });
+  //     }
+
+  //     function renderPagination(totalPages) {
+  //       const pagination = document.getElementById("pagination");
+  //       pagination.innerHTML = "";
+
+  //       const prevButton = document.createElement("li");
+  //       prevButton.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+  //       prevButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+  //         currentPage - 1
+  //       })">Previous</a>`;
+  //       pagination.appendChild(prevButton);
+
+  //       const maxVisiblePages = 1;
+  //       let startPage = Math.max(1, currentPage - maxVisiblePages);
+  //       let endPage = Math.min(totalPages, currentPage + maxVisiblePages);
+
+  //       if (startPage > 1) {
+  //         pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
+  //         if (startPage > 2) {
+  //           pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  //         }
+  //       }
+
+  //       for (let i = startPage; i <= endPage; i++) {
+  //         const pageItem = document.createElement("li");
+  //         pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
+  //         pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+  //         pagination.appendChild(pageItem);
+  //       }
+
+  //       if (endPage < totalPages) {
+  //         if (endPage < totalPages - 1) {
+  //           pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  //         }
+  //         pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`;
+  //       }
+
+  //       const nextButton = document.createElement("li");
+  //       nextButton.className = `page-item ${
+  //         currentPage === totalPages ? "disabled" : ""
+  //       }`;
+  //       nextButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+  //         currentPage + 1
+  //       })">Next</a>`;
+  //       pagination.appendChild(nextButton);
+  //     }
+
+  //     return;
+  //     $("#fundTable").DataTable().destroy();
+  //     fetch("/fundReport/getUPIReport", {
+  //       method: "POST",
+  //       body: JSON.stringify({ id: id, date: date, dateStart: dateStart }),
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       credentials: "same-origin",
+  //     })
+  //       .then((res) => res.json())
+  //       .then((body) => {
+  //         if (body.status === 1) {
+  //           let data = body.data;
+  //           if (Object.keys(data).length > 0) {
+  //             let html;
+  //             let total = 0;
+  //             let i = 1;
+  //             data.forEach((e) => {
+  //               total += e.reqAmount;
+  //               html +=
+  //                 "<tr><td>" +
+  //                 i +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.username +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.mobile +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.reqAmount +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.reqDate +
+  //                 "  " +
+  //                 e.reqTime +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.transaction_id +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.upi_name +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.upi_app_name +
+  //                 "</td>\
+  //                                   <td>" +
+  //                 e.reqStatus +
+  //                 "</td></tr>";
+  //               i++;
+  //             });
+  //             $("#tabody").html(html);
+
+  //             $("#fundTable").dataTable({
+  //               pageLength: 50,
+  //               aLengthMenu: [
+  //                 [25, 50, 100, 200, -1],
+  //                 [25, 50, 100, 200, "All"],
+  //               ],
+  //               iDisplayLength: -1,
+  //             });
+  //             $("#totalAmt").html("Total Amount : " + total + "/-");
+  //             $("#sbmitInfo").attr("disabled", false);
+  //           } else {
+  //             $("#sbmitInfo").attr("disabled", false);
+  //             toastr["info"]("No Upi Fund History Found", "Khatri Games");
+  //             $("#fundTable").DataTable().clear().draw();
+  //             $("#totalAmt").html("Total Amount : 0/-");
+  //           }
+  //         } else {
+  //           toastr["info"](body.message, "Khatri Games");
+  //           $("#fundTable").DataTable().clear().draw();
+  //           $("#totalAmt").html("Total Amount : 0/-");
+  //         }
+  //       });
+  //   }
+
+  // Define the getUPI function
+  function getUPI() {
+    const id = $("#inputState").val();
+    const date = $("#datepicker-autoclose").val();
+    const dateStart = $("#datepicker-autoclose1").val();
+
+    let currentPage = 1;
+    let rowsPerPage = 10;
+    let totalPages = 1;
+    let Data = [];
+
+    document
+      .getElementById("perPageData")
+      .addEventListener("change", function () {
+        getPerPageCount(this.value);
+      });
+
+    function getPerPageCount(value) {
+      history(currentPage, parseInt(value || 10));
     }
+
+    function history(page = 1, perpageData) {
+      const tableBody = document.getElementById("table-body");
+
+      const showDropdown = document.getElementById("showwwww");
+
+      let d = perpageData || 10;
+
+      $.ajax({
+        type: "post",
+        url: "/fundReport/getUPIReport",
+        data: JSON.stringify({
+          page: page,
+          limit: d,
+          date: date,
+          dateStart: dateStart,
+          id: id,
+        }),
+        contentType: "application/json",
+        dataType: "json",
+        success: function (data) {
+          Data = data.data;
+          totalPages = data.totalPages;
+
+          displayTableData(page, rowsPerPage, Data);
+          renderPagination(totalPages);
+          $("#totalAmt").html("Total Amount : " + data.totalAmount + "/-");
+
+
+          if (Data.length === 0) {
+            showDropdown.style.display = "none";
+          } else {
+            showDropdown.style.display = "flex";
+          }
+        },
+        error: function (e) {
+          alert("error: " + JSON.stringify(e));
+        },
+      });
+    }
+
+    // Define changePage function within getUPI scope
+    window.changePage = function (page) {
+      if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        history(currentPage);
+      }
+    };
+
+    function displayTableData(page, rowsPerPage, data) {
+      const tableBody = document.getElementById("table-body");
+      tableBody.innerHTML = "";
+
+      
+      const totalPages = Math.ceil(data.length / rowsPerPage);
+    if (page > totalPages) {
+      page = totalPages;
+    }
+
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedData = data.slice(start, end);
+
+      if (paginatedData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
+        return;
+      }
+      //   let total = 0;
+      paginatedData.forEach((row, INDEX) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+                <td>${INDEX + 1}</td>
+                <td>${row.username}</td>
+                <td>${row.mobile}</td>
+                <td>${row.reqAmount}</td>
+                <td>${row.reqDate} ${row.reqTime}</td>
+                <td>${row.transaction_id}</td>
+                <td>${row.upi_name}</td>
+                <td>${row.upi_app_name}</td>
+                <td>${row.reqStatus}</td>`;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function renderPagination(totalPages) {
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      const prevButton = document.createElement("li");
+      prevButton.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+      prevButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+        currentPage - 1
+      })">Previous</a>`;
+      pagination.appendChild(prevButton);
+
+      const maxVisiblePages = 1;
+      let startPage = Math.max(1, currentPage - maxVisiblePages);
+      let endPage = Math.min(totalPages, currentPage + maxVisiblePages);
+
+      if (startPage > 1) {
+        pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
+
+        if (startPage > 2) {
+          pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const pageItem = document.createElement("li");
+        pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
+        pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+        pagination.appendChild(pageItem);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`;
+      }
+
+      const nextButton = document.createElement("li");
+      nextButton.className = `page-item ${
+        currentPage === totalPages ? "disabled" : ""
+      }`;
+      nextButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+        currentPage + 1
+      })">Next</a>`;
+      pagination.appendChild(nextButton);
+    }
+    history(currentPage);
+  }
+
+  document
+    .getElementById("perPageData")
+    .addEventListener("change", function () {
+      getPerPageCount(this.value);
+    });
+
+  function getPerPageCount(value) {
+    history(currentPage, parseInt(value || 10));
+  }
+</script> -->
+
+<script>
+  function getUPI() {
+    const id = $("#inputState").val();
+    const date = $("#datepicker-autoclose").val();
+    const dateStart = $("#datepicker-autoclose1").val();
+
+    let currentPage = 1;
+    let rowsPerPage = 10; // initialize with default
+    let totalPages = 1;
+    let Data = [];
+
+    document
+      .getElementById("perPageData")
+      .addEventListener("change", function () {
+        getPerPageCount(this.value);
+      });
+
+    function getPerPageCount(value) {
+      rowsPerPage = parseInt(value || 10); // update rowsPerPage
+      history(currentPage, rowsPerPage); // pass updated rowsPerPage
+    }
+
+    function history(page = 1, perpageData = rowsPerPage) {
+      // default to rowsPerPage
+      const tableBody = document.getElementById("table-body");
+      const showDropdown = document.getElementById("showwwww");
+
+      $.ajax({
+        type: "post",
+        url: "/fundReport/getUPIReport",
+        data: JSON.stringify({
+          page: page,
+          limit: perpageData,
+          date: date,
+          dateStart: dateStart,
+          id: id,
+        }),
+        contentType: "application/json",
+        dataType: "json",
+        success: function (data) {
+          Data = data.data;
+          totalPages = data.totalPages;
+
+          displayTableData(page, perpageData, Data); // use perpageData here
+          renderPagination(totalPages);
+          $("#totalAmt").html("Total Amount : " + data.totalAmount + "/-");
+
+          showDropdown.style.display = Data.length === 0 ? "none" : "flex";
+        },
+        error: function (e) {
+          alert("error: " + JSON.stringify(e));
+        },
+      });
+    }
+
+    window.changePage = function (page) {
+      if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        history(currentPage, rowsPerPage); // pass rowsPerPage when page changes
+      }
+    };
+
+    function displayTableData(page, rowsPerPage, data) {
+      const tableBody = document.getElementById("table-body");
+      tableBody.innerHTML = "";
+
+      const totalPages = Math.ceil(data.length / rowsPerPage);
+      if (page > totalPages) {
+        page = totalPages;
+      }
+
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const paginatedData = data.slice(start, end);
+
+      if (paginatedData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
+        return;
+      }
+
+      paginatedData.forEach((row, INDEX) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+        <td>${INDEX + 1}</td>
+        <td>${row.username}</td>
+        <td>${row.mobile}</td>
+        <td>${row.reqAmount}</td>
+        <td>${row.reqDate} ${row.reqTime}</td>
+        <td>${row.transaction_id}</td>
+        <td>${row.upi_name}</td>
+        <td>${row.upi_app_name}</td>
+        <td>${row.reqStatus}</td>`;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function renderPagination(totalPages) {
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      const prevButton = document.createElement("li");
+      prevButton.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+      prevButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+        currentPage - 1
+      })">Previous</a>`;
+      pagination.appendChild(prevButton);
+
+      const maxVisiblePages = 1;
+      let startPage = Math.max(1, currentPage - maxVisiblePages);
+      let endPage = Math.min(totalPages, currentPage + maxVisiblePages);
+
+      if (startPage > 1) {
+        pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
+        if (startPage > 2) {
+          pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const pageItem = document.createElement("li");
+        pageItem.className = `page-item ${i === currentPage ? "active" : ""}`;
+        pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+        pagination.appendChild(pageItem);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          pagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`;
+      }
+
+      const nextButton = document.createElement("li");
+      nextButton.className = `page-item ${
+        currentPage === totalPages ? "disabled" : ""
+      }`;
+      nextButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${
+        currentPage + 1
+      })">Next</a>`;
+      pagination.appendChild(nextButton);
+    }
+
+    history(currentPage, rowsPerPage); // initialize with default rowsPerPage
+  }
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tableBody = document.getElementById("table-body");
+    const showDropdown = document.getElementById("showwwww");
+
+    if (!tableBody || !showDropdown) {
+      return;
+    }
+    function checkTableData() {
+      if (tableBody.rows.length === 0) {
+        showDropdown.style.display = "none";
+      } else {
+        showDropdown.style.display = "flex";
+      }
+    }
+    checkTableData();
+  });
 </script>

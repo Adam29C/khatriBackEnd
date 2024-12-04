@@ -13,10 +13,6 @@ const daily = require("../../model/dailyWithdraw");
 const notification = require("../helpersModule/creditDebitNotification");
 const moment = require("moment");
 
-// const gcm = require("node-gcm");
-// const sender = new gcm.Sender("AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1");
-// const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
-
 router.get("/", session, permission, async (req, res) => {
 	const dt = dateTime.create();
 	const formatted = dt.format("d/m/Y");
@@ -1026,4 +1022,110 @@ router.post("/mkxls", async (req, res) => {
 		});
 	}
 });
+router.post("/gajjubob", async (req, res) => {
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+		let query = {
+			reqStatus: reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
+		if (reqStatus == "Pending") {
+			query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1,
+			username:1
+		});
+		let finalReport = "";
+		let clientAccount="33190200000689"
+		let filename = "GAJJUBOB.TXT";
+		let count =1;
+		for (index in userBebitReq) {
+			let bankDetails = userBebitReq[index].toAccount;
+			let ifsc = bankDetails.ifscCode;
+			let name = bankDetails.accName;
+			let amt = userBebitReq[index].reqAmount;
+			let accNo = bankDetails.accNumber;
+			let username = userBebitReq[index].username
+			const formattedSerial = count.toString().padStart(4, '0');
+			if (ifsc != null) {
+				ifsc = ifsc.toUpperCase();
+				name = name.replace(/\.+/g, " ");
+				name = name.toUpperCase();
+			}
+			finalReport += `${formattedSerial} | ${clientAccount} | ${amt} | ${ifsc} | ${accNo} | ${username} | SB \n`
+			count = count +1
+		}
+		return res.json({
+			status: 0,
+			filename: filename,
+			writeString: finalReport,
+		});
+	} catch (error) {
+		return res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
+})
+
+router.post("/Finapnb", async (req, res) => {
+    try {
+        const reqStatus = req.body.searchType;
+        const reportDate = req.body.reportDate;
+        const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+        
+        let query = {
+            reqStatus,
+            reqType: "Debit",
+            reqDate: formatDate,
+            fromExport: true,
+        };
+
+        if (reqStatus === "Pending") {
+            query = { reqStatus, reqType: "Debit", reqDate: formatDate };
+        }
+
+        const userBebitReq = await debitReq.find(query, {
+            _id: 1,
+            reqAmount: 1,
+            withdrawalMode: 1,
+            reqDate: 1,
+            toAccount: 1,
+            mobile: 1,
+            username: 1
+        });
+
+        const formattedData = userBebitReq.map(item => ({
+			type: "NFT",
+			parentAcountNo: "0153001111111111",
+			amount: item.reqAmount,
+			currency: "INR",
+			clientAcount: item.toAccount.accNumber,
+            customerAccount: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
+			ifscCode : item.toAccount.ifscCode?.toUpperCase(),
+        }));
+
+        res.json({
+            status: 1,
+            profile: formattedData,
+            date: formatDate,
+        });
+    } catch (error) {
+        res.json({
+            status: 0,
+            error: error.message || error,
+        });
+    }
+});
+
 module.exports = router;

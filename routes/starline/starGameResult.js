@@ -14,9 +14,6 @@ const history = require("../../model/wallet_history");
 const moment = require("moment");
 const messaging = require("../../firebase")
 const lodash = require('lodash');
-// const gcm = require("node-gcm");
-// const sender = new gcm.Sender("AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1");
-// const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
 
 router.get("/", session, permission, async (req, res) => {
 	const dt = dateTime.create();
@@ -187,7 +184,7 @@ router.post("/", session, async (req, res) => {
 						time: formatted1,
 					};
 					let token = [];
-					noti(req, res, result, token);
+					// noti(req, res, result, token);
 					return res.json({
 						status: 1,
 						message: "Success",
@@ -271,8 +268,6 @@ router.post("/", session, async (req, res) => {
 
 router.get("/pastResult", session, async (req, res) => {
 	try {
-		// Need to Test
-		//return res.json('Not Found');
 		const name = req.query.date;
 		const result = await StarlinegameResult.find({ resultDate: name });
 		const countResult = await StarlinegameResult.find({
@@ -558,7 +553,7 @@ router.post("/refundAll", session, async (req, res) => {
 				singleUserUpdate.username +
 				", Refund Successfully Done For " +
 				name;
-			sendRefundNotification(tokenArray, name, body);
+			// sendRefundNotification(tokenArray, name, body);
 		} else {
 			const userlist = await starBids.find({
 				providerId: providerId,
@@ -623,23 +618,8 @@ router.post("/refundAll", session, async (req, res) => {
 					tokenArray.push(firebaseId);
 					i++;
 				}
-
-				//await history.insertMany(historyArray);
-				// var singleUserBidUpdate = await starBids.updateMany(
-				// 	{ providerId: providerId, gameDate: resultDate, winStatus: 0 },
-				// 	{
-				// 		$set: {
-				// 			winStatus: 5,
-				// 			updatedAt: formatted2,
-				// 		},
-				// 	}
-				// );
-
-				const body =
-					"Hello Khatri Games User, Your Refund For Date : " +
-					resultDate +
-					", is Processed Successfully";
-				sendRefundNotification(tokenArray, providerName, body);
+                const body = `Hello Khatri Games User, Your Refund For Date :${resultDate}, is Processed Successfully`
+				// sendRefundNotification(tokenArray, providerName, body);
 			}
 		}
 		res.json({
@@ -654,41 +634,6 @@ router.post("/refundAll", session, async (req, res) => {
 		});
 	}
 });
-
-// async function sendRefundNotification(tokenArray, name, body) {
-// 	let priority = 'high'
-//         let finalArr=[]
-//         for(let arr of tokenArray){
-//             if(arr!==""){
-//                 finalArr.push(arr)
-//             }
-//          }
-// 	let message = {
-// 		android: {
-// 			priority: priority,
-// 		},
-// 		data: {
-// 			title: `Refund For ${name}`,
-// 			body: body,
-// 			icon: 'ic_launcher',
-// 			type: 'Notification',
-// 		},
-// 		token: finalArr,
-// 	};
-// 	try {
-// 		const response = await messaging.sendMulticast(message);
-// 		console.log('Successfully sent message:', response);
-// 		if (response.failureCount > 0) {
-// 			response.responses.forEach((resp, idx) => {
-// 				if (!resp.success) {
-// 					console.error(`Failed to send to ${tokens[idx]}: ${resp.error}`);
-// 				}
-// 			});
-// 		}
-// 	} catch (error) {
-// 		console.log('Error sending message:', error);
-// 	}
-// }
 
 async function sendRefundNotification(tokenArray, name, body) {
     let finalArr = tokenArray.filter(token => token !== "");
@@ -707,7 +652,7 @@ async function sendRefundNotification(tokenArray, name, body) {
     for (let chunk of tokenChunks) {
         message.tokens = chunk;
         try {
-            const response = await messaging.sendMulticast(message);
+            const response = await messaging.sendEachForMulticast(message);
             if (response.failureCount > 0) {
                 response.responses.forEach((resp, idx) => {
                     if (!resp.success) {
