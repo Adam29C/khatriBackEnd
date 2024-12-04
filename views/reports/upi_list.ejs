@@ -397,8 +397,6 @@
 
       const showDropdown = document.getElementById("showwwww");
 
-      console.log("perpageData", perpageData);
-
       let d = perpageData || 10;
 
       $.ajax({
@@ -460,9 +458,6 @@
         tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
         return;
       }
-
-
-      console.log("paginatedData" ,paginatedData);
 
       //   let total = 0;
       paginatedData.forEach((row, INDEX) => {
@@ -537,7 +532,6 @@
     });
 
   function getPerPageCount(value) {
-    console.log("value");
 
     history(currentPage, parseInt(value || 10));
   }

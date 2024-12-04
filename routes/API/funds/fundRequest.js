@@ -71,7 +71,6 @@ router.post("/addFund", verify,async (req, res) => {
 			}
 		}
 	} catch (e) {
-		console.log(e)
 		res.status(400).json({
 			status: 0,
 			message: "Something Bad Happened Please Contact Support",

@@ -332,11 +332,9 @@
       url: "/paymentMode/listGateways",
       data: {},
       success: function (result) {
-        // console.log("result", result);
 
         let message = result.message;
         if (result.status) {
-          // console.log("result", result.data);
           let data = result.data;
 
           const tableBody = document.querySelector("#UpiTable tbody");
@@ -411,8 +409,6 @@
     //   url: `/paymentMode/deleteUpi`,
     //   data: { id: bankId },
     //   success: function (result) {
-
-    //     console.log("resultresult" ,result);
 
     //     let message = result.message;
     //     if (result.status === 1) {

@@ -675,7 +675,6 @@ router.post("/refundAll", session, async (req, res) => {
 // 	};
 // 	try {
 // 		const response = await messaging.sendEachForMulticast(message);
-// 		console.log('Successfully sent message:', response);
 // 		if (response.failureCount > 0) {
 // 			response.responses.forEach((resp, idx) => {
 // 				if (!resp.success) {
@@ -684,7 +683,6 @@ router.post("/refundAll", session, async (req, res) => {
 // 			});
 // 		}
 // 	} catch (error) {
-// 		console.log('Error sending message:', error);
 // 	}
 // }
 

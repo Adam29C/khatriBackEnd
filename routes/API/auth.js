@@ -174,8 +174,6 @@ router.post("/checkUsernameNew", async (req, res) => {
 router.post("/checkUsernameNewOne", async (req, res) => {
 	try {
 		const { mobileNumber, otp, username, status } = req.body;
-		console.log(req.body)
-		console.log(typeof status)
 		if (status === 1) {
 			if (!mobileNumber || !otp) {
 				return res.json({
@@ -271,7 +269,6 @@ router.post("/", async (req, res) => {
 
 router.post("/verifyMobile", async (req, res) => {
 	try {
-		console.log("EREREREREERre",req.body)
 		const data = req.header("x-api-key");
 		const mobileNumber = req.body.mobile;
 		if (!data)
@@ -291,26 +288,13 @@ router.post("/verifyMobile", async (req, res) => {
 			});
 		let userBanned = await User.findOne({ mobile: mobileNumber, banned: true });
 		if (userBanned) {
-			console.log(userBanned)
 			return res.status(400).json({
 				status: 2,
 				message: "You Are Blocked By Admin",
 			});
-
-			// break
 		}
-		console.log("me yaha apr hu")
 		const user = await User.findOne({ mobile: mobileNumber });
 		if (user) {
-			// console.log(user)
-			// console.log(typeof user.banned)
-			// if (user.banned === true || user.banned) {
-			// 	console.log("#$$$$$$$$$$$$$$")
-			// 	return res.status(200).json({
-			// 		status: 0,
-			// 		message: "You Are Blocked By Admin",
-			// 	});
-			// }
 			const username = user.username;
 			const newDeviceId = req.body.deviceId;
 			const deviceIdDatabase = user.deviceId;
@@ -1155,7 +1139,6 @@ router.post("/sendMobileOtp", async (req, res) => {
 router.post("/sendMobileOtpNew", async (req, res) => {
 	try {
 		const { mobileNumber } = req.body;
-		console.log(req.body)
 		if (!mobileNumber) {
 			return res.status(400).json({
 				status: 0,
@@ -1175,7 +1158,6 @@ router.post("/sendMobileOtpNew", async (req, res) => {
 		} else {
 			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp: data, status: 0, currentTime: Date.now(), });
 		}
-		console.log("success")
 		return res.status(200).send({
 			status: 1,
 			otp: data,
@@ -1192,7 +1174,6 @@ router.post("/sendMobileOtpNew", async (req, res) => {
 
 router.post("/forgotOtpSend", async (req, res) => {
 	try {
-		console.log(req.body,"#$$$$$$$$$$$$$$$")
 		const { mobileNumber } = req.body;
 		if (!mobileNumber) {
 			return res.status(400).json({
@@ -1202,13 +1183,11 @@ router.post("/forgotOtpSend", async (req, res) => {
 		}
 		let userDetails = await User.findOne({ mobile: mobileNumber });
 		if (!userDetails) {
-			console.log("#@@@@@@@@@@@@@@@@@@@")
 			return res.status(400).json({
 				status: 0,
 				message: "User Details Not Found",
 			});
 		}
-		console.log("forgot case execute")
 		let data = await otpSend(mobileNumber);
 		await User.findOneAndUpdate({ _id: userDetails._id }, { forgotOtp: data, forgotOtpTime: Date.now() });
 		return res.status(200).send({
@@ -1217,7 +1196,6 @@ router.post("/forgotOtpSend", async (req, res) => {
 			message: "Otp  Send Successfully",
 		});
 	} catch (error) {
-		console.log(error)
 		return res.status(400).json({
 			status: 0,
 			message: "Something Bad Happened Contact Support",
@@ -1293,7 +1271,6 @@ router.post("/userExistOtpVerifyDevice", async (req, res) => {
 router.post("/forgotOtpVerify", async (req, res) => {
 	try {
 		const { mobileNumber, otp } = req.body;
-		console.log(req.body)
 		if (!mobileNumber || !otp) {
 			return res.status(400).json({
 				status: 0,
@@ -1558,7 +1535,6 @@ async function updateUserCount() {
 
 async function otpSend(mobileNumber) {
 	try {
-		console.log("mobileNumber:::", mobileNumber)
 		let generateOTP = Math.floor(1000 + Math.random() * 9000);
 		let message = `Your one time verification code is ${generateOTP}. Verification code is valid for 30 min., We have never ask for verification code or pin.`
 		const url = `https://sms.par-ken.com/api/smsapi?key=${account_key}&route=${route}&sender=${sender_id}&number=${mobileNumber}&sms=${message}&templateid=${template_id}`

@@ -85,7 +85,6 @@ router.post("/insertSettings", session, async (req, res) => {
 						modifiedAt: formatted
 					})
 				}
-				console.log(finalArr)
 				await gamesSetting.insertMany(finalArr)
 			} else {
 				const settings = new gamesSetting({
@@ -144,7 +143,6 @@ router.post("/insertSettings", session, async (req, res) => {
 		// 	});
 		// }
 	} catch (e) {
-		console.log(e)
 		res.status(400).send(e);
 	}
 });

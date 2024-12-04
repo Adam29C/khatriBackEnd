@@ -136,40 +136,25 @@ router.get("/web/games", async (req, res) => {
 
         const todayDayName = moment().format("dddd");
         const nowTime = moment();
-
-        console.log(`Start fetching providers and appVersionInfo at ${Date.now() - startTime}ms`);
-
-        // Fetch providers and settings in parallel
         const [providers, appVersionInfo] = await Promise.all([
             gamesProvider.find({}).sort({ _id: 1 }).lean(),
             AppVersion.findOne()
         ]);
-
-        console.log(`Completed fetching providers and appVersionInfo at ${Date.now() - startTime}ms`);
-
-        // Pre-fetch all the game settings for the day and providers
         const providerIds = providers.map(p => p._id);
         const settings = await gamesSetting
             .find({ providerId: { $in: providerIds }, gameDay: todayDayName })
             .sort({ _id: 1 })
             .lean();
 
-        console.log(`Completed fetching game settings at ${Date.now() - startTime}ms`);
-
-        // Create a map for provider settings to reduce searching overhead
         const providerSettingsMap = settings.reduce((acc, setting) => {
             if (!acc[setting.providerId]) acc[setting.providerId] = [];
             acc[setting.providerId].push(setting);
             return acc;
         }, {});
 
-        console.log(`Completed building providerSettingsMap at ${Date.now() - startTime}ms`);
-
-        // Process each provider in parallel
         const finalArr = await Promise.all(providers.map(async (provider) => {
             const providerSettings = providerSettingsMap[provider._id.toString()] || [];
 
-            // Processing logic for game details
             const updatedSettings = providerSettings.map((gameDetail) => {
                 const obtTime = moment(gameDetail.OBT, "hh:mm A");
                 const cbtTime = moment(gameDetail.CBT, "hh:mm A");
@@ -200,9 +185,6 @@ router.get("/web/games", async (req, res) => {
             };
         }));
 
-        console.log(`Completed processing provider game details at ${Date.now() - startTime}ms`);
-
-        // Sort the final array by OBT times
         const parseTime = (timeStr) => {
             const [time, modifier] = timeStr.split(' ');
             let [hours, minutes] = time.split(':').map(Number);
@@ -219,12 +201,7 @@ router.get("/web/games", async (req, res) => {
             return timeA - timeB;
         });
 
-        console.log(`Completed sorting game details at ${Date.now() - startTime}ms`);
-
-        // Check app version info
         const appInfo = appVersionInfo.maintainence ? "Maintenance" : `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
-
-        console.log(`Sending response at ${Date.now() - startTime}ms`);
 
         return res.send({ data: finalArr, status: true, appInfo });
     } catch (e) {
@@ -1698,7 +1675,6 @@ router.get("/web/app_url", async (req, res) => {
         let appInfo;
         if (!appVersionInfo.maintainence) {
             appInfo = `${process.env.APK_DOMAIN}/${appVersionInfo.apkFileName}`;
-            console.log("appInfo::", appInfo)
             return res.send({ status: true, appInfo });
         } else {
             return res.send({ status: false });

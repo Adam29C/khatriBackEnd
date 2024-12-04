@@ -578,8 +578,6 @@
             "Email ",
           ];
 
-          console.log("xlsData " ,xlsData);
-
           var formatHeader = excel.addStyle({
             border: "none,none,none,thin #333333",
             font: "Calibri 12 #ffff B",
@@ -1290,7 +1288,6 @@
             arr.push(e._id);
           }
         });
-        console.log(arr);
         excel.generate("cashfree" + reportDate + "_Batch.xlsx");
       });
   }

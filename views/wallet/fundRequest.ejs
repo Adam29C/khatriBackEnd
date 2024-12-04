@@ -349,7 +349,6 @@ function pendingManualDebit() {
                     let html='';
                     let total = 0
                     data.data.forEach(function(e) {
-                        console.log("e" , e._id);
                         total += e.amount === undefined || null ? 0 : parseFloat(e.amount)
                         html += `<tr>
             <td>${i}</td>
@@ -454,7 +453,6 @@ function DeclinedManualDebit(){
             contentType: "text/plain",
             dataType: 'json',
             success: function (data) {
-                console.log("data.data" ,data);
 
                 if (data.data.length === 0)
                 {
@@ -532,7 +530,6 @@ let abc = ""
             }
         });
     }else{
-    console.log("");
 }
 
 }
@@ -543,7 +540,6 @@ function ShowImage(image){
 $('#Custome-modal-for-show-image').modal('show');
 $('#transactionImage').attr('src', image);
 
-console.log("image" ,image);
 }
 
     

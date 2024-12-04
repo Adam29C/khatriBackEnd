@@ -163,7 +163,6 @@ module.exports = async function () {
 	// 				.then((res) => res.json())
 	// 				.then((json) => json);
 	// 		} catch (error) {
-	// 			console.log(error);
 	// 		}
 	// 	}
 	// });
@@ -268,7 +267,6 @@ module.exports = async function () {
 	// 				}
 	// 			);
 	// 		} catch (error) {
-	// 			console.log(error);
 	// 		}
 	// 	}
 	// });
@@ -292,7 +290,6 @@ module.exports = async function () {
 	// 				}
 	// 			);
 	// 		} catch (error) {
-	// 			console.log(error);
 	// 		}
 	// 	}
 	// });
@@ -315,7 +312,6 @@ module.exports = async function () {
 	// 				}
 	// 			);
 	// 		} catch (error) {
-	// 			console.log(error);
 	// 		}
 	// 	//}
 	// });
@@ -329,7 +325,6 @@ module.exports = async function () {
 				.count();
 			let dataUpdate = await dashboard.find();
 			const update_id = dataUpdate[0]._id;
-			console.log("yesterdayRegisteredyesterdayRegistered:::", yesterdayRegistered)
 			await dashboard.updateOne(
 				{ _id: update_id },
 				{
@@ -618,7 +613,6 @@ module.exports = async function () {
 			if (error) {
 				console.log(error);
 			} else {
-				console.log("Email sent: " + info.response);
 				fs.unlink("zeroBalance.vcf", function (error, info) { });
 			}
 		});
@@ -634,7 +628,6 @@ module.exports = async function () {
 			try {
 				const collection = database.collection(timeHistoryDetails.collectionName);
 				const result = await collection.deleteMany(filter);
-				console.log(`Deleted ${result.deletedCount} documents from ${timeHistoryDetails.collectionName}`);
 			} catch (error) {
 				console.error(`Error cleaning up collection ${timeHistoryDetails.collectionName}:`, error.toString());
 			}

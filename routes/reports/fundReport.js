@@ -883,7 +883,6 @@ router.post("/getUPIFundReport", async (req, res) => {
             }
         }
         let finalArray = []
-        console.log("newArra:::", newArra.length)
         if (newArra.length > 0) {
             finalArray = newArra.sort((a, b) => {
                 const timeA = moment(`${a.reqDate} ${a.reqTime}`, "DD/MM/YYYY hh:mm:ss A");
