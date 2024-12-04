@@ -342,7 +342,7 @@ router.post("/", session, async (req, res) => {
 
 					if (sendStatus === 1) {
 						let token = [];
-						notification(req, res, finalResult, token);
+						// notification(req, res, finalResult, token);
 						const rowData = {
 							providerId: id,
 							session: session,
@@ -929,7 +929,7 @@ router.post("/refundAll", session, async (req, res) => {
 			tokenArray.push(firebaseId);
 			const name = singleUserBidUpdate.providerName;
 			const body = `Hello ${singleUserUpdate.username}, Your Bid Amount ${biddingPoints}/- RS Is Refund Successful In Your Wallet!`;
-			sendRefundNotification(tokenArray, name, body);
+			// sendRefundNotification(tokenArray, name, body);
 		} else {
 			const userlist = await gameBids.find({
 				providerId: providerId,
@@ -1001,7 +1001,7 @@ router.post("/refundAll", session, async (req, res) => {
 					"Hello Khatri Games User, Your Refund For Date : " +
 					resultDate +
 					", is Processed Successfully";
-				sendRefundNotification(tokenArray, providerName, body);
+				// sendRefundNotification(tokenArray, providerName, body);
 			}
 		}
 		res.json({
@@ -1016,41 +1016,6 @@ router.post("/refundAll", session, async (req, res) => {
 		});
 	}
 });
-
-// async function sendRefundNotification(tokenArray, name, body) {
-// 	let priority = 'high'
-// 	let finalArr = []
-// 	for (let arr of tokenArray) {
-// 		if (arr !== "") {
-// 			finalArr.push(arr)
-// 		}
-// 	}
-// 	let message = {
-// 		android: {
-// 			priority: priority,
-// 		},
-// 		data: {
-// 			title: `Refund For ${name}`,
-// 			body: body,
-// 			icon: 'ic_launcher',
-// 			type: 'Notification',
-// 		},
-// 		token: finalArr,
-// 	};
-// 	try {
-// 		const response = await messaging.sendMulticast(message);
-// 		console.log('Successfully sent message:', response);
-// 		if (response.failureCount > 0) {
-// 			response.responses.forEach((resp, idx) => {
-// 				if (!resp.success) {
-// 					console.error(`Failed to send to ${tokens[idx]}: ${resp.error}`);
-// 				}
-// 			});
-// 		}
-// 	} catch (error) {
-// 		console.log('Error sending message:', error);
-// 	}
-// }
 
 async function sendRefundNotification(tokenArray, name, body) {
 	let finalArr = tokenArray.filter(token => token !== "");
@@ -1069,7 +1034,7 @@ async function sendRefundNotification(tokenArray, name, body) {
 	for (let chunk of tokenChunks) {
 		message.tokens = chunk;
 		try {
-			const response = await messaging.sendMulticast(message);
+			const response = await messaging.sendEachForMulticast(message);
 			if (response.failureCount > 0) {
 				response.responses.forEach((resp, idx) => {
 					if (!resp.success) {

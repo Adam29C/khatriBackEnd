@@ -1230,7 +1230,6 @@
             arr.push(e._id);
           }
         });
-        console.log(arr);
         excel.generate("cashfree" + reportDate + "_Batch.xlsx");
       });
   }
@@ -1447,9 +1446,6 @@
 
         let a = 1;
         $.each(xlsData, function (key, e) {
-
-        console.log("e" ,e);
-
           let j = 0;
           excel.set(0, 0, a, e.type);
           j++;

@@ -72,6 +72,58 @@ router.post("/checkUsername", async (req, res) => {
 	try {
 		const { mobileNumber, otp, username } = req.body;
 		if (!mobileNumber || !otp || !username) {
+			return res.status(400).json({
+				status: 0,
+				message: "Number, otp, username  Is Require",
+			});
+		}
+		let userInitialInfo = await initialInfo.findOne({ mobileNumber, status: 0 }, { Otp: 1, status: 1, currentTime: 1 });
+		if (!userInitialInfo) {
+			return res.status(400).json({
+				status: 0,
+				message: "Data Not Found",
+			});
+		}
+		let newTimestamp = moment(userInitialInfo.currentTime).add(2, 'minutes').valueOf();
+		let currentTime = Date.now();
+		if (currentTime > newTimestamp) {
+			return res.status(400).json({
+				status: 0,
+				message: "OTP has expired. Please try again.",
+			});
+		}
+		if (userInitialInfo.Otp !== parseInt(otp)) {
+			return res.status(400).json({
+				status: 0,
+				message: "Invalid OTP. Please try again.",
+			});
+		} else {
+			await initialInfo.updateOne({ mobileNumber }, { status: 1 })
+		}
+		let check = await User.findOne({ username: username })
+		if (check) {
+			return res.json({
+				status: 0,
+				message: `The username ${username} already exists. Please use a different username`
+			})
+		}
+		return res.status(200).send({
+			status: 1,
+			message: "OTP verified successfully.",
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			message: "Server Error",
+			error: error.toString()
+		})
+	}
+});
+
+router.post("/checkUsernameNew", async (req, res) => {
+	try {
+		const { mobileNumber, otp, username } = req.body;
+		if (!mobileNumber || !otp || !username) {
 			return res.json({
 				status: 0,
 				message: "Number, otp, username  Is Require",
@@ -106,6 +158,63 @@ router.post("/checkUsername", async (req, res) => {
 			})
 		}
 		await initialInfo.updateOne({ mobileNumber }, { status: 1 })
+		return res.status(200).send({
+			status: 1,
+			message: "OTP verified successfully.",
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			message: "Server Error",
+			error: error.toString()
+		})
+	}
+});
+
+router.post("/checkUsernameNewOne", async (req, res) => {
+	try {
+		const { mobileNumber, otp, username, status } = req.body;
+		console.log(req.body)
+		console.log(typeof status)
+		if (status === 1) {
+			if (!mobileNumber || !otp) {
+				return res.json({
+					status: 0,
+					message: "Number, otp Is Require",
+				})
+			}
+			let userInitialInfo = await initialInfo.findOne({ mobileNumber, status: 0 }, { Otp: 1, status: 1, currentTime: 1 });
+			if (!userInitialInfo) {
+				return res.json({
+					status: 0,
+					message: "Data Not Found",
+				})
+			}
+			let newTimestamp = moment(userInitialInfo.currentTime).add(2, 'minutes').valueOf();
+			let currentTime = Date.now();
+			if (currentTime > newTimestamp) {
+				return res.json({
+					status: 0,
+					message: "OTP has expired. Please try again.",
+				})
+			}
+			if (userInitialInfo.Otp !== parseInt(otp)) {
+				return res.json({
+					status: 0,
+					message: "Invalid OTP. Please try again."
+				})
+			}
+			await initialInfo.updateOne({ mobileNumber }, { status: 1 })
+		}
+		if (status === 2) {
+			let check = await User.findOne({ username: username });
+			if (check) {
+				return res.json({
+					status: 0,
+					message: `The username ${username} already exists. Please use a different username`
+				})
+			}
+		}
 		return res.status(200).send({
 			status: 1,
 			message: "OTP verified successfully.",
@@ -162,6 +271,7 @@ router.post("/", async (req, res) => {
 
 router.post("/verifyMobile", async (req, res) => {
 	try {
+		console.log("EREREREREERre",req.body)
 		const data = req.header("x-api-key");
 		const mobileNumber = req.body.mobile;
 		if (!data)
@@ -179,9 +289,28 @@ router.post("/verifyMobile", async (req, res) => {
 				status: 2,
 				message: "Access Denied",
 			});
+		let userBanned = await User.findOne({ mobile: mobileNumber, banned: true });
+		if (userBanned) {
+			console.log(userBanned)
+			return res.status(400).json({
+				status: 2,
+				message: "You Are Blocked By Admin",
+			});
 
+			// break
+		}
+		console.log("me yaha apr hu")
 		const user = await User.findOne({ mobile: mobileNumber });
 		if (user) {
+			// console.log(user)
+			// console.log(typeof user.banned)
+			// if (user.banned === true || user.banned) {
+			// 	console.log("#$$$$$$$$$$$$$$")
+			// 	return res.status(200).json({
+			// 		status: 0,
+			// 		message: "You Are Blocked By Admin",
+			// 	});
+			// }
 			const username = user.username;
 			const newDeviceId = req.body.deviceId;
 			const deviceIdDatabase = user.deviceId;
@@ -224,6 +353,158 @@ router.post("/verifyMobile", async (req, res) => {
 
 router.post("/register", async (req, res) => {
 	try {
+
+		// return res.json({
+		// 	status : 1,
+		// 	message : "Success"
+		// })
+
+		let data = req.header("x-api-key");
+		if (!data)
+			return res.status(200).send({
+				status: 0,
+				message: "Access Denied",
+			});
+
+		let buff = Buffer.from(data, "base64");
+		let text = buff.toString("ascii");
+
+		const validAPI = bcrypt.compare(process.env.REGISTER_API_KEY, text);
+		if (!validAPI) {
+			return res.status(200).send({
+				status: 0,
+				message: "Access Denied",
+			});
+		}
+
+		let username = req.body.username;
+		let trimusername = username.toLowerCase().replace(/\s/g, "");
+		// check if USER already exist
+		const userExist = await User.findOne({ username: trimusername });
+
+		if (userExist) {
+			let salt = await bcrypt.genSalt(10);
+			let userMpin = req.body.mpin;
+			let hashedMpin = await bcrypt.hash(userMpin, salt);
+			let data = await User.findOneAndUpdate(
+				{ _id: userExist._id },
+				{
+					deviceId: req.body.deviceId,
+					mpin: hashedMpin,
+				}
+			);
+			return res.status(200).send({
+				status: 0,
+				message: "User Already Registered",
+			});
+		}
+
+		const mobileNumber = req.body.mobile;
+		const OTP = req.body.deviceVeriOTP;
+		let otpData = { type: 'error' };
+		otpData['type'] = OTP === 1234 || OTP === '1234' ? 'success' : 'success';
+
+		if (otpData.type == "success") {
+			try {
+				let userMpin = req.body.mpin;
+				const salt = await bcrypt.genSalt(10);
+				const hashedMpin = await bcrypt.hash(userMpin, salt);
+				const dt = dateTime.create();
+				const formatted = dt.format("d/m/Y");
+				const time = dt.format("I:M:S p");
+				const ts = moment(formatted, "DD/MM/YYYY").unix();
+				let username = req.body.username;
+				const user = new User({
+					name: req.body.name,
+					username: username.toLowerCase().replace(/\s/g, ""),
+					mobile: req.body.mobile.replace(/\s/g, ""),
+					firebaseId: req.body.firebaseId,
+					deviceName: req.body.deviceName,
+					deviceId: req.body.deviceId,
+					deviceVeriOTP: req.body.deviceVeriOTP,
+					banned: false,
+					wallet_bal_updated_at: null,
+					wallet_balance: 0,
+					mpin: hashedMpin,
+					mpinOtp: null,
+					CreatedAt: formatted,
+					loginStatus: true,
+					mainNotification: true,
+					gameNotification: true,
+					starLineNotification: true,
+					andarBaharNotification: true,
+					time: time,
+					timestamp: ts,
+				});
+
+				const savedUser = await user.save();
+				mappingTableApi(savedUser).then(function (data) {
+
+					const token = jwt.sign(
+						{ key: user.deviceId },
+						process.env.jsonSecretToken,
+						{ expiresIn: "1h" }
+					);
+
+					let messageData = {
+						name: user.name,
+						mobile: user.mobile,
+					};
+
+					const userData = {
+						token: token,
+						mobile: user.mobile,
+						username: user.username,
+						wallet_balance: user.wallet_balance,
+						userId: user._id,
+						name: user.name,
+						mainNotification: user.mainNotification,
+						gameNotification: user.gameNotification,
+						starLineNotification: user.starLineNotification,
+						andarBaharNotification: user.andarBaharNotification,
+					};
+
+					return res.status(200).send({
+						status: 1,
+						message: "Registered Successfully",
+						data: userData,
+						mpinGenerated: 0,
+						welcome_message: "🙏",
+					});
+
+					// sendWelcomeMessage(messageData).then(function (data) {
+					// 	updateUserCount();
+
+					// });
+				});
+			} catch (error) {
+				return res.status(200).json({
+					status: 0,
+					message: "Validation Error",
+					error: error,
+				});
+			}
+		}
+		if (otpData.type == "error") {
+			return res.json({
+				status: 0,
+				message: "Otp Error",
+				data: data,
+				error: error,
+			});
+		}
+		// });
+	} catch (error) {
+		res.json({
+			status: 0,
+			message: "Something Went Wrong",
+			error: error,
+		});
+	}
+});
+
+router.post("/registerNew", async (req, res) => {
+	try {
 		let data = req.header("x-api-key");
 		if (!data)
 			return res.status(200).send({
@@ -245,7 +526,6 @@ router.post("/register", async (req, res) => {
 		let username = req.body.username;
 		let trimusername = username.toLowerCase().replace(/\s/g, "");
 		const userExist = await User.findOne({ username: trimusername });
-		// let lastLoginTime = moment().valueOf();
 		if (userExist) {
 			let salt = await bcrypt.genSalt(10);
 			let userMpin = req.body.mpin;
@@ -318,8 +598,7 @@ router.post("/register", async (req, res) => {
 					starLineNotification: true,
 					andarBaharNotification: true,
 					time: time,
-					timestamp: ts,
-					// lastLoginTime
+					timestamp: ts
 				});
 
 				const savedUser = await user.save();
@@ -635,6 +914,7 @@ router.post("/mpinLogin", async (req, res) => {
 				if (mpin === null) {
 					mpinGen = 0;
 				}
+
 				await User.updateOne(
 					{ _id: user._id },
 					{ $set: { loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
@@ -647,6 +927,83 @@ router.post("/mpinLogin", async (req, res) => {
 					mpinGenerated: mpinGen,
 				});
 				// }
+			} else {
+				return res.status(200).json({
+					status: 0,
+					message: "You Are Blocked By Admin",
+				});
+			}
+		} else {
+			return res.status(200).send({
+				status: 0,
+				message: "User Not Registered",
+			});
+		}
+	} catch (e) {
+		return res.status(400).send({
+			status: 0,
+			message: "Something Happened Contact Support",
+			error: e,
+		});
+	}
+});
+
+router.post("/mpinLoginNew", async (req, res) => {
+	try {
+		const user = await User.findOne({ deviceId: req.body.deviceId });
+		if (user) {
+			let mpin = user.mpin;
+			const banned = user.banned;
+			if (mpin == null) {
+				return res.status(200).send({
+					status: 0,
+					message: "MPIN Not Available, Generate Mpin First",
+				});
+			}
+			if (banned === false) {
+				if (req.body.isMpin) {
+					const validPass = await bcrypt.compare(req.body.mpin, user.mpin);
+					if (!validPass) {
+						return res.status(200).send({
+							status: 0,
+							message: "Invalid MPIN",
+						});
+					}
+				} else {
+					await User.findByIdAndUpdate({ _id: user._id }, { fingerPrint: req.body.mpin });
+				}
+				const token = jwt.sign(
+					{ key: user.deviceId },
+					process.env.jsonSecretToken
+				);
+				const data = {
+					token: token,
+					mobile: user.mobile,
+					username: user.username,
+					wallet_balance: user.wallet_balance,
+					userId: user._id,
+					name: user.name,
+					mainNotification: user.mainNotification,
+					gameNotification: user.gameNotification,
+					starLineNotification: user.starLineNotification,
+					andarBaharNotification: user.andarBaharNotification,
+				};
+
+				const userMpin = user.mpin;
+				let mpinGen = 1;
+				if (userMpin === null) {
+					mpinGen = 0;
+				}
+				await User.updateOne(
+					{ _id: user._id },
+					{ $set: { firebaseId: req.body.firebaseId, loginStatus: true, lastLoginDate: moment().format('DD/MM/YYYY') } }
+				);
+				return res.header("auth-token", token).send({
+					status: 1,
+					message: "Success",
+					data: data,
+					mpinGenerated: mpinGen,
+				});
 			} else {
 				return res.status(200).json({
 					status: 0,
@@ -795,8 +1152,47 @@ router.post("/sendMobileOtp", async (req, res) => {
 	}
 });
 
+router.post("/sendMobileOtpNew", async (req, res) => {
+	try {
+		const { mobileNumber } = req.body;
+		console.log(req.body)
+		if (!mobileNumber) {
+			return res.status(400).json({
+				status: 0,
+				message: "Number Is Require",
+			});
+		}
+		let userInfo = await initialInfo.findOne({ mobileNumber });
+		let data = await otpSend(mobileNumber);
+		if (!userInfo) {
+			let info = await new initialInfo({
+				mobileNumber,
+				Otp: data,
+				status: 0,
+				currentTime: Date.now(),
+			})
+			await info.save()
+		} else {
+			await initialInfo.findOneAndUpdate({ mobileNumber }, { Otp: data, status: 0, currentTime: Date.now(), });
+		}
+		console.log("success")
+		return res.status(200).send({
+			status: 1,
+			otp: data,
+			message: "Otp Send Successfully",
+		});
+	} catch (error) {
+		return res.status(400).json({
+			status: 0,
+			message: "Something Bad Happened Contact Support",
+			error: error,
+		});
+	}
+});
+
 router.post("/forgotOtpSend", async (req, res) => {
 	try {
+		console.log(req.body,"#$$$$$$$$$$$$$$$")
 		const { mobileNumber } = req.body;
 		if (!mobileNumber) {
 			return res.status(400).json({
@@ -806,11 +1202,13 @@ router.post("/forgotOtpSend", async (req, res) => {
 		}
 		let userDetails = await User.findOne({ mobile: mobileNumber });
 		if (!userDetails) {
+			console.log("#@@@@@@@@@@@@@@@@@@@")
 			return res.status(400).json({
 				status: 0,
 				message: "User Details Not Found",
 			});
 		}
+		console.log("forgot case execute")
 		let data = await otpSend(mobileNumber);
 		await User.findOneAndUpdate({ _id: userDetails._id }, { forgotOtp: data, forgotOtpTime: Date.now() });
 		return res.status(200).send({
@@ -819,6 +1217,7 @@ router.post("/forgotOtpSend", async (req, res) => {
 			message: "Otp  Send Successfully",
 		});
 	} catch (error) {
+		console.log(error)
 		return res.status(400).json({
 			status: 0,
 			message: "Something Bad Happened Contact Support",
@@ -832,17 +1231,18 @@ router.post("/userExistOtpVerifyDevice", async (req, res) => {
 		const { mobileNumber, otp, deviceId } = req.body;
 		// Validate request body
 		if (!mobileNumber || !otp || !deviceId) {
-			return res.json({
+			return res.status(400).json({
 				status: 0,
 				message: "Mobile number, OTP, and device ID are required.",
-			})
+			});
 		}
+
 		let userDetails = await initialInfo.findOne({ mobileNumber });
 		if (!userDetails) {
-			return res.json({
+			return res.status(400).json({
 				status: 0,
 				message: "User details not found.",
-			})
+			});
 		}
 
 		let newTimestamp = moment(userDetails.forgotOtpTime)
@@ -850,25 +1250,27 @@ router.post("/userExistOtpVerifyDevice", async (req, res) => {
 			.valueOf();
 		let currentTime = Date.now();
 		if (currentTime > newTimestamp) {
-			return res.json({
+			return res.status(400).json({
 				status: 0,
 				message: "OTP has expired. Please try again.",
-			})
+			});
 		}
+
 		let userDetailsInfo = await User.findOne({ mobile: mobileNumber });
 
 		if (!userDetailsInfo) {
-			return res.json({
+			return res.status(400).json({
 				status: 0,
 				message: "User details not found.",
-			})
+			});
 		}
 		if (userDetails.Otp !== parseInt(otp)) {
-			return res.json({
+			return res.status(400).json({
 				status: 0,
 				message: "Invalid OTP. Please try again.",
-			})
+			});
 		}
+		// Update device ID upon successful verification
 		await User.updateOne({ mobile: mobileNumber }, { $set: { deviceId } });
 		const token = jwt.sign(
 			{ key: User.deviceId, deviceId },
@@ -891,6 +1293,7 @@ router.post("/userExistOtpVerifyDevice", async (req, res) => {
 router.post("/forgotOtpVerify", async (req, res) => {
 	try {
 		const { mobileNumber, otp } = req.body;
+		console.log(req.body)
 		if (!mobileNumber || !otp) {
 			return res.status(400).json({
 				status: 0,
@@ -930,6 +1333,96 @@ router.post("/forgotOtpVerify", async (req, res) => {
 		});
 	}
 })
+
+router.post("/checkUsernameNew", async (req, res) => {
+	try {
+		const { username } = req.body;
+
+		if (!username) {
+			return res.status(400).json({
+				status: 0,
+				message: "Username is required",
+			});
+		}
+
+		let check = await User.findOne({ username: username });
+
+		if (check) {
+			return res.json({
+				status: 0,
+				message: `The username ${username} already exists. Please use a different username`,
+			});
+		}
+
+		return res.status(200).send({
+			status: 1,
+			message: "Username is available.",
+		});
+
+	} catch (error) {
+		return res.json({
+			status: 0,
+			message: "Server Error",
+			error: error.toString(),
+		});
+	}
+});
+
+router.post("/verifyOtp", async (req, res) => {
+	try {
+		const { mobileNumber, otp } = req.body;
+
+		if (!mobileNumber || !otp) {
+			return res.status(400).json({
+				status: 0,
+				message: "Number and OTP are required",
+			});
+		}
+
+		let userInitialInfo = await initialInfo.findOne(
+			{ mobileNumber, status: 0 },
+			{ Otp: 1, status: 1, currentTime: 1 }
+		);
+
+		if (!userInitialInfo) {
+			return res.status(400).json({
+				status: 0,
+				message: "Data not found",
+			});
+		}
+
+		let newTimestamp = moment(userInitialInfo.currentTime).add(2, 'minutes').valueOf();
+		let currentTime = Date.now();
+
+		if (currentTime > newTimestamp) {
+			return res.status(400).json({
+				status: 0,
+				message: "OTP has expired. Please try again.",
+			});
+		}
+
+		if (userInitialInfo.Otp !== parseInt(otp)) {
+			return res.status(400).json({
+				status: 0,
+				message: "Invalid OTP. Please try again.",
+			});
+		} else {
+			await initialInfo.updateOne({ mobileNumber }, { status: 1 });
+		}
+
+		return res.status(200).send({
+			status: 1,
+			message: "OTP verified successfully.",
+		});
+
+	} catch (error) {
+		return res.json({
+			status: 0,
+			message: "Server Error",
+			error: error.toString(),
+		});
+	}
+});
 
 router.post("/sendOTP", async (req, res) => {
 
@@ -1065,6 +1558,7 @@ async function updateUserCount() {
 
 async function otpSend(mobileNumber) {
 	try {
+		console.log("mobileNumber:::", mobileNumber)
 		let generateOTP = Math.floor(1000 + Math.random() * 9000);
 		let message = `Your one time verification code is ${generateOTP}. Verification code is valid for 30 min., We have never ask for verification code or pin.`
 		const url = `https://sms.par-ken.com/api/smsapi?key=${account_key}&route=${route}&sender=${sender_id}&number=${mobileNumber}&sms=${message}&templateid=${template_id}`

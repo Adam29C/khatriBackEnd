@@ -1,16 +1,15 @@
 const fundReq = require('../../model/API/FundRequest');
 const users = require('../../model/API/Users');
 const dateTime = require('node-datetime');
-// const gcm = require('node-gcm');
-// const sender = new gcm.Sender('AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1');
-// const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
 const messaging = require("../../firebase")
+const moment = require("moment")
+
 module.exports = async function (data) {
     try {
         if (process.env.pm_id == '0') {
-            const dt = dateTime.create();
-            const reqDate = dt.format('d/m/Y');
-            const userId = await fundReq.find({ reqStatus: "Declined", reqDate: reqDate }, { userId: 1, reqStatus: 1, reqType: 1, reqAmount: 1, username: 1 });
+            const today = moment().format("DD/MM/YYYY");
+            const formatted = moment(today, "DD/MM/YYYY").subtract(1, "days").format("DD/MM/YYYY");
+            const userId = await fundReq.find({ reqStatus: "Declined", reqDate: formatted }, { userId: 1, reqStatus: 1, reqType: 1, reqAmount: 1, username: 1 });
 
             if (userId) {
                 for (index in userId) {
@@ -19,34 +18,6 @@ module.exports = async function (data) {
                     let token = userFirebase.firebaseId;
 
                     let body = `Your ${userId[index].reqType} Request Of Rs ${userId[index].reqAmount }/- Is Auto Expired`;
-                    let priority = 'high'
-                    // const message = {
-                    //     notification: {
-                    //         title: "Credit/Debit Request Notification",
-                    //         body: body,
-                    //     },
-                    //     data: {
-                    //         type: "Wallet"
-                    //     },
-                    //     android: {
-                    //         priority: priority
-                    //     },
-                    //     apns: {
-                    //         payload: {
-                    //             aps: {
-                    //                 'content-available': 1,
-                    //                 'priority': priority === 'high' ? 10 : 5
-                    //             }
-                    //         }
-                    //     },
-                    //     token: token
-
-                    // };
-                    // try {
-                    //     const response = await admin.messaging().send(message);
-                    // } catch (error) {
-                    //     console.log('Error sending message:', error);
-                    // }
                     let message = {
                         android: {
                             priority: 'high',
@@ -77,17 +48,3 @@ module.exports = async function (data) {
         return e;
     }
 };
-
-// var message = new gcm.Message({
-//     priority: 'high',
-//     data: {
-//         body : "Credit/Debit Request Notification",
-//         icon : "ic_launcher",
-//         title: body,
-//         type : "Wallet"
-//     }
-// });
-// sender.send(message, { registrationTokens: userToken }, function (err, response) {
-//     // if (err) throw err;
-//     // else console.log(response);
-// });

@@ -12,7 +12,6 @@ const notification = require('../helpersModule/sendNotification');
 const gameSum = require('../../model/dashBoard/BidSumGames');
 const dateTime = require('node-datetime');
 const Pusher = require('pusher');
-const mainGameResult = require("../../model/games/GameResult")
 const admins = require("../../model/dashBoard/AdminModel.js")
 router.post('/gameWinner', Loginsession, async (req, res) => {
     try {
@@ -128,7 +127,6 @@ router.post('/gameWinner', Loginsession, async (req, res) => {
                     addedBy_name: adminName
                 }
                 historyDataArray.push(arrValue);
-                console.log("historyDataArrayhistoryDataArray:::",historyDataArray.length)
                 let token = {
                     firebaseId: userToken,
                     amount: bal

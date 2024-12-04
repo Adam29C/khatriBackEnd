@@ -18,6 +18,7 @@ const morgan = require("morgan");
 const whatsAppCron = require("./routes/whatsapp/whatsapp");
 const fs = require('fs');
 const https = require('https'); // Add HTTPS module
+const moment = require("moment");
 
 // var MemoryStore = require('memorystore')(session)
 
@@ -84,43 +85,45 @@ dotenv.config();
 
 // Connect To DB
 mongoose.connect(
-  process.env.DB_CONNECT,
-   {
-     useNewUrlParser: true,
-     useFindAndModify: false,
-     useCreateIndex: true,
-     useUnifiedTopology: true,
-   },
-   (err) => {
-     if (err) console.log(err);
-     else console.log("Mongo Connected");
-     console.log(mongoose.version)
-   }
- );
+    process.env.DB_CONNECT,
+    {
+        useNewUrlParser: true,
+        useFindAndModify: false,
+        useCreateIndex: true,
+        useUnifiedTopology: true,
+    },
+    (err) => {
+        if (err) console.log(err);
+        else console.log("Mongo Connected");
+        console.log(mongoose.version)
+    }
+);
 // let certPath = path.join(__dirname, './global-bundle.pem');
 // mongoose.connect(
-// process.env.DB_CONNECT,
-//    {    
-//      ssl: true,  // Ensure SSL is enabled
-//      sslCA: fs.readFileSync(certPath),  // Provide the CA certificate
-//      tlsAllowInvalidCertificates: true,  // Allow invalid certificates (temporary workaround)
-//    },
-//    (err) => {
-//      if (err) {
-//        console.log('Error connecting to MongoDB:', err);
-//      } else {
-//        console.log('MongoDB Connected');
-//        console.log('Mongoose version:', mongoose.version);
-//      }
-//    }
-//  );
+//   process.env.DB_CONNECT,
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     ssl: true,  // SSL enable karein
+//     sslCA: fs.readFileSync(certPath),  // CA certificate provide karein
+//     tlsAllowInvalidCertificates: true,  // Temporary workaround for invalid certificates
+//   },
+//   (err) => {
+//     if (err) {
+//       console.log('Error connecting to MongoDB:',err);
+//     } else {
+//       console.log('MongoDB Connected');
+//       // console.log('Mongoose version:', mongoose.version);
+//     }
+//   }
+// );
 
-app.use(session({
-  secret: "dashboard###$$$$123321",
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
-}));
+// app.use(session({
+//     secret: "dashboard###$$$$123321",
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: { secure: false }
+// }));
 
 // Logger
 app.use(morgan("dev"));
@@ -130,11 +133,11 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "views")));
 
 app.use(function (req, res, next) {
-  res.set(
-    "Cache-Control",
-    "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0"
-  );
-  next();
+    res.set(
+        "Cache-Control",
+        "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0"
+    );
+    next();
 });
 
 //body parser
@@ -218,9 +221,9 @@ app.use("/settelment", settelment);
 app.use("/payments", payments);
 app.use("/api", website);
 app.use("/chat", chat);
-app.use("/paymentMode",payment_additional);
-app.use("/manualPayment",manualPayment);
-app.use("/manual",manual)
+app.use("/paymentMode", payment_additional);
+app.use("/manualPayment", manualPayment);
+app.use("/manual", manual)
 
 
 const gameProvi = require("./model/games/Games_Provider");
@@ -231,94 +234,127 @@ const userWalletTracing = require("./model/Wallet_Bal_trace");
 const userDltCron = require("./routes/helpersModule/cronJobs");
 
 userDltCron();
-cron.schedule("0 8 * * *", async () => {
-  try {
-    const dt = dateTime.create();
-    const formatted = dt.format("m/d/Y I:M:S p");
+// cron.schedule("0 8 * * *", async () => {
+//     try {
+//         const dt = dateTime.create();
+//         const formatted = dt.format("m/d/Y I:M:S p");
 
-    await gameProvi.updateMany({
-      $set: {
-        providerResult: "***-**-***",
-        modifiedAt: formatted,
-        resultStatus: 0,
-      },
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
+//         await gameProvi.updateMany({
+//             $set: {
+//                 providerResult: "***-**-***",
+//                 modifiedAt: formatted,
+//                 resultStatus: 0,
+//             },
+//         });
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
 
 cron.schedule("58 7 * * *", async () => {
-  try {
-    const dt = dateTime.create();
-    const formatted = dt.format("m/d/Y I:M:S p");
+    try {
+        const dt = dateTime.create();
+        const formatted = dt.format("m/d/Y I:M:S p");
 
-    await gameProvi.updateMany({
-      $set: {
-        providerResult: "***-**-***",
-        modifiedAt: formatted,
-        resultStatus: 0,
-      },
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-cron.schedule("55 23 * * *", async (req, res) => {
-  try {
-    const dt = dateTime.create();
-    const formatted = dt.format("d/m/Y");
-    await fund.updateMany(
-      { reqStatus: "Pending" },
-      {
-        $set: { reqStatus: "Declined", reqUpdatedAt: formatted },
-      }
-    );
-    declineNoti();
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-cron.schedule("5 0 * * *", async (req, res) => {
-  try {
-    const Active_TotWalletBal = await userBal.aggregate([
-      { $match: { banned: false } },
-      { $group: { _id: null, sumdigit: { $sum: "$wallet_balance" } } },
-    ]);
-    if (Active_TotWalletBal.length) {
-      const dt = dateTime.create();
-      const formatted = dt.format("d/m/Y I:M:S p");
-      const trace = new userWalletTracing({
-        walletBal_12oClock: Active_TotWalletBal[0].sumdigit,
-        createdAt: formatted,
-      });
-      await trace.save();
+        await gameProvi.updateMany({
+            $set: {
+                providerResult: "***-**-***",
+                modifiedAt: formatted,
+                resultStatus: 0,
+            },
+        });
+    } catch (error) {
+        console.log(error);
     }
-  } catch (error) {
-    console.log(error);
-  }
+});
+ 
+// cron.schedule("55 23 * * *", async (req, res) => {
+//   try {
+//     const dt = dateTime.create();
+//     const formatted = dt.format("d/m/Y");
+//     await fund.updateMany(
+//       { reqStatus: "Pending" },
+//       {
+//         $set: { reqStatus: "Declined", reqUpdatedAt: formatted },
+//       }
+//     );
+//     declineNoti();
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
+
+cron.schedule("05 1 * * *", async (req, res) => {
+    try {
+        const today = moment().format("DD/MM/YYYY");
+        const formatted = moment(today, "DD/MM/YYYY").subtract(1, "days").format("DD/MM/YYYY");
+        await fund.updateMany(
+            { reqStatus: "Pending" },
+            {
+                $set: { reqStatus: "Declined", reqUpdatedAt: formatted },
+            }
+        );
+        declineNoti();
+    } catch (error) {
+        console.log(error);
+    }
 });
 
-cron.schedule("*/1 * * * *", async (req, res) => {
-  try {
-    const dt = dateTime.create();
-    const formatted = dt.format("I:M p");
-    var time = new Date();
-    const current_time = time.toLocaleString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
+// cron.schedule("5 0 * * *", async (req, res) => {
+//   try {
+//     const Active_TotWalletBal = await userBal.aggregate([
+//       { $match: { banned: false } },
+//       { $group: { _id: null, sumdigit: { $sum: "$wallet_balance" } } },
+//     ]);
+//     if (Active_TotWalletBal.length) {
+//       const dt = dateTime.create();
+//       const formatted = dt.format("d/m/Y I:M:S p");
+//       const trace = new userWalletTracing({
+//         walletBal_12oClock: Active_TotWalletBal[0].sumdigit,
+//         createdAt: formatted,
+//       });
+//       await trace.save();
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
-    whatsAppCron.executeWhatsAppTrigger(`${current_time}`);
-  } catch (error) {
-    console.log(error);
-  }
+cron.schedule("20 1 * * *", async (req, res) => {
+    try {
+        const Active_TotWalletBal = await userBal.aggregate([
+            { $match: { banned: false } },
+            { $group: { _id: null, sumdigit: { $sum: "$wallet_balance" } } },
+        ]);
+        if (Active_TotWalletBal.length) {
+            const dt = dateTime.create();
+            const formatted = dt.format("d/m/Y I:M:S p");
+            const trace = new userWalletTracing({
+                walletBal_12oClock: Active_TotWalletBal[0].sumdigit,
+                createdAt: formatted,
+            });
+            await trace.save();
+        }
+    } catch (error) {
+        console.log(error);
+    }
 });
+// cron.schedule("*/1 * * * *", async (req, res) => {
+//     try {
+//         const dt = dateTime.create();
+//         const formatted = dt.format("I:M p");
+//         var time = new Date();
+//         const current_time = time.toLocaleString("en-US", {
+//             hour: "numeric",
+//             minute: "numeric",
+//             hour12: true,
+//         });
 
-//console.log(process.env.port)
+//         whatsAppCron.executeWhatsAppTrigger(`${current_time}`);
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
 // const port = process.env.PORT || 9206;
 // https.createServer(app).listen(port, () => {
 //   console.log(`Running securely on PORT: ${port} Date: ${new Date().toLocaleString()}`);
@@ -326,6 +362,6 @@ cron.schedule("*/1 * * * *", async (req, res) => {
 
 let port = 5000
 app.listen(port, () => {
-  new Date().toLocaleDateString();
-  console.log(`Running on PORT: ${port} Date: ${new Date().toLocaleString()}`);
+    new Date().toLocaleDateString();
+    console.log(`Running on PORT: ${port} Date: ${new Date().toLocaleString()}`);
 });

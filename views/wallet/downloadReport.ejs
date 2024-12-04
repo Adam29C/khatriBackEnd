@@ -355,9 +355,6 @@
 
         let a = 1;
         $.each(xlsData, function (key, e) {
-
-        console.log("e" ,e);
-
           let j = 0;
           excel.set(0, 0, a, e.type);
           j++;
@@ -515,8 +512,6 @@
 
   function updateClass() {
     const div = document.getElementById("creditDebitTab");
-    console.log("divdivdiv", div);
-
     if (window.innerWidth < 620) {
       div.classList.add("table-responsive");
     } else {

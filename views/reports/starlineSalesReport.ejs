@@ -182,10 +182,7 @@
       var i = 1;
       let total_amt = 0;
 
-   
       var totalPointDifference = 0;
-            var totalBiddingPoint = 0;
-            var totalWiningPoint = 0;
 
       var winPoint = data[0].GameWinPoints;
       var bidPoint = data[0].BiddingPoints;
@@ -202,10 +199,9 @@ var bidPoint = e.BiddingPoints;
 var winPoint = e.GameWinPoints;
 var pointDifference = bidPoint - winPoint;
 
-   // Total pointDifference ka sum add karte jao
-   totalPointDifference += pointDifference;
-              totalBiddingPoint += bidPoint;
-              totalWiningPoint += winPoint;
+// Total pointDifference ka sum add karte jao
+totalPointDifference += pointDifference;
+
 Html +=
   "<tr><td>" + i + "</td> <td>" + (e.providerName ? e.providerName : "-") +
   "</td> <td>" +
@@ -225,16 +221,9 @@ Html +=
 i++;
 });
 
-Html +=
-  "<tr><td></td><td></td><td></td><td style='font-weight:bold;'>Total - " +
-  totalBiddingPoint +
-  "</td><td style='font-weight:bold; '>Total - " +
-  totalWiningPoint +
-  "</td><td style='font-weight:bold; color:" +
-  (totalPointDifference > 0 ? "#22b922" : "red") +
-  "'>Total - " +
-  totalPointDifference +
-  "</td></tr>";
+// Table ke end mein ek nayi row add karenge
+Html += "<tr><td colspan='5' style='text-align:right; font-weight:bold;'>Total Profit/Loss:</td>";
+Html += "<td style='font-weight:bold; color:" + (totalPointDifference > 0 ? " #22b922 " : "red") + "'>" + totalPointDifference + "</td></tr>";
 
 // HTML ko update karna
 $("#completedata").html(Html);
