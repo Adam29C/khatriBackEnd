@@ -13,9 +13,9 @@ const gameSum = require('../../model/dashBoard/BidSumGames');
 const dateTime = require('node-datetime');
 const Pusher = require('pusher');
 const admins = require("../../model/dashBoard/AdminModel.js")
-
 router.post('/gameWinner', Loginsession, async (req, res) => {
     try {
+        console.log(req.body)
         const provider = req.body.providerId;
         const digit = req.body.windigit;
         const gamedate = req.body.gameDate;

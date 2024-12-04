@@ -7,6 +7,7 @@ const gameBids = require("../../model/games/gameBids");
 const gameResult = require("../../model/games/GameResult");
 const session = require("../helpersModule/session");
 const permission = require("../helpersModule/permission");
+const mainGameResult = require("../../model/games/GameResult");
 
 router.get("/mainWinner", session, permission, async (req, res) => {
   try {
@@ -281,7 +282,7 @@ router.post("/remaningWinnerList", async (req, res) => {
         "Full Sangam Digits": []
       };
     }
-    let providerResult = await gameResult.findOne({ providerId, resultDate: date, session });
+    let providerResult = await mainGameResult.findOne({ providerId, resultDate: date, session });
     if (!providerResult) {
       return res.json({
         status: 0,

@@ -1,465 +1,626 @@
-const router = require("express").Router();
-const fundReq = require("../../model/API/FundRequest");
-const UPIlist = require("../../model/API/upiPayments");
-const userProfile = require("../../model/API/Profile");
-const dateTime = require("node-datetime");
-const moment = require("moment");
-const session = require("../helpersModule/session");
-const permission = require("../helpersModule/permission");
-const mongoose = require("mongoose");
+const router = require('express').Router();
+const user = require('../../model/API/Users');
+const history = require('../../model/wallet_history');
+const abResult = require('../../model/AndarBahar/ABGameResult');
+const ABbids = require('../../model/AndarBahar/ABbids');
+const starResult = require('../../model/starline/GameResult');
+const starBIds = require('../../model/starline/StarlineBids');
+const gameBids = require('../../model/games/gameBids');
+const gameResult = require('../../model/games/GameResult');
+const Loginsession = require('../helpersModule/session');
+const notification = require('../helpersModule/sendNotification');
+const gameSum = require('../../model/dashBoard/BidSumGames');
+const dateTime = require('node-datetime');
+const Pusher = require('pusher');
+const mainGameResult = require("../../model/games/GameResult")
+const admins = require("../../model/dashBoard/AdminModel.js")
+router.post('/gameWinner', Loginsession, async (req, res) => {
+    try {
+console.log(req.body,"@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#")
+        const provider = req.body.providerId;
+        const digit = req.body.windigit;
+        const gamedate = req.body.gameDate;
+        const digitFamily = req.body.digitFamily;
+        const resultId = req.body.resultId;
+        const session = req.body.session;
+        const userInfo = req.session.details;
+        const adminId = userInfo.user_id;
+        const adminName = userInfo.username;
+        let historyDataArray = [];
+        let tokenArray = [];
+        let resultList = '';
+        let totalPoints = 0;
+        let namefor = '';
 
-router.get("/bank", session, permission, async (req, res) => {
-  try {
-    const userInfo = req.session.details;
-    const permissionArray = req.view;
-    const check = permissionArray["bankReq"].showStatus;
-    if (check === 1) {
-      res.render("approvedReports/bankAccount", {
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Approved Report"
-      });
-    } else {
-      res.render("./dashboard/starterPage", {
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Dashboard"
-      });
+        resultList = await gameBids.find({
+            $and: [
+                { $or: [{ bidDigit: digit }, { bidDigit: digitFamily }] }], providerId: provider, gameDate: gamedate, gameSession: session
+        }).sort({ bidDigit: 1 });
+
+        calculateSum(session, provider, gamedate);
+        if (session === 'Close') {
+            const jodiDigit = req.body.jodiDigit;
+            const halfSangam1 = req.body.halfSangam1;
+            const halfSangam2 = req.body.halfSangam2;
+            const fullSangam = req.body.fullSangam;
+
+            const winnerListJoidClose = await gameBids.find({
+                $and: [
+                    { $or: [{ bidDigit: jodiDigit }] }], providerId: provider, gameDate: gamedate, gameSession: session
+            }).sort({ bidDigit: 1 });
+
+            const winnerListClose = await gameBids.find({
+                $and: [
+                    { $or: [{ bidDigit: halfSangam1 }, { bidDigit: halfSangam2 }, { bidDigit: fullSangam }] }], providerId: provider, gameDate: gamedate, gameSession: session
+            }).sort({ bidDigit: 1 });
+
+            if (Object.keys(resultList).length === 0) {
+                resultList = winnerListJoidClose.concat(winnerListClose);
+            }
+            else {
+                resultList = resultList.concat(winnerListJoidClose, winnerListClose);
+            }
+        }
+        const dt0 = dateTime.create();
+        const date = dt0.format('d/m/Y');
+        const formatted = dt0.format('m/d/Y I:M:S p');
+        const formatted2 = dt0.format('d/m/Y I:M:S p');
+
+        for (index in resultList) {
+            let bidPoint = resultList[index].biddingPoints;
+            let gamePrice = resultList[index].gameTypePrice;
+            let bal = bidPoint * gamePrice;
+            totalPoints += bal;
+            let userID = resultList[index].userId;
+            let id = resultList[index]._id;
+            let gameName = resultList[index].providerName;
+            namefor = gameName;
+            let gameType = resultList[index].gameTypeName;
+            await gameBids.updateOne(
+                { _id: id },
+                {
+                    $set: {
+                        winStatus: 1,
+                        gameWinPoints: bal,
+                        updatedAt: formatted,
+                        isPaymentDone: true,
+                    }
+                });
+
+            const userBal = await user.findOne({ _id: userID }, {
+                wallet_balance: 1, username: 1,
+                firebaseId: 1
+            });
+
+            if (userBal) {
+                const previous_amount = userBal.wallet_balance;
+                const current_amount = previous_amount + bal;
+                const name = userBal.username;
+                const userToken = userBal.firebaseId;
+                await user.updateOne(
+                    { _id: userID },
+                    { $inc: { wallet_balance: bal } },
+                    {
+                        $set: {
+                            wallet_bal_updated_at: formatted2
+                        }
+                    });
+
+                let dt1 = dateTime.create();
+                let time = dt1.format('I:M:S p');
+                let arrValue = {
+                    userId: userID,
+                    bidId: id,
+                    reqType: "main",
+                    previous_amount: previous_amount,
+                    current_amount: current_amount,
+                    provider_id: provider,
+                    transaction_amount: bal,
+                    username: name,
+                    provider_ssession: session,
+                    description: "Amount Added To Wallet For " + gameName + " : " + gameType + " Game Win",
+                    transaction_date: date,
+                    filterType: 1,
+                    transaction_status: "Success",
+                    win_revert_status: 1,
+                    transaction_time: time,
+                    admin_id: adminId,
+                    addedBy_name: adminName
+                }
+console.log("historyDataArray::::",historyDataArray.length)
+                historyDataArray.push(arrValue);
+                let token = {
+                    firebaseId: userToken,
+                    amount: bal
+                }
+                tokenArray.push(token);
+            }
+        }
+
+        await history.insertMany(historyDataArray);
+        await gameResult.updateOne(
+            { _id: resultId },
+            { $set: { status: 1 } });
+
+        await gameBids.updateMany(
+            { winStatus: 0, providerId: provider, gameDate: gamedate, gameSession: session },
+            {
+                $set:
+                {
+                    winStatus: 2,
+                    updatedAt: formatted
+                }
+            }
+        );
+
+        let sumDgit = namefor;
+        notification(req, res, sumDgit, tokenArray);
+        refreshEveryWhere(5205);
+        res.status(200).send({
+            status: 1,
+            message: 'Points Added Successfully'
+        });
+
+    } catch (error) {
+        res.status(400).send({
+            status: 0,
+            message: 'Contact Support',
+            error: error
+        });
     }
-  } catch (e) {
-    res.json({ message: e });
-  }
 });
 
-router.get("/paytm", session, permission, async (req, res) => {
-  try {
-    const dt = dateTime.create();
-    let date = dt.format("d/m/Y");
-    const report = await fundReq.find({
-      reqDate: date,
-      reqStatus: "Approved",
-      withdrawalMode: "Paytm",
-      reqType: "Debit",
-      from: 2
-    });
-    const userInfo = req.session.details;
-    const permissionArray = req.view;
+router.post('/abWinners', Loginsession, async (req, res) => {
+    try {
+        const provider = req.body.providerId;
+        const digit = req.body.windigit;
+        const date = req.body.gameDate;
+        const gamePrice = req.body.gamePrice;
+        const resultId = req.body.resultId;
+        const userInfo = req.session.details;
+        const adminId = userInfo.user_id;
+        const adminName = userInfo.username;
+        let namefor = '';
+        let historyDataArray = []; let tokenArray = [];
+        const resultList = await ABbids.find({ providerId: provider, bidDigit: digit, gameDate: date }).sort({ _id: -1 });
 
-    const check = permissionArray["paytmReq"].showStatus;
-    if (check === 1) {
-      res.render("approvedReports/paytm", {
-        data: report,
-        total: 0,
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Approved Report"
-      });
-    } else {
-      res.render("./dashboard/starterPage", {
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Dashboard"
-      });
+        const dt0 = dateTime.create();
+        const todayDate = dt0.format('d/m/Y');
+        let formatted = dt0.format('m/d/Y I:M:S p');
+        let formatted2 = dt0.format('d/m/Y I:M:S p');
+        for (index in resultList) {
+
+            let bidPoint = resultList[index].biddingPoints;
+            let bal = bidPoint * gamePrice;
+            let userID = resultList[index].userId;
+            let id = resultList[index]._id;
+            let gameName = resultList[index].providerName;
+            let gameType = resultList[index].gameTypeName;
+            namefor = 'Jackpot (' + gameName + ')';
+            await ABbids.updateOne(
+                { _id: id },
+                {
+                    $set: {
+                        winStatus: 1,
+                        gameWinPoints: bal,
+                        updatedAt: formatted
+                    }
+                });
+            const userBal = await user.findOne({ _id: userID }, {
+                wallet_balance: 1, username: 1,
+                firebaseId: 1
+            });
+            const previous_amount = userBal.wallet_balance;
+            const current_amount = previous_amount + bal;
+            const username = userBal.username;
+            const userToken = userBal.firebaseId;
+
+            await user.updateOne(
+                { _id: userID },
+                { $inc: { wallet_balance: bal } },
+                {
+                    $set: {
+                        wallet_bal_updated_at: formatted2
+                    }
+                });
+
+            let time = dt0.format('I:M:S p');
+            let arrValue = {
+                userId: userID,
+                bidId: id,
+                reqType: "andarBahar",
+                previous_amount: previous_amount,
+                current_amount: current_amount,
+                provider_id: provider,
+                transaction_amount: bal,
+                username: username,
+                description: "Amount Added To Wallet For " + gameName + " : " + gameType + " Jackpot Game Win",
+                transaction_date: todayDate,
+                filterType: 1,
+                transaction_time: time,
+                transaction_status: "Success",
+                win_revert_status: 1,
+                admin_id: adminId,
+                addedBy_name: adminName
+            }
+            historyDataArray.push(arrValue);
+            // let token = {
+            //     firebaseId : userToken,
+            //     gameName : 'Dhan Jackpot ('+ gameName + ')'
+            // }
+            let token = {
+                firebaseId: userToken,
+                amount: bal
+            }
+            tokenArray.push(token);
+        }
+
+        await history.insertMany(historyDataArray);
+        await abResult.updateOne(
+            { _id: resultId },
+            { $set: { status: 1 } });
+
+        await ABbids.updateMany(
+            { winStatus: 0, providerId: provider, gameDate: date },
+            {
+                $set:
+                {
+                    winStatus: 2,
+                    updatedAt: formatted
+                }
+            }
+        );
+
+        let sumDgit = namefor;
+        notification(req, res, sumDgit, tokenArray);
+        refreshEveryWhere(5207)
+        res.status(200).send({
+            status: 1,
+            message: 'Points Added Successfully'
+        });
+    } catch (error) {
+        res.status(400).send({
+            status: 0,
+            message: 'Something Bad Happened',
+            error: error
+        });
     }
-  } catch (e) {
-    res.json({ message: e });
-  }
 });
 
-router.get("/bankManual", session, permission, async (req, res) => {
-  try {
-    const dt = dateTime.create();
-    let date = dt.format("d/m/Y");
-    const reportList = await fundReq.find({
-      reqDate: date,
-      reqStatus: "Approved",
-      reqType: "Debit",
-      withdrawalMode: "Bank",
-      fromExport: false,
-      from: 2
-    });
-    let finalArray = []
-    if (reportList.length > 0) {
-      for (report of reportList) {
-        let reqTime = moment(report.reqTime);
-        finalArray.push({
-          toAccount: report.toAccount,
-          _id: report._id,
-          userId: report.userId,
-          reqAmount: report.reqAmount,
-          fullname: report.fullname,
-          username: report.username,
-          mobile: report.mobile,
-          reqType: report.reqType,
-          reqStatus: report.reqStatus,
-          reqDate: report.reqDate,
-          reqTime: reqTime.format('DD/MM/YYYY hh:mm A'),
-          withdrawalMode: report.withdrawalMode,
-          UpdatedBy: report.UpdatedBy,
-          reqUpdatedAt: report.reqUpdatedAt,
-          timestamp: report.timestamp,
-          createTime: report.createTime,
-          updatedTime: report.updatedTime,
-          adminId: report.adminId,
-          from: report.from,
-          fromExport: report.fromExport
-        })
-      }
-      finalArray.sort((a, b) => {
-        return new Date(a.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + a.reqTime.split(' ').slice(1).join(' ')) -
-          new Date(b.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + b.reqTime.split(' ').slice(1).join(' '));
-      });
+router.post('/starWinners', Loginsession, async (req, res) => {
+    try {
+        const provider = req.body.providerId;
+        const digit = req.body.windigit;
+        const date = req.body.gameDate;
+        const digitFamily = req.body.digitFamily;
+        const resultId = req.body.resultId;
+        const userInfo = req.session.details;
+        const adminId = userInfo.user_id;
+        const adminName = userInfo.username;
+        let namefor = '';
+        let historyDataArray = []; let tokenArray = [];
+        const resultList = await starBIds.find({
+            $and: [
+                { $or: [{ bidDigit: digit }, { bidDigit: digitFamily }] }
+            ], providerId: provider, gameDate: date
+        }).sort({ _id: -1 });
+
+        const dt0 = dateTime.create();
+        const todayDate = dt0.format('d/m/Y');
+        const formatted = dt0.format('m/d/Y I:M:S p');
+        const formatted2 = dt0.format('d/m/Y I:M:S p');
+        for (index in resultList) {
+            let bidPoint = resultList[index].biddingPoints;
+            let gamePrice = resultList[index].gameTypePrice;
+            let bal = bidPoint * gamePrice;
+            let userID = resultList[index].userId;
+            let id = resultList[index]._id;
+            let gameName = resultList[index].providerName;
+            let gameType = resultList[index].gameTypeName;
+            namefor = 'Starline (' + gameName + ')'
+            await starBIds.updateOne(
+                { _id: id },
+                {
+                    $set: {
+                        winStatus: 1,
+                        gameWinPoints: bal,
+                        updatedAt: formatted
+                    }
+                });
+            const userBal = await user.findOne({ _id: userID }, {
+                wallet_balance: 1, username: 1,
+                firebaseId: 1
+            });
+            const previous_amount = userBal.wallet_balance;
+            const current_amount = previous_amount + bal;
+            const name = userBal.username;
+            const userToken = userBal.firebaseId;
+            await user.updateOne(
+                { _id: userID },
+                { $inc: { wallet_balance: bal } },
+                {
+                    $set: {
+                        wallet_bal_updated_at: formatted2
+                    }
+                });
+
+            let dt1 = dateTime.create();
+            let time = dt1.format('I:M:S p');
+            let arrValue = {
+                userId: userID,
+                bidId: id,
+                reqType: "star",
+                previous_amount: previous_amount,
+                current_amount: current_amount,
+                provider_id: provider,
+                transaction_amount: bal,
+                username: name,
+                description: "Amount Added To Wallet For " + gameName + " : " + gameType + " Khatri Starline Game Win",
+                transaction_date: todayDate,
+                filterType: 1,
+                transaction_time: time,
+                transaction_status: "Success",
+                win_revert_status: 1,
+                admin_id: adminId,
+                addedBy_name: adminName
+            }
+            historyDataArray.push(arrValue);
+            let token = {
+                firebaseId: userToken,
+                amount: bal
+            }
+            tokenArray.push(token);
+        }
+
+        await history.insertMany(historyDataArray);
+        await starResult.updateOne(
+            { _id: resultId },
+            { $set: { status: 1 } });
+
+        await starBIds.updateMany(
+            { providerId: provider, gameDate: date, winStatus: 0, gameSession: 'Open' },
+            {
+                $set:
+                {
+                    winStatus: 2,
+                    updatedAt: formatted
+                }
+            }
+        );
+
+        let sumDgit = namefor;
+        notification(req, res, sumDgit, tokenArray);
+        refreshEveryWhere(5206);
+        res.status(200).send({
+            status: 1,
+            message: 'Points Added Successfully'
+        });
+
+    } catch (error) {
+
+        res.status(400).send({
+            status: 0,
+            message: 'Something Bad Happened',
+            error: error
+        });
     }
-    const userInfo = req.session.details;
-    const permissionArray = req.view;
-    const check = permissionArray["bankReq"].showStatus;
-    if (check === 1) {
-      res.render("approvedReports/bankManual", {
-        data: finalArray,
-        total: 0,
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Approved Report"
-      });
-    } else {
-      res.render("./dashboard/starterPage", {
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Dashboard"
-      });
+});
+
+router.post("/remaningGameWinner", async (req, res) => {
+    try {
+        const { providerId, gameDate, session, adminId } = req.body;
+        if (!providerId || !gameDate || !session) {
+            return res.status(400).send({
+                status: 0,
+                message: 'all filed required',
+            });
+        }
+        let historyDataArray = [];
+        let tokenArray = [];
+        let resultList = '';
+        let totalPoints = 0;
+        let namefor = '';
+
+        let providerResult = await gameResult.findOne({ providerId, resultDate: gameDate, session });
+        if (!providerResult) {
+            return res.status(400).send({
+                status: 0,
+                message: 'Result Data Not Found',
+            });
+        }
+        let digit = providerResult.winningDigit.toString();
+        let digitFamily = providerResult.winningDigitFamily
+        resultList = await gameBids.find({
+            $and: [
+                { $or: [{ bidDigit: digit }, { bidDigit: digitFamily }] }], providerId: providerId, gameDate: gameDate, gameSession: session
+        }).sort({ bidDigit: 1 });
+
+        calculateSum(session, providerId, gameDate);
+        let adminDetails;
+        if (adminId) {
+            adminDetails = await admins.findOne({ _id: adminId })
+        }
+        if (session === 'Close') {
+            const jodiDigit = req.body.jodiDigit;
+            const halfSangam1 = req.body.halfSangam1;
+            const halfSangam2 = req.body.halfSangam2;
+            const fullSangam = req.body.fullSangam;
+
+            const winnerListJoidClose = await gameBids.find({
+                $and: [
+                    { $or: [{ bidDigit: jodiDigit }] }], providerId: providerId, gameDate: gameDate, gameSession: session
+            }).sort({ bidDigit: 1 });
+
+            const winnerListClose = await gameBids.find({
+                $and: [
+                    { $or: [{ bidDigit: halfSangam1 }, { bidDigit: halfSangam2 }, { bidDigit: fullSangam }] }], providerId: providerId, gameDate: gameDate, gameSession: session
+            }).sort({ bidDigit: 1 });
+
+            if (Object.keys(resultList).length === 0) {
+                resultList = winnerListJoidClose.concat(winnerListClose);
+            }
+            else {
+                resultList = resultList.concat(winnerListJoidClose, winnerListClose);
+            }
+        }
+        const dt0 = dateTime.create();
+        const date = dt0.format('d/m/Y');
+        const formatted = dt0.format('m/d/Y I:M:S p');
+        const formatted2 = dt0.format('d/m/Y I:M:S p');
+
+        for (index in resultList) {
+            let bidPoint = resultList[index].biddingPoints;
+            let gamePrice = resultList[index].gameTypePrice;
+            let bal = bidPoint * gamePrice;
+            totalPoints += bal;
+            let userID = resultList[index].userId;
+            let id = resultList[index]._id;
+            let gameName = resultList[index].providerName;
+            namefor = gameName;
+            let gameType = resultList[index].gameTypeName;
+            await gameBids.updateOne(
+                { _id: id },
+                {
+                    $set: {
+                        winStatus: 1,
+                        gameWinPoints: bal,
+                        updatedAt: formatted,
+                        isPaymentDone: true,
+                    }
+                });
+
+            const userBal = await user.findOne({ _id: userID }, {
+                wallet_balance: 1, username: 1,
+                firebaseId: 1
+            });
+
+            if (userBal) {
+                const previous_amount = userBal.wallet_balance;
+                const current_amount = previous_amount + bal;
+                const name = userBal.username;
+                const userToken = userBal.firebaseId;
+                await user.updateOne(
+                    { _id: userID },
+                    { $inc: { wallet_balance: bal } },
+                    {
+                        $set: {
+                            wallet_bal_updated_at: formatted2
+                        }
+                    });
+
+                let dt1 = dateTime.create();
+                let time = dt1.format('I:M:S p');
+                let arrValue = {
+                    userId: userID,
+                    bidId: id,
+                    reqType: "main",
+                    previous_amount: previous_amount,
+                    current_amount: current_amount,
+                    provider_id: providerId,
+                    transaction_amount: bal,
+                    username: name,
+                    provider_ssession: session,
+                    description: "Amount Added To Wallet For " + gameName + " : " + gameType + " Game Win",
+                    transaction_date: date,
+                    filterType: 1,
+                    transaction_status: "Success",
+                    win_revert_status: 1,
+                    transaction_time: time,
+                    admin_id: adminId || null,
+                    addedBy_name: adminDetails?.adminName || null
+                }
+                historyDataArray.push(arrValue);
+                let token = {
+                    firebaseId: userToken,
+                    amount: bal
+                }
+                tokenArray.push(token);
+            }
+        }
+
+        await history.insertMany(historyDataArray);
+        await gameResult.updateOne(
+            { _id: providerResult._id },
+            { $set: { status: 1 } });
+
+        await gameBids.updateMany(
+            { winStatus: 0, providerId: providerId, gameDate: gameDate, gameSession: session },
+            {
+                $set:
+                {
+                    winStatus: 2,
+                    updatedAt: formatted
+                }
+            }
+        );
+
+        let sumDgit = namefor;
+
+        notification(req, res, sumDgit, tokenArray);
+        refreshEveryWhere(5205);
+        return res.status(200).send({
+            status: 1,
+            message: 'Points Added Successfully'
+        });
+    } catch (error) {
+        return res.status(500).send({
+            status: 0,
+            message: 'Contact Support',
+            error: error
+        });
     }
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
+})
 
-router.get("/creditUPI", session, permission, async (req, res) => {
-  try {
-    const dt = dateTime.create();
-    let date = dt.format("d/m/Y");
-    const report = await UPIlist.find({
-      reqDate: date,
-      $and: [{ $or: [{ reqStatus: "submitted" }, { reqStatus: "pending" }] }]
-    });
+async function calculateSum(session, providerId, gameDate) {
+    try {
+        if (session == "Open") {
+            const bids = await gameBids.find({ providerId: providerId, gameDate: gameDate, $and: [{ $or: [{ gameTypeName: "Jodi Digit" }, { gameTypeName: "Full Sangam Digits" }, { gameTypeName: "Half Sangam Digits" }] }] });
 
-    const userInfo = req.session.details;
-    const permissionArray = req.view;
+            let jodiPrice = 0; let halfSangam = 0; let fullSangam = 0;
 
-    const check = permissionArray["paytmReq"].showStatus;
-    if (check === 1) {
-      res.render("dashboard/approvedCredit", {
-        data: report,
-        total: 0,
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Approved Report"
-      });
-    } else {
-      res.render("./dashboard/starterPage", {
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Dashboard"
-      });
+            for (index in bids) {
+                let bidDigit = bids[index].bidDigit;
+                let strLength = bidDigit.length;
+                let points = bids[index].biddingPoints;
+                switch (strLength) {
+                    case 2:
+                        jodiPrice = jodiPrice + points;
+                        break;
+                    case 5:
+                        halfSangam = halfSangam + points;
+                        break;
+                    case 7:
+                        fullSangam = fullSangam + points;
+                        break;
+                }
+            }
+
+            const sum = new gameSum({
+                providerId: providerId,
+                date: gameDate,
+                half_Sangamsum: halfSangam,
+                full_Sangamsum: fullSangam,
+                Jodi_Sum: jodiPrice
+            })
+            await sum.save();
+        }
+    } catch (error) {
+        console.log(error);
     }
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
+}
 
-router.get("/creditUPI_ajax", session, permission, async (req, res) => {
-  try {
-    const date_cust = req.query.date_cust;
-    const dateFormat = moment(date_cust, "MM/DD/YYYY").format("DD/MM/YYYY");
+async function refreshEveryWhere(checkNum) {
 
-    const report = await UPIlist.find({
-      reqDate: dateFormat,
-      $and: [{ $or: [{ reqStatus: "submitted" }, { reqStatus: "pending" }] }]
+    const channels_client = new Pusher({
+        appId: '1024162',
+        key: 'c5324b557c7f3a56788a',
+        secret: 'c75c293b0250419f6161',
+        cluster: 'ap2'
     });
 
-    res.json({ approvedData: report });
-  }
-  catch (e) {
-    res.json({ message: e });
-  }
-});
-
-router.get("/paytm_ajax", session, async (req, res) => {
-  try {
-    const date_cust = req.query.date_cust;
-    const dateFormat = moment(date_cust, "MM/DD/YYYY").format("DD/MM/YYYY");
-
-    const report = await fundReq.find({
-      reqDate: dateFormat,
-      reqStatus: "Approved",
-      withdrawalMode: "Paytm",
-      reqType: "Debit",
-      // from : 2
-    });
-    res.json({ approvedData: report });
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
-
-// router.get("/bank_ajax", session, async (req, res) => {
-//     try {
-//         const date_cust = req.query.date_cust;
-//         const dateFormat = moment(date_cust, "MM/DD/YYYY").format("DD/MM/YYYY");
-//         const userBebitReq = await fundReq.find({
-//             reqDate: dateFormat,
-//             reqStatus: "Approved",
-//             reqType: "Debit",
-//             $and: [{ $or: [{ withdrawalMode: "Bank" }, { withdrawalMode: "Paytm" }] }],
-//             fromExport : true
-//         });
-//         let userIdArray = [];
-//         let debitArray = {};
-//         for (index in userBebitReq) {
-//           let reqAmount = userBebitReq[index].reqAmount;
-//           let withdrawalMode = userBebitReq[index].withdrawalMode;
-//           let reqDate = userBebitReq[index].reqDate;
-//           let user = userBebitReq[index].userId;
-//           let rowId = userBebitReq[index]._id;
-//           let userKi = mongoose.mongo.ObjectId(user);
-//           let reqTime = moment(userBebitReq[index].reqTime)
-//           userIdArray.push(userKi);
-//           debitArray[userKi] = {
-//             username : userBebitReq[index].username,
-//             rowId: rowId,
-//             userId: userKi,
-//             reqAmount: reqAmount,
-//             withdrawalMode: withdrawalMode,
-//             reqDate: reqDate,
-//             mobile: userBebitReq[index].mobile,
-//             reqTime: reqTime.format('DD/MM/YYYY hh:mm A'),
-//             reqUpdatedAt: userBebitReq[index].reqUpdatedAt
-//           };
-//         }
-
-//         let user_Profile = await userProfile.find({ userId: { $in: userIdArray } });
-
-//         for (index in user_Profile) {
-//           let id = user_Profile[index].userId;
-//           if (debitArray[id]) {
-//             debitArray[id].address = user_Profile[index].address;
-//             debitArray[id].city = user_Profile[index].city;
-//             debitArray[id].pincode = user_Profile[index].pincode;
-//             debitArray[id].name = user_Profile[index].account_holder_name;
-//             debitArray[id].account_no = user_Profile[index].account_no;
-//             debitArray[id].bank_name = user_Profile[index].bank_name;
-//             debitArray[id].ifsc = user_Profile[index].ifsc_code;
-//             debitArray[id].paytm_number = user_Profile[index].paytm_number;
-//           }
-//         }
-
-//         res.json({ approvedData: debitArray });
-//     } catch (e) {
-//       res.json({ message: e });
-//     }
-//   });
-
-//   router.get("/bankManual_ajax", session, permission, async (req, res) => {
-//       try {
-//           const date_cust = req.query.date_cust;
-//           const dateFormat = moment(date_cust, "MM/DD/YYYY").format("DD/MM/YYYY");
-//           const report = await fundReq.find({
-//                 reqDate: dateFormat,
-//                 reqStatus: "Approved",
-//                 reqType: "Debit",
-//                 withdrawalMode: "Bank",
-//                 fromExport : false,
-//                 from : 2
-//           });
-//           res.json({ approvedData: report });
-//       } catch (e) {
-//         res.json({ message: e });
-//       }
-//   });
-
-router.get("/bank_ajax", session, async (req, res) => {
-  try {
-    const date_cust = req.query.date_cust;
-    const dateFormat = moment(date_cust, "MM/DD/YYYY").format("DD/MM/YYYY");
-    const userBebitReq = await fundReq.find({
-      reqDate: dateFormat,
-      reqStatus: "Approved",
-      reqType: "Debit",
-      $and: [{ $or: [{ withdrawalMode: "Bank" }, { withdrawalMode: "Paytm" }] }],
-      fromExport: true
+    channels_client.trigger('my-channel', 'my-event', {
+        "type": checkNum
     });
 
-    let userIdArray = [];
-    let debitArray = {};
-    let finalObject = {};
-    for (index in userBebitReq) {
-      let reqAmount = userBebitReq[index].reqAmount;
-      let withdrawalMode = userBebitReq[index].withdrawalMode;
-      let reqDate = userBebitReq[index].reqDate;
-      let user = userBebitReq[index].userId;
-      let rowId = userBebitReq[index]._id;
-      let userKi = mongoose.mongo.ObjectId(user);
-      let reqTime = moment(userBebitReq[index].reqTime)
-      userIdArray.push(userKi);
-      debitArray[userKi] = {
-        username: userBebitReq[index].username,
-        rowId: rowId,
-        userId: userKi,
-        reqAmount: reqAmount,
-        withdrawalMode: withdrawalMode,
-        reqDate: reqDate,
-        mobile: userBebitReq[index].mobile,
-        reqTime: reqTime.format('DD/MM/YYYY hh:mm A'),
-        reqUpdatedAt: userBebitReq[index].reqUpdatedAt
-      };
-    }
-    let arr = Object.entries(debitArray).map(([key, value]) => ({ key, ...value }));
-    arr.sort((a, b) => {
-      return new Date(a.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + a.reqTime.split(' ').slice(1).join(' ')) -
-        new Date(b.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + b.reqTime.split(' ').slice(1).join(' '));
-    });
-    finalObject = Object.fromEntries(arr.map(item => [item.key, item]));
-    let user_Profile = await userProfile.find({ userId: { $in: userIdArray } });
-
-    for (index in user_Profile) {
-      let id = user_Profile[index].userId;
-      if (finalObject[id]) {
-        finalObject[id].address = user_Profile[index].address;
-        finalObject[id].city = user_Profile[index].city;
-        finalObject[id].pincode = user_Profile[index].pincode;
-        finalObject[id].name = user_Profile[index].account_holder_name;
-        finalObject[id].account_no = user_Profile[index].account_no;
-        finalObject[id].bank_name = user_Profile[index].bank_name;
-        finalObject[id].ifsc = user_Profile[index].ifsc_code;
-        finalObject[id].paytm_number = user_Profile[index].paytm_number;
-      }
-    }
-    return res.json({ approvedData: finalObject });
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
-
-router.get("/bankManual_ajax", session, permission, async (req, res) => {
-  try {
-    const date_cust = req.query.date_cust;
-    const dateFormat = moment(date_cust, "MM/DD/YYYY").format("DD/MM/YYYY");
-    const reportList = await fundReq.find({
-      reqDate: dateFormat,
-      reqStatus: "Approved",
-      reqType: "Debit",
-      withdrawalMode: "Bank",
-      fromExport: false,
-      from: 2
-    });
-    let finalArray = []
-    for (report of reportList) {
-      let reqTime = moment(report.reqTime);
-      finalArray.push({
-        toAccount: report.toAccount,
-        _id: report._id,
-        userId: report.userId,
-        reqAmount: report.reqAmount,
-        fullname: report.fullname,
-        username: report.username,
-        mobile: report.mobile,
-        reqType: report.reqType,
-        reqStatus: report.reqStatus,
-        reqDate: report.reqDate,
-        reqTime: reqTime.format('DD/MM/YYYY hh:mm A'),
-        withdrawalMode: report.withdrawalMode,
-        UpdatedBy: report.UpdatedBy,
-        reqUpdatedAt: report.reqUpdatedAt,
-        timestamp: report.timestamp,
-        createTime: report.createTime,
-        updatedTime: report.updatedTime,
-        adminId: report.adminId,
-        from: report.from,
-        fromExport: report.fromExport
-      })
-    }
-    finalArray.sort((a, b) => {
-      return new Date(a.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + a.reqTime.split(' ').slice(1).join(' ')) -
-        new Date(b.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + b.reqTime.split(' ').slice(1).join(' '));
-    });
-    return res.json({ approvedData: finalArray });
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
-
-//Declined Reports Route
-router.get("/declined", session, permission, async (req, res) => {
-  try {
-    const dt = dateTime.create();
-    let date = dt.format("d/m/Y");
-    const report = await fundReq.find({
-      reqDate: date,
-      reqType: "Debit",
-      reqStatus: "Declined"
-    });
-    const userInfo = req.session.details;
-    const permissionArray = req.view;
-    const check = permissionArray["decDebit"].showStatus;
-    if (check === 1) {
-      res.render("dashboard/declinedReports", {
-        data: report,
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Declined Report"
-      });
-    } else {
-      res.render("./dashboard/starterPage", {
-        userInfo: userInfo,
-        permission: permissionArray,
-        title: "Dashboard"
-      });
-    }
-  } catch (err) {
-    console.log(err);
-  }
-});
-
-router.get("/declined_ajax", session, async (req, res) => {
-  try {
-    const date_cust = req.query.date_cust;
-    const dateFormat = moment(date_cust, "MM/DD/YYYY").format("DD/MM/YYYY");
-
-    const report = await fundReq.find({
-      reqStatus: "Declined",
-      reqType: "Debit",
-      reqDate: dateFormat
-    });
-    res.json({ approvedData: report });
-  } catch (e) {
-    res.json({ message: e });
-  }
-});
-
-router.post("/updateUpi", session, async (req, res) => {
-  try {
-    const rowId = req.query.rowId;
-    const dt = dateTime.create();
-    let date = dt.format("d/m/Y I:M:S");
-
-    const udpate = await UPIlist.updateOne({ _id: rowId }, {
-      $set: {
-        updateAt: date,
-        reqStatus: "Approved"
-      }
-    })
-
-    res.json({
-      status: 1,
-      message: "Req Updated Successfully",
-      id: rowId
-    });
-
-  } catch (e) {
-    res.json({
-      status: 0,
-      message: "Something Bad Happened, Contact Support"
-    });
-  }
-});
-
+}
 module.exports = router;

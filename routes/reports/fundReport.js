@@ -765,6 +765,77 @@ router.get("/new_upi_list", session, permission, async (req, res) => {
     }
 });
 
+// router.post("/getUPIFundReport", async (req, res) => {
+// 	try {
+// 		const id = req.body.id;
+// 		const date = req.body.date;
+// 		const dateStart = req.body.dateStart;
+// 		const page = parseInt(req.body.page) || 1;
+// 		const limit = parseInt(req.body.limit) || 10;
+// 		const skip = (page - 1) * limit;
+
+// 		let startDate0 = moment(dateStart, "MM/DD/YYYY").valueOf();
+//         let endDate0 = moment(date, "MM/DD/YYYY").valueOf();
+
+// 		let query;
+// 		if (id === '1') {
+// 			query = {
+// 				reqType: "Credit",
+// 				particular: "UPI",
+// 				timestamp: { '$gte': startDate0, '$lte': endDate0 }
+// 			};
+// 		} else {
+// 			const upiDetails = await UPI_list.findOne({ _id: id }, { UPI_ID: 1 });
+// 			query = {
+// 				particular: "UPI",
+// 				reqType: "Credit",
+// 				timestamp: { '$gte': startDate0, '$lte': endDate0 },
+// 				upiId: upiDetails.UPI_ID,
+// 			};
+// 		}
+// 		const totalAmountData = await upiFundReport.aggregate([
+// 			{ $match: query },
+// 			{ $group: { _id: null, totalAmount: { $sum: "$transaction_amount" } } }
+// 		]);
+
+// 		const totalAmount = totalAmountData.length > 0 ? totalAmountData[0].totalAmount : 0;
+
+// 		const totalItems = await upiFundReport.countDocuments(query);
+
+// 		const creditAmountDetails = await upiFundReport.find(query)
+// 			.sort({ transaction_date: 1, transaction_time: 1 })
+// 			.skip(skip)
+// 			.limit(limit);
+
+// 		const newArray = creditAmountDetails.map(details => ({
+// 			_id: details._id,
+// 			username: details.username,
+// 			mobile: details.mobile,
+// 			reqAmount: details.transaction_amount,
+// 			reqDate: details.transaction_date,
+// 			reqTime: details.transaction_time,
+// 			transaction_id: details.transaction_id || null,
+// 			upi_name: details.upiId,
+// 			upi_app_name: "googlepay",
+// 			reqStatus: details.transaction_status,
+// 		}));
+// 		return res.json({
+// 			status: 1,
+// 			message: "Success",
+// 			data: newArray,
+// 			totalItems,
+// 			totalAmount,
+// 			totalPages: Math.ceil(totalItems / limit),
+// 			currentPage: page,
+// 		});
+// 	} catch (error) {
+// 		return res.json({
+// 			status: 0,
+// 			message: "Something Bad Happened, Contact Support",
+// 		});
+// 	}
+// });
+
 router.post("/getUPIFundReport", async (req, res) => {
     try {
         const id = req.body.id;
@@ -812,6 +883,7 @@ router.post("/getUPIFundReport", async (req, res) => {
             }
         }
         let finalArray = []
+        console.log("newArra:::", newArra.length)
         if (newArra.length > 0) {
             finalArray = newArra.sort((a, b) => {
                 const timeA = moment(`${a.reqDate} ${a.reqTime}`, "DD/MM/YYYY hh:mm:ss A");

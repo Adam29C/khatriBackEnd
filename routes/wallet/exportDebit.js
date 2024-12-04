@@ -13,6 +13,10 @@ const daily = require("../../model/dailyWithdraw");
 const notification = require("../helpersModule/creditDebitNotification");
 const moment = require("moment");
 
+// const gcm = require("node-gcm");
+// const sender = new gcm.Sender("AAAAz-Vezi4:APA91bHNVKatfjZiHl13fcF1xzWK5pLOixdZlHE8KVRwIxVHLJdWGF973uErxgjL_HkzzD1K7a8oxgfjXp4StlVk_tNOTYdFkSdWe6vaKw6hVEDdt0Dw-J0rEeHpbozOMXd_Xlt-_dM1");
+// const sender = new gcm.Sender(process.env.FIREBASE_SENDER_KEY);
+
 router.get("/", session, permission, async (req, res) => {
 	const dt = dateTime.create();
 	const formatted = dt.format("d/m/Y");

@@ -37,6 +37,33 @@ router.get("/", session, permission, async (req, res) => {
   }
 });
 
+//router.get("/pendingBank", session, permission, async (req, res) => {
+//     const dt = dateTime.create();
+//     const formatted = dt.format("d/m/Y");
+//     const pendingCredit = await fundReq
+//         .find({ reqStatus: "Pending", reqType: "Debit", withdrawalMode: "Bank", reqDate: formatted })
+//         .sort({ _id: -1 });
+
+//     const userInfo = req.session.details;
+//     const permissionArray = req.view;
+
+//     const check = permissionArray["fundRequest"].showStatus;
+//     if (check === 1) {
+//         res.render("./wallet/pendingDebit", {
+//             data: pendingCredit,
+//             userInfo: userInfo,
+//             permission: permissionArray,
+//             title: "Pending Request(Bank)"
+//         });
+//     } else {
+//         res.render("./dashboard/starterPage", {
+//             userInfo: userInfo,
+//             permission: permissionArray,
+//             title: "Dashboard"
+//         });
+//     }
+// });
+
 router.get("/pendingBank", session, permission, async (req, res) => {
   const dt = dateTime.create();
   const formatted = dt.format("d/m/Y");
@@ -314,6 +341,7 @@ router.post("/getBal", session, async (req, res) => {
   try {
     const user_id = req.body.id;
     const userbal = await User.findOne({ _id: user_id }, { username: 1, wallet_balance: 1, _id: 0 })
+    // const paytmNumebr = await Userprofile.findOne({ userId: user_id },{paytm_number : 1});
     let data = {
       username: userbal.username,
       wallet_balance: userbal.wallet_balance

@@ -308,6 +308,7 @@ router.post("/getUsername", session, async (req, res) => {
 
 router.post("/userReport", session, async (req, res) => {
     try {
+console.log(req.body)
         const { userId, gameId, startDate, endDate } = req.body;
         
         if (!startDate || !endDate || !moment(startDate).isValid() || !moment(endDate).isValid()) {
@@ -318,6 +319,7 @@ router.post("/userReport", session, async (req, res) => {
         const dayOfWeek = today.format('dddd');
         const gameSettings = await providerSetting.find({
             gameDay: dayOfWeek,
+            //isClosed: '1'
         }, {
             providerId: 1,
             OBT: 1,
@@ -364,10 +366,13 @@ router.post("/userReport", session, async (req, res) => {
 
         let finalResult = [];
         if (!userId && gameId === "0") {
+            console.log("First if condition ")
             finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
         } else if (gameId === "0") {
+            console.log("seconde if condition ")
             finalResult = await Promise.all(arrangedProviderList.map((providerData, index) => processProvider(providerData, index)));
         } else {
+            console.log("third if condition ")
             const providerData = await provider.findOne({ _id: new ObjectId(gameId) }, { providerName: 1 });
             if (!providerData) {
                 return res.status(404).json({ message: "Game not found" });
@@ -384,6 +389,7 @@ router.post("/userReport", session, async (req, res) => {
         return res.json(finalResult);
 
     } catch (error) {
+        console.log(error)
         return res.status(500).json({
             status: 0,
             message: "An error occurred while generating the report. Please contact support.",

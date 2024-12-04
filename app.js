@@ -339,7 +339,6 @@ cron.schedule("20 1 * * *", async (req, res) => {
         console.log(error);
     }
 });
-
 // cron.schedule("*/1 * * * *", async (req, res) => {
 //     try {
 //         const dt = dateTime.create();

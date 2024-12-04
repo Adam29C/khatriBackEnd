@@ -397,6 +397,8 @@
 
       const showDropdown = document.getElementById("showwwww");
 
+      console.log("perpageData", perpageData);
+
       let d = perpageData || 10;
 
       $.ajax({
@@ -458,6 +460,10 @@
         tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No data available</td></tr>`;
         return;
       }
+
+
+      console.log("paginatedData" ,paginatedData);
+
       //   let total = 0;
       paginatedData.forEach((row, INDEX) => {
         const tr = document.createElement("tr");
@@ -531,6 +537,8 @@
     });
 
   function getPerPageCount(value) {
+    console.log("value");
+
     history(currentPage, parseInt(value || 10));
   }
 </script> -->
@@ -686,16 +694,25 @@
     const tableBody = document.getElementById("table-body");
     const showDropdown = document.getElementById("showwwww");
 
+    // Check if the required elements exist
     if (!tableBody || !showDropdown) {
-      return;
+      console.error("Required elements not found in the DOM");
+      return; // Exit if the elements do not exist
     }
+
+    // Function to check if the table has data
     function checkTableData() {
+      // Check if the table has any rows (i.e., any data)
       if (tableBody.rows.length === 0) {
-        showDropdown.style.display = "none";
+        // Hide the dropdown if no rows exist
+        showDropdown.style.display = "none"; // Hide it completely from layout
       } else {
-        showDropdown.style.display = "flex";
+        // Show the dropdown if there are rows
+        showDropdown.style.display = "flex"; // Assuming flex layout for showing the element
       }
     }
+
+    // Call the checkTableData function to check the table data
     checkTableData();
   });
 </script>
