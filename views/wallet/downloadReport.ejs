@@ -491,10 +491,11 @@
 
         let a = 1;
         $.each(xlsData, function (key, e) {
+
           let j = 0;
           excel.set(0, j, a, e.paymentMethodName);
           j++;
-          excel.set(0, j, a, e.debitAccountNo);
+          excel.set(0, j, a, `'${e.debitAccountNo}`);
           j++;
           excel.set(0, j, a, e.remitterName);
           j++;
@@ -502,11 +503,11 @@
           j++;
           excel.set(0, j, a, e.iFSCCODE);
           j++;
-          excel.set(0, j, a, e.beneficiaryAccountNo);
+          excel.set(0, j, a, `'${e.beneficiaryAccountNo}`);
           j++;
           excel.set(0, j, a, e.beneficiaryName);
           j++;
-          excel.set(0, j, a, e.mobileNo);
+          excel.set(0, j, a, `'${e.mobileNo}`);
           j++;
           excel.set(0, j, a, e.Email);
           j++;
@@ -517,7 +518,6 @@
           excel.set(0, j, a, e.CCY);
           j++;
           a++;
-
         });
         excel.generate("AP28564835.xlsx");
       });
