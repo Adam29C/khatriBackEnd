@@ -246,7 +246,7 @@ router.post("/approveReq", session, async (req, res) => {
 
 			let userDetail = await User.findOne(
 				{ _id: userId },
-				{ wallet_balance: 1,firebaseId:1 }
+				{ wallet_balance: 1, firebaseId: 1 }
 			);
 			let wallet_balance = userDetail.wallet_balance;
 			let updateAmt = wallet_balance - transaction_amount;
@@ -922,53 +922,53 @@ async function updateReal(points) {
 	);
 }
 router.post("/rblxls", async (req, res) => {
-    try {
-        const reqStatus = req.body.searchType;
-        const reportDate = req.body.reportDate;
-        const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
-        let query = {
-            reqStatus: reqStatus,
-            reqType: "Debit",
-            reqDate: formatDate,
-            fromExport: true,
-        };
-        if (reqStatus == "Pending") {
-            query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
-        }
-        const userBebitReq = await debitReq.find(query, {
-            _id: 1,
-            reqAmount: 1,
-            withdrawalMode: 1,
-            reqDate: 1,
-            toAccount: 1,
-            mobile: 1
-        });
-        const formattedData = userBebitReq.map(item => ({
-            destinationAcNumber: item.toAccount.accNumber,
-            destinationBankName: item.toAccount.bankName,
-            destinationIfscCode: item.toAccount.ifscCode,
-            destinationAccName: item.toAccount.accName,
-            amount: item.reqAmount,
-            withdrawalMode: item.withdrawalMode,
-            paymentType: "NFT",
-            sourceNarration: "to XYZ",
-            currency: "INR",
-            destinationNarration: "From abc",
-            beneficiaryAccountType: "Saving",
-            sourceAccountNumber: "100881008810088",
-            email: "abc@ac.com"
-        }));
-        res.json({
-            status: 0,
-            Profile: formattedData,
-            date: formatDate,
-        });
-    } catch (error) {
-        res.json({
-            status: 0,
-            error: error.message || error,
-        });
-    }
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+		let query = {
+			reqStatus: reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
+		if (reqStatus == "Pending") {
+			query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1
+		});
+		const formattedData = userBebitReq.map(item => ({
+			destinationAcNumber: item.toAccount.accNumber,
+			destinationBankName: item.toAccount.bankName,
+			destinationIfscCode: item.toAccount.ifscCode,
+			destinationAccName: item.toAccount.accName,
+			amount: item.reqAmount,
+			withdrawalMode: item.withdrawalMode,
+			paymentType: "NFT",
+			sourceNarration: "to XYZ",
+			currency: "INR",
+			destinationNarration: "From abc",
+			beneficiaryAccountType: "Saving",
+			sourceAccountNumber: "100881008810088",
+			email: "abc@ac.com"
+		}));
+		res.json({
+			status: 0,
+			Profile: formattedData,
+			date: formatDate,
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
 });
 
 router.post("/mkxls", async (req, res) => {
@@ -995,7 +995,7 @@ router.post("/mkxls", async (req, res) => {
 		});
 		let finalReport = "";
 		let Client_Code = "MKTTC";
-		let filename =`${Client_Code}.txt`;
+		let filename = `${Client_Code}.txt`;
 		for (index in userBebitReq) {
 			let bankDetails = userBebitReq[index].toAccount;
 			let ifsc = bankDetails.ifscCode;
@@ -1047,12 +1047,12 @@ router.post("/gajjubob", async (req, res) => {
 			reqDate: 1,
 			toAccount: 1,
 			mobile: 1,
-			username:1
+			username: 1
 		});
 		let finalReport = "";
-		let clientAccount="33190200000689"
+		let clientAccount = "33190200000689"
 		let filename = "GAJJUBOB.TXT";
-		let count =1;
+		let count = 1;
 		for (index in userBebitReq) {
 			let bankDetails = userBebitReq[index].toAccount;
 			let ifsc = bankDetails.ifscCode;
@@ -1067,7 +1067,7 @@ router.post("/gajjubob", async (req, res) => {
 				name = name.toUpperCase();
 			}
 			finalReport += `${formattedSerial} | ${clientAccount} | ${amt} | ${ifsc} | ${accNo} | ${username} | SB \n`
-			count = count +1
+			count = count + 1
 		}
 		return res.json({
 			status: 0,
@@ -1083,53 +1083,108 @@ router.post("/gajjubob", async (req, res) => {
 })
 
 router.post("/Finapnb", async (req, res) => {
-    try {
-        const reqStatus = req.body.searchType;
-        const reportDate = req.body.reportDate;
-        const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
-        
-        let query = {
-            reqStatus,
-            reqType: "Debit",
-            reqDate: formatDate,
-            fromExport: true,
-        };
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
 
-        if (reqStatus === "Pending") {
-            query = { reqStatus, reqType: "Debit", reqDate: formatDate };
-        }
+		let query = {
+			reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
 
-        const userBebitReq = await debitReq.find(query, {
-            _id: 1,
-            reqAmount: 1,
-            withdrawalMode: 1,
-            reqDate: 1,
-            toAccount: 1,
-            mobile: 1,
-            username: 1
-        });
+		if (reqStatus === "Pending") {
+			query = { reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
 
-        const formattedData = userBebitReq.map(item => ({
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1,
+			username: 1
+		});
+
+		const formattedData = userBebitReq.map(item => ({
 			type: "NFT",
 			parentAcountNo: "0153001111111111",
 			amount: item.reqAmount,
 			currency: "INR",
 			clientAcount: item.toAccount.accNumber,
-            customerAccount: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
-			ifscCode : item.toAccount.ifscCode?.toUpperCase(),
-        }));
+			customerAccount: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
+			ifscCode: item.toAccount.ifscCode?.toUpperCase(),
+		}));
 
-        res.json({
-            status: 1,
-            profile: formattedData,
-            date: formatDate,
-        });
-    } catch (error) {
-        res.json({
-            status: 0,
-            error: error.message || error,
-        });
-    }
+		res.json({
+			status: 1,
+			profile: formattedData,
+			date: formatDate,
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
+});
+
+router.post("/APXlsFile", async (req, res) => {
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+
+		let query = {
+			reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
+
+		if (reqStatus === "Pending") {
+			query = { reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
+
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1,
+			username: 1
+		});
+
+		const formattedData = userBebitReq.map(item => ({
+			paymentMethodName: "NFT",
+			debitAccountNo: "0153001111111111",
+			remitterName: "The Hotel Utkarsh Heritage",
+			paymentAmount: item.reqAmount,
+			iFSCCODE: item.toAccount.ifscCode?.toUpperCase(),
+			beneficiaryAccountNo: item.toAccount.accNumber,
+			beneficiaryName: item.username,
+			mobileNo: "9999999999",
+			Email: "deepakshrm989@gmail.com",
+			REMARKS: "NA",
+			paymentInstructions1: "NA",
+			CCY: ""
+		}));
+
+		res.json({
+			status: 1,
+			profile: formattedData,
+			date: formatDate,
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
 });
 
 module.exports = router;
