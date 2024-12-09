@@ -463,19 +463,19 @@
         const xlsData = json.profile;
         const reportDate = json.date;
         var excel = $JExcel.new("Calibri light 10 #333333");
+
         var headers = [
-          "Beneficiary Name",
-          "Mobile No.",
-          "Beneficiary Email",
-          "Beneficiary a/c No",
-          "Beneficiary IFSC Code",
-          "Beneficiary Bank Branch",
-          "Remitter Name",
-          "Amount",
-          "Debit Account No",
           "Payment Method Name",
-          "payment Instructions ",
-          "Remark",
+          "Debit Account No / IBAN",
+          "Remitter Name",
+          "Payment Amount (Request)",
+          "IFSC CODE",
+          "Beneficiary Account No",
+          "Beneficiary Name (Request)",
+          "Phone/Mobile No",
+          "Email",
+          "REMARKS",
+          "Payment Instructions 1",
           "CCY",
         ];
 
@@ -491,33 +491,33 @@
 
         let a = 1;
         $.each(xlsData, function (key, e) {
-          let accNum = e.beneficiaryName;
           let j = 0;
-          excel.set(0, 0, a, e.beneficiaryName);
+          excel.set(0, j, a, e.paymentMethodName);
           j++;
-          excel.set(0, j, a, e.mobileNo);
-          j++;
-          excel.set(0, j, a, e.Email);
-          j++;
-          excel.set(0, j, a, e.beneficiaryAccountNo);
-          j++;
-          excel.set(0, j, a, e.iFSCCODE);
+          excel.set(0, j, a, e.debitAccountNo);
           j++;
           excel.set(0, j, a, e.remitterName);
           j++;
           excel.set(0, j, a, e.paymentAmount);
           j++;
-          excel.set(0, j, a, e.debitAccountNo);
+          excel.set(0, j, a, e.iFSCCODE);
           j++;
-          excel.set(0, j, a, e.paymentMethodName);
+          excel.set(0, j, a, e.beneficiaryAccountNo);
           j++;
-          excel.set(0, j, a, e.paymentInstructions1);
+          excel.set(0, j, a, e.beneficiaryName);
+          j++;
+          excel.set(0, j, a, e.mobileNo);
+          j++;
+          excel.set(0, j, a, e.Email);
           j++;
           excel.set(0, j, a, e.REMARKS);
+          j++;
+          excel.set(0, j, a, e.paymentInstructions1);
           j++;
           excel.set(0, j, a, e.CCY);
           j++;
           a++;
+
         });
         excel.generate("payout" + reportDate + "_Batch.xlsx");
       });
