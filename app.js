@@ -118,12 +118,12 @@ mongoose.connect(
 //   }
 // );
 
-// app.use(session({
-//     secret: "dashboard###$$$$123321",
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: { secure: false }
-// }));
+app.use(session({
+    secret: "dashboard###$$$$123321",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
 
 // Logger
 app.use(morgan("dev"));
@@ -267,7 +267,7 @@ cron.schedule("58 7 * * *", async () => {
         console.log(error);
     }
 });
- 
+
 // cron.schedule("55 23 * * *", async (req, res) => {
 //   try {
 //     const dt = dateTime.create();
