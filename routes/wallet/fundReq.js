@@ -37,19 +37,78 @@ router.get("/", session, permission, async (req, res) => {
   }
 });
 
+//router.get("/pendingBank", session, permission, async (req, res) => {
+//     const dt = dateTime.create();
+//     const formatted = dt.format("d/m/Y");
+//     const pendingCredit = await fundReq
+//         .find({ reqStatus: "Pending", reqType: "Debit", withdrawalMode: "Bank", reqDate: formatted })
+//         .sort({ _id: -1 });
+
+//     const userInfo = req.session.details;
+//     const permissionArray = req.view;
+
+//     const check = permissionArray["fundRequest"].showStatus;
+//     if (check === 1) {
+//         res.render("./wallet/pendingDebit", {
+//             data: pendingCredit,
+//             userInfo: userInfo,
+//             permission: permissionArray,
+//             title: "Pending Request(Bank)"
+//         });
+//     } else {
+//         res.render("./dashboard/starterPage", {
+//             userInfo: userInfo,
+//             permission: permissionArray,
+//             title: "Dashboard"
+//         });
+//     }
+// });
+
 router.get("/pendingBank", session, permission, async (req, res) => {
   const dt = dateTime.create();
   const formatted = dt.format("d/m/Y");
-  const pendingCredit = await fundReq
+  const pendingCreditList = await fundReq
     .find({ reqStatus: "Pending", reqType: "Debit",withdrawalMode: "Bank", reqDate: formatted })
     .sort({ _id: -1 });
 
   const userInfo = req.session.details;
   const permissionArray = req.view;
+  let finalArray=[]
+  if(pendingCreditList.length>0){
+    for (let pendingCredit of pendingCreditList) {
+      let reqTime = moment(pendingCredit.reqTime);
+      finalArray.push({
+        toAccount: pendingCredit.toAccount,
+        _id: pendingCredit._id,
+        userId: pendingCredit.userId,
+        reqAmount: pendingCredit.reqAmount,
+        fullname: pendingCredit.fullname,
+        username: pendingCredit.username,
+        mobile: pendingCredit.mobile,
+        reqType: pendingCredit.reqType,
+        reqStatus: pendingCredit.reqStatus,
+        reqDate: pendingCredit.reqDate,
+        reqTime: reqTime.format('DD/MM/YYYY hh:mm A'),
+        withdrawalMode: pendingCredit.withdrawalMode,
+        UpdatedBy: pendingCredit.UpdatedBy,
+        reqUpdatedAt: pendingCredit.reqUpdatedAt,
+        timestamp: pendingCredit.timestamp,
+        createTime: pendingCredit.createTime,
+        updatedTime: pendingCredit.updatedTime,
+        adminId: pendingCredit.adminId,
+        from: pendingCredit.from,
+        fromExport: pendingCredit.fromExport
+      })
+    }
+    finalArray.sort((a, b) => {
+      return new Date(a.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + a.reqTime.split(' ').slice(1).join(' ')) -
+        new Date(b.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + b.reqTime.split(' ').slice(1).join(' '));
+    });
+  }
   const check = permissionArray["fundRequest"].showStatus;
   if (check === 1) {
     res.render("./wallet/pendingDebit", {
-      data: pendingCredit,
+      data: finalArray,
       userInfo: userInfo,
       permission: permissionArray,
       title: "Pending Request(Bank)"
@@ -63,69 +122,11 @@ router.get("/pendingBank", session, permission, async (req, res) => {
   }
 });
 
-// router.get("/pendingBank", session, permission, async (req, res) => {
-//   const dt = dateTime.create();
-//   const formatted = dt.format("d/m/Y");
-//   const pendingCreditList = await fundReq
-//     .find({ reqStatus: "Pending", reqType: "Debit", withdrawalMode: "Bank", reqDate: formatted })
-//     .sort({ _id: -1 });
-
-//   const userInfo = req.session.details;
-//   const permissionArray = req.view;
-//   let finalArray = []
-//   if (pendingCreditList.length > 0) {
-//     for (let pendingCredit of pendingCreditList) {
-//       let reqTime = moment(pendingCredit.reqTime);
-//       finalArray.push({
-//         toAccount: pendingCredit.toAccount,
-//         _id: pendingCredit._id,
-//         userId: pendingCredit.userId,
-//         reqAmount: pendingCredit.reqAmount,
-//         fullname: pendingCredit.fullname,
-//         username: pendingCredit.username,
-//         mobile: pendingCredit.mobile,
-//         reqType: pendingCredit.reqType,
-//         reqStatus: pendingCredit.reqStatus,
-//         reqDate: pendingCredit.reqDate,
-//         reqTime: reqTime.format('DD/MM/YYYY hh:mm A'),
-//         withdrawalMode: pendingCredit.withdrawalMode,
-//         UpdatedBy: pendingCredit.UpdatedBy,
-//         reqUpdatedAt: pendingCredit.reqUpdatedAt,
-//         timestamp: pendingCredit.timestamp,
-//         createTime: pendingCredit.createTime,
-//         updatedTime: pendingCredit.updatedTime,
-//         adminId: pendingCredit.adminId,
-//         from: pendingCredit.from,
-//         fromExport: pendingCredit.fromExport
-//       })
-//     }
-//     finalArray.sort((a, b) => {
-//       return new Date(a.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + a.reqTime.split(' ').slice(1).join(' ')) -
-//         new Date(b.reqTime.split(' ')[0].split('/').reverse().join('-') + ' ' + b.reqTime.split(' ').slice(1).join(' '));
-//     });
-//   }
-//   const check = permissionArray["fundRequest"].showStatus;
-//   if (check === 1) {
-//     res.render("./wallet/pendingDebit", {
-//       data: finalArray,
-//       userInfo: userInfo,
-//       permission: permissionArray,
-//       title: "Pending Request(Bank)"
-//     });
-//   } else {
-//     res.render("./dashboard/starterPage", {
-//       userInfo: userInfo,
-//       permission: permissionArray,
-//       title: "Dashboard"
-//     });
-//   }
-// });
-
 router.get("/pendingPaytm", session, permission, async (req, res) => {
   const dt = dateTime.create();
   const formatted = dt.format("d/m/Y");
   const pendingCredit = await fundReq
-    .find({ reqStatus: "Pending", reqType: "Debit", withdrawalMode: "Paytm", reqDate: formatted })
+    .find({ reqStatus: "Pending", reqType: "Debit",withdrawalMode: "Paytm", reqDate: formatted })
     .sort({ _id: -1 });
 
   const userInfo = req.session.details;
@@ -157,18 +158,18 @@ router.get("/other", session, async (req, res) => {
     //Changes by dev removed { from : 2} from all queries
     if (data == "pendingDebit") {
       const pendingDebit = await fundReq
-        .find({ reqStatus: "Pending", reqType: "Debit", reqDate: formatted })
+        .find({ reqStatus: "Pending", reqType: "Debit", reqDate: formatted  })
         .sort({ _id: -1 });
       res.json(pendingDebit);
     } else if (data == "approvedDebit") {
       const approvedDebit = await fundReq
-        .find({ reqStatus: "Approved", reqType: "Debit", reqDate: formatted })
+        .find({ reqStatus: "Approved", reqType: "Debit", reqDate: formatted})
         .sort({ _id: -1 });
 
       res.json(approvedDebit);
     } else if (data == "declinedDebit") {
       const declinedDebit = await fundReq
-        .find({ reqStatus: "Declined", reqType: "Debit", reqDate: formatted })
+        .find({ reqStatus: "Declined", reqType: "Debit", reqDate: formatted})
         .sort({ _id: -1 });
       res.json(declinedDebit);
     } else if (data == "completed") {
@@ -229,7 +230,7 @@ router.post("/updateWallet/:id", session, async (req, res) => {
       reqType = "Debit";
       filter = 5
       title = `Your Debit (Withdrawal) Request Of Rs.${parseInt(bal)}/- is Approved ✔️🤑💰`;
-      body = `Hello ${username} 🤩🤩`;
+	    body = `Hello ${username} 🤩🤩`;
     }
     await User.updateOne(
       { _id: userId },
@@ -246,7 +247,7 @@ router.post("/updateWallet/:id", session, async (req, res) => {
           reqUpdatedAt: updateTime,
           UpdatedBy: adminName,
           adminId: admin_id,
-          fromExport: false,
+          fromExport : false,
           from: 2
         }
       }

@@ -60,20 +60,3 @@ module.exports = async function (userToken, title, body) {
         }
     }
 };
-
-// var message = new gcm.Message({
-	// 	priority: "high",
-	// 	data: {
-	// 		title: notificationTitle,
-	// 		icon: "ic_launcher",
-	// 		body: notificationBody,
-	// 		type: "otp",
-	// 	},
-	// });
-
-	// // console.log(message);
-
-	// sender.send(message, { registrationTokens: token }, function (err, response) {
-	// 	// if (err) throw err;
-	// 	// else console.log(response) ;
-	// });

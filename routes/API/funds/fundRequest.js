@@ -21,7 +21,7 @@ router.get("/", (req, res) => {
 	res.json({ status: 0, message: "Access Denied" });
 });
 
-router.post("/addFund", verify, async (req, res) => {
+router.post("/addFund", verify,async (req, res) => {
 	try {
 		const userId = req.body.user_id;
 		const user = await User.findOne({ _id: userId });
@@ -37,6 +37,7 @@ router.post("/addFund", verify, async (req, res) => {
 				reqType: "Credit",
 			});
 			if (findAlreadyPending === null) {
+				const dt = dateTime.create();
 				const formatted = dt.format("d/m/Y");
 				const ts = moment(formatted, "DD/MM/YYYY").unix();
 
@@ -969,6 +970,7 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 
 			let updatedBal = userBalance + amount;
 
+
 			const insertPayment = new upi({
 				userId: userId,
 				fullname: fullName,
@@ -988,6 +990,8 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 				timestamp: ts,
 			});
 
+			await insertPayment.save();
+
 			if (status == "Approved") {
 				await User.updateOne(
 					{ _id: userId },
@@ -998,7 +1002,6 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 						},
 					}
 				);
-				await insertPayment.save();
 
 				const addReq = new fundReq({
 					userId: userId,
@@ -1044,7 +1047,7 @@ router.post("/newAutoPaymentUpi", async (req, res) => {
 				});
 				await wallet_his.save();
 
-				const online_Payment = new onlineUpiPayment({
+                const online_Payment = new onlineUpiPayment({
 					userId: userId,
 					bidId: saveId._id,
 					filterType: 4,
@@ -1116,7 +1119,7 @@ router.post("/completeAutoPayment", async (req, res) => {
 	try {
 		return res.json({
 			status: 1,
-			message: "Success",
+			message:"Success",
 		});
 	} catch (error) {
 		res.json({

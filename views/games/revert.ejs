@@ -123,8 +123,6 @@
 
         let data = { resultId : id , providerId : providerId, session : session, digit: digit, family: family, date: date};
 
-        console.log(data);
-
         $.ajax({
             type: "post",
             url: "/gameResult/paymentRevert",

@@ -53,7 +53,6 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
             }
             else {
                 const userToken = token.map(token => token.firebaseId).filter(firebaseId => firebaseId !== "");
-                sendMutipalNotification(userToken, title, body, notificationType)
             }
         } else {
             for (let i = 0; i < token.length; i++) {
@@ -84,12 +83,13 @@ module.exports = async function (req, res, sumDgit, uesrtoken) {
     }
     catch (e) {
         console.log(e)
+        //    return e;
     }
 };
 
 const sendMutipalNotification = async (tokenArr, title, body, notificationType) => {
-      let message = {
-         android: {
+    let message = {
+        android: {
             priority: 'high',
         },
         data: {
@@ -102,7 +102,7 @@ const sendMutipalNotification = async (tokenArr, title, body, notificationType) 
     try {
         const response = await messaging.sendEachForMulticast({
             tokens: tokenArr,
-            ...message,
+           ...message,
         });
         if (response.failureCount > 0) {
             response.responses.forEach((resp, idx) => {

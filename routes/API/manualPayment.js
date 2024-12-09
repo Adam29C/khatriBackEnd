@@ -75,7 +75,6 @@ router.post("/addManualPayment", async (req, res) => {
       message: "Request Add Successfully Wait for 30 Mins. We Will Verify Your Payment And Update",
     });
   } catch (error) {
-console.log(error)
     return res.status(500).send({
       statusCode: 500,
       status: "Failure",

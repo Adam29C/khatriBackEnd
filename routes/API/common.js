@@ -18,17 +18,15 @@ const moment = require('moment');
 const dotenv = require("dotenv");
 const SendOtp = require("sendotp");
 const { ObjectId } = require("mongodb");
-// const sendOtp = new SendOtp("290393AuGCyi6j5d5bfd26");
 const sendOtp = new SendOtp("1207171791436302472");
 dotenv.config();
 const APK_DOMAIN = process.env.APK_DOMAIN;
-
-
 const chatDomain = process.env.CHAT_DOMAIN;
+
 router.post("/getBal", verify, async (req, res) => {
 	try {
 		const id = req.body.id;
-		const user = await userDetails.findOne({ _id: id }, { wallet_balance: 1, username:1, mobile:1 });
+		const user = await userDetails.findOne({ _id: id }, { wallet_balance: 1, username: 1, mobile: 1 });
 		if (!user) {
 			return res.json({
 				status: 1,
@@ -116,7 +114,7 @@ router.post("/walletHistoryPaginatoion", verify, async (req, res) => {
 		let perPage = 50;
 		let page = parseInt(req.body.skipValue);
 		history
-			.find({ userId: new ObjectId(userId)})
+			.find({ userId: new ObjectId(userId) })
 			.sort({ _id: -1 })
 			.skip(perPage * page - perPage)
 			.limit(perPage)
@@ -231,20 +229,48 @@ router.post("/firebaseUpdate", async (req, res) => {
 		const deviceno = req.body.deviceId;
 		const tokenFromApp = req.body.token;
 		const appVersion = req.body.appVersion;
+		if (deviceno == "b3e074e61314b0e6" || deviceno == "240f51a543c29e1e" || deviceno=="d01ef824cc4be6b0") {
+			if (appVersion < 2.0) {
+				let userDetails = await userTab.findOne(
+					{ deviceId: deviceno },
+					{ username: 1, mpin: 1 }
+				);
+
+				let appLink = `http://16.171.226.214:5000/localApk/Khatri-V2.0.apk`;
+				return res.status(200).json({
+					status: 4,
+					message: "You Are Using Old App Version Kindly Install Our New App",
+					appLink,
+					forceStatus: false, //Show Close Button
+					name: userDetails.username,
+					mpinGen: 0,
+					newVersion: 2.0
+				});
+			}
+			else {
+				const updatetoken = await userTab.updateOne(
+					{ deviceId: deviceno },
+					{
+						$set: { firebaseId: tokenFromApp },
+					}
+				);
+				return res.status(200).json({
+					status: 1,
+					message: "Token Updated Successfully",
+					data: updatetoken,
+					token: tokenFromApp,
+					name: userDetails.username,
+					mpinGen: 0,
+				});
+			}
+		}
 
 		const verData = await version.findOne();
-		// if (!verData) {
-
-		// }
 		const maintainance = verData.maintainence;
 		const Currentversion = verData.appVersion;
 		const fsatuts = verData.forceUpdate;
 		const apk = verData.apkFileName;
-		const appLink = `${APK_DOMAIN}/${apk}`//"https://update.yogicactors.co.uk/apk/Dhan_Games.apk",
-		// status : 0 : Sing Up
-		// status : 1 : Login
-		// status : 5 : maintainance
-		// status : 4 : App Upodate
+		const appLink = `${APK_DOMAIN}/${apk}`;
 
 		if (maintainance == false) {
 			const user = await userTab.findOne(
@@ -279,10 +305,7 @@ router.post("/firebaseUpdate", async (req, res) => {
 						process.env.jsonSecretToken,
 						{ expiresIn: "1h" }
 					);
-					// { expiresIn: "5min" }
 					fetch(
-						// "https://chatpanel.rolloutgames.xyz/mappingTableFirebaseToken",
-						// "http://162.241.115.39/mappingTableFirebaseToken",
 						`${chatDomain}/mappingTableFirebaseToken`,
 						{
 							method: "POST",
@@ -308,12 +331,11 @@ router.post("/firebaseUpdate", async (req, res) => {
 					res.status(200).json({
 						status: 4,
 						message: "You Are Using Old App Version Kindly Install Our New App",
-						// appLink: "https://update.yogicactors.co.uk/apk/Dhan_Games.apk",
 						appLink,
-						forceStatus: fsatuts, //Show Close Button
+						forceStatus: fsatuts,
 						name: userName,
 						mpinGen: pinStatus,
-                        newVersion: Currentversion
+						newVersion: Currentversion
 					});
 				}
 			} else {
@@ -326,10 +348,9 @@ router.post("/firebaseUpdate", async (req, res) => {
 					res.status(200).json({
 						status: 4,
 						message: "You Are Using Old App Version Kindly Install Our New App",
-						// appLink: "https://update.yogicactors.co.uk/apk/Dhan_Games.apk",
 						appLink,
 						forceStatus: fsatuts, //Show Close Button
-                        newVersion: Currentversion
+						newVersion: Currentversion
 					});
 				}
 			}
@@ -340,7 +361,7 @@ router.post("/firebaseUpdate", async (req, res) => {
 			});
 		}
 	} catch (error) {
-		res.status(400).json({
+		return res.status(400).json({
 			status: 0,
 			message: "Something bad happend contact support",
 			error: error,
@@ -404,13 +425,6 @@ router.post("/sendOTP", async (req, res) => {
 		);
 
 		if (updateOtp) {
-			// const firebaseToken = updateOtp.firebaseId;
-			// let userToken = [];
-			// userToken.push(firebaseToken);
-			// let title = "To Recharge your wallet";
-			// let body = `OTP : ${generateOTP}`;
-			// sendNoti(userToken, title, body);
-
 			return res.json({
 				status: 1,
 				message: "OTP Succesfully Sent",

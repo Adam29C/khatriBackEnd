@@ -570,13 +570,8 @@ router.post("/refundAll", session, async (req, res) => {
 			const save = await arrValue.save();
 			tokenArray.push(firebaseId);
 			const name = singleUserBidUpdate.providerName;
-			// const body =
-			// 	"Hello " +
-			// 	singleUserUpdate.username +
-			// 	", Refund Successfully Done For " +
-			// 	name;
 			const body = `Hello ${singleUserUpdate.username}, Your Bid Amount ${biddingPoints}/- RS Is Refund Successful In Your Wallet!`;
-			sendRefundNotification(tokenArray, name, body);
+			// sendRefundNotification(tokenArray, name, body);
 		} else {
 			const userlist = await ABbids.find({
 				providerId: providerId,
@@ -642,11 +637,8 @@ router.post("/refundAll", session, async (req, res) => {
 					i++;
 				}
 
-				const body =
-					"Hello Khatri User, Your Refund For Date : " +
-					resultDate +
-					", is Processed Successfully";
-				sendRefundNotification(tokenArray, providerName, body);
+				const body=`Hello Khatri User, Your Refund For Date :${resultDate}, is Processed Successfully`	
+				// sendRefundNotification(tokenArray, providerName, body);
 			}
 		}
 		res.json({
@@ -682,8 +674,7 @@ router.post("/refundAll", session, async (req, res) => {
 // 		token: finalArr,
 // 	};
 // 	try {
-// 		const response = await messaging.sendMulticast(message);
-// 		console.log('Successfully sent message:', response);
+// 		const response = await messaging.sendEachForMulticast(message);
 // 		if (response.failureCount > 0) {
 // 			response.responses.forEach((resp, idx) => {
 // 				if (!resp.success) {
@@ -692,7 +683,6 @@ router.post("/refundAll", session, async (req, res) => {
 // 			});
 // 		}
 // 	} catch (error) {
-// 		console.log('Error sending message:', error);
 // 	}
 // }
 
@@ -713,7 +703,7 @@ async function sendRefundNotification(tokenArray, name, body) {
 	for (let chunk of tokenChunks) {
 		message.tokens = chunk;
 		try {
-			const response = await messaging.sendMulticast(message);
+			const response = await messaging.sendEachForMulticast(message);
 			if (response.failureCount > 0) {
 				response.responses.forEach((resp, idx) => {
 					if (!resp.success) {

@@ -162,7 +162,6 @@ router.post("/insertSettings", session, async (req, res) => {
             modifiedAt: formatted
           })
         }
-        console.log(finalArr)
         await starSettings.insertMany(finalArr)
       } else {
         const settings = new starSettings({
