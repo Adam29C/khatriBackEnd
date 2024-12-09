@@ -267,7 +267,7 @@ cron.schedule("58 7 * * *", async () => {
         console.log(error);
     }
 });
- 
+
 // cron.schedule("55 23 * * *", async (req, res) => {
 //   try {
 //     const dt = dateTime.create();
