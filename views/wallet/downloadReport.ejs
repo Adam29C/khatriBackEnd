@@ -53,11 +53,12 @@
                 id="report_type"
                 required
               >
-                <option value="0">Kotk XLS</option>
-                <option value="6">Cash free</option>
+                <!-- <option value="0">Kotk XLS</option>
+                <option value="6">Cash free</option> -->
                 <option value="8">MK.txt</option>
-                <option value="9">Gajju Bob</option>
-                <option value="10">FINA PNB</option>
+                <option value="11">AP28564835.xlsx</option>
+                <!-- <option value="9">Gajju Bob</option>
+                <option value="10">FINA PNB</option> -->
                 <!-- <option value="0">Dhanlaxmi Kotk XLS</option>
 								<option value="1">Tirupatie Kotk XLS</option>
 								<option value="2">Mahalaxmi Kotk XLS</option>
@@ -239,6 +240,9 @@
     if (parseInt(reportType) === 9) {
       return generateGajjuBOBRport(reportDate, searchType);
     }
+    if (parseInt(reportType) === 11) {
+      return generateAP28564835Rport(reportDate, searchType);
+    }
     if (parseInt(reportType) === 10) {
       return generateFINAPNBRport(reportDate, searchType);
     }
@@ -303,7 +307,6 @@
       });
   }
 
-
   function generateFINAPNBRport(id) {
     const searchType = $("#req_status").val();
     // const reportType = $("#report_type").val();
@@ -324,7 +327,6 @@
     })
       .then((res) => res.json())
       .then((json) => {
-        
         const xlsData = json.profile;
         const reportDate = json.date;
 
@@ -344,14 +346,10 @@
           font: "Calibri 12 #ffff B",
         });
 
-
-
         for (var i = 0; i < headers.length; i++) {
           excel.set(0, i, 0, headers[i], formatHeader);
           excel.set(0, i, undefined, "auto");
         }
-
-        
 
         let a = 1;
         $.each(xlsData, function (key, e) {
@@ -375,8 +373,6 @@
         });
         excel.generate("payout_" + reportDate + "_Batch.xlsx");
       });
-
-
   }
 
   function generateGajjuBOBRport(id) {
@@ -417,22 +413,19 @@
 
     const req = {
       reportDate: reportDate,
-      searchType: searchType == '0' || 0 ? 'Approved' :'Pending',
+      searchType: searchType == "0" || 0 ? "Approved" : "Pending",
     };
 
     fetch("/debitReport/mkxls", {
       method: "POST",
       body: JSON.stringify(req),
       headers: {
-        "Content-Type": "application/json", 
+        "Content-Type": "application/json",
       },
       credentials: "same-origin",
     })
       .then((res) => res.json())
       .then((json) => {
-
-
-        
         const filename = json.filename;
         const text = json.writeString;
         var element = document.createElement("a");
@@ -443,6 +436,90 @@
 
         document.body.removeChild(element);
         return;
+      });
+  }
+
+  function generateAP28564835Rport() {
+    const searchType = $("#req_status").val();
+    const reportType = $("#report_type").val();
+    const reportDate = $("#datepicker-autoclose").val();
+
+    let jsonData = {
+      reportType: reportType,
+      searchType: searchType == "0" || 0 ? "Approved" : "Pending",
+      reportDate: reportDate,
+    };
+
+    fetch("/debitReport/APXlsFile", {
+      method: "POST",
+      body: JSON.stringify(jsonData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const xlsData = json.profile;
+        const reportDate = json.date;
+        var excel = $JExcel.new("Calibri light 10 #333333");
+        var headers = [
+          "Beneficiary Name",
+          "Mobile No.",
+          "Beneficiary Email",
+          "Beneficiary a/c No",
+          "Beneficiary IFSC Code",
+          "Beneficiary Bank Branch",
+          "Remitter Name",
+          "Amount",
+          "Debit Account No",
+          "Payment Method Name",
+          "payment Instructions ",
+          "Remark",
+          "CCY",
+        ];
+
+        var formatHeader = excel.addStyle({
+          border: "none,none,none,thin #333333",
+          font: "Calibri 12 #ffff B",
+        });
+
+        for (var i = 0; i < headers.length; i++) {
+          excel.set(0, i, 0, headers[i], formatHeader);
+          excel.set(0, i, undefined, "auto");
+        }
+
+        let a = 1;
+        $.each(xlsData, function (key, e) {
+          let accNum = e.beneficiaryName;
+          let j = 0;
+          excel.set(0, 0, a, e.beneficiaryName);
+          j++;
+          excel.set(0, j, a, e.mobileNo);
+          j++;
+          excel.set(0, j, a, e.Email);
+          j++;
+          excel.set(0, j, a, e.beneficiaryAccountNo);
+          j++;
+          excel.set(0, j, a, e.iFSCCODE);
+          j++;
+          excel.set(0, j, a, e.remitterName);
+          j++;
+          excel.set(0, j, a, e.paymentAmount);
+          j++;
+          excel.set(0, j, a, e.debitAccountNo);
+          j++;
+          excel.set(0, j, a, e.paymentMethodName);
+          j++;
+          excel.set(0, j, a, e.paymentInstructions1);
+          j++;
+          excel.set(0, j, a, e.REMARKS);
+          j++;
+          excel.set(0, j, a, e.CCY);
+          j++;
+          a++;
+        });
+        excel.generate("payout" + reportDate + "_Batch.xlsx");
       });
   }
 
