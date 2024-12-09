@@ -1161,11 +1161,11 @@ router.post("/APXlsFile", async (req, res) => {
 
 		const formattedData = userBebitReq.map(item => ({
 			paymentMethodName: "NEFT",
-			debitAccountNo: "2302259051616400,",
+			debitAccountNo: "2302259051616400",
 			remitterName: "The Hotel Utkarsh Heritage",
-			paymentAmount: `${item.reqAmount},`,
+			paymentAmount: `${item.reqAmount}`,
 			iFSCCODE: item.toAccount.ifscCode?.toUpperCase(),
-			beneficiaryAccountNo: `${item.toAccount.accNumber},`,
+			beneficiaryAccountNo: `${item.toAccount.accNumber}`,
 			beneficiaryName: item.username,
 			mobileNo: "9999999999",
 			Email: "deepakshrm989@gmail.com",
