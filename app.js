@@ -118,12 +118,12 @@ mongoose.connect(
 //   }
 // );
 
-// app.use(session({
-//     secret: "dashboard###$$$$123321",
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: { secure: false }
-// }));
+app.use(session({
+    secret: "dashboard###$$$$123321",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
 
 // Logger
 app.use(morgan("dev"));
