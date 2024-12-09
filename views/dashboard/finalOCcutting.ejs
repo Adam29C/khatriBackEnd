@@ -551,9 +551,9 @@
           $("#datatable4").DataTable({
             pageLength: 20,
             order: [[1, "desc"]],
-            drawCallback: function(settings) {
+            drawCallback: function (settings) {
               calculateTotal();
-            }
+            },
           });
           $("#single").html(providerName + " (" + session + ")");
           $("#mingle").html(providerName + " (" + session + "-Pana)");
@@ -634,7 +634,7 @@
         let data = this.data();
         // let cell = $(data[1]); // assuming data[1] contains the HTML for the cell
         // let cellValue = parseFloat(cell.text()) || 0; // extracting the text and converting to number
-        total += parseFloat(data[1])
+        total += parseFloat(data[1]);
         console.log("total", total);
       });
 

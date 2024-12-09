@@ -356,7 +356,7 @@
           ],
         },
         success: function (data) {
-          console.log(data);
+          
           $("#tabDiv").css("display", "block");
           let html;
           let TotalBid = 0;
@@ -456,6 +456,7 @@
                 }
               }
             });
+
             if (gameSession != "Jodi Digit") {
               $("#singleTable").html(singleData);
               $("#datatable4").DataTable({
@@ -682,6 +683,7 @@
               j++;
             });
             $("#groupData").html(html);
+
             $("#tfootBids").html(
               "<tr><th>Grand Total</th><th>" +
                 totalBidSum +
@@ -689,6 +691,8 @@
                 totalSum +
                 "</th></tr>"
             );
+
+
             let pannaArr = [];
             let singleArr = [];
             let allSingle = [
@@ -754,6 +758,7 @@
             });
 
             let mergeHtml = "";
+            
             data.pana.forEach(function (e) {
               let tabDigit = e.Digit;
               let bidCount = 0;
