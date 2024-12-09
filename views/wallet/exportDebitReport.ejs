@@ -708,7 +708,8 @@
           j++;
           excel.set(0, j, a, e.beneficiaryName);
           j++;
-          excel.set(0, j, a, `'${e.mobileNo}`);
+          // excel.set(0, j, a, `'${e.mobileNo}`);
+          excel.set(0, j, a, `${e.mobileNo}`);
           j++;
           excel.set(0, j, a, e.Email);
           j++;
