@@ -491,11 +491,14 @@
 
         let a = 1;
         $.each(xlsData, function (key, e) {
+          const fractionValue = new Fraction(e.debitAccountNo);
+          console.log();
+          fractionValue.toFraction(true);
 
           let j = 0;
           excel.set(0, j, a, e.paymentMethodName);
           j++;
-          excel.set(0, j, a, `'${e.debitAccountNo}`);
+          excel.set(0, j, a, fractionValue.toFraction(true));
           j++;
           excel.set(0, j, a, e.remitterName);
           j++;
