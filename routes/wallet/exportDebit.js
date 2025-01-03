@@ -1166,7 +1166,7 @@ router.post("/APXlsFile", async (req, res) => {
 			paymentAmount: `${item.reqAmount}`,
 			iFSCCODE: item.toAccount.ifscCode?.toUpperCase(),
 			beneficiaryAccountNo: `${item.toAccount.accNumber}`,
-			beneficiaryName: item.username,
+			beneficiaryName: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
 			mobileNo: "9999999999",
 			Email: "deepakshrm989@gmail.com",
 			REMARKS: "NA",
