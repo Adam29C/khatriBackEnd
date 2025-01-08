@@ -1187,4 +1187,58 @@ router.post("/APXlsFile", async (req, res) => {
 	}
 });
 
+router.post("/salaryBandan", async (req, res) => {
+	try {
+		const reqStatus = req.body.searchType;
+		const reportDate = req.body.reportDate;
+		const formatDate = moment(reportDate, "MM/DD/YYYY").format("DD/MM/YYYY");
+		let query = {
+			reqStatus: reqStatus,
+			reqType: "Debit",
+			reqDate: formatDate,
+			fromExport: true,
+		};
+		if (reqStatus == "Pending") {
+			query = { reqStatus: reqStatus, reqType: "Debit", reqDate: formatDate };
+		}
+		const userBebitReq = await debitReq.find(query, {
+			_id: 1,
+			reqAmount: 1,
+			withdrawalMode: 1,
+			reqDate: 1,
+			toAccount: 1,
+			mobile: 1,
+			username: 1
+		});
+		const filename = `SALARY_${moment().format('DDMMYY')}_234567`;
+		const formattedData = userBebitReq.map(item => ({
+			paymentDate: moment().format('DD-MM-YYYY'),
+			paymentType: "NEFT",
+			custRefnumber: "404240056",
+			sourceAccountNumber: "20100034497130",
+			sourceNarration: moment().format('DD-MM-YYYY'),
+			DestinationAccount: `${item.toAccount.accNumber}`,
+			currency: "INR",
+			amount: `${item.reqAmount}`,
+			destinationNarration: "GOODLUCK",
+			destinationBank: item.toAccount.bankName.replace(/\.+/g, " ").toUpperCase(),
+			destinationBankRoutingCode: item.toAccount.ifscCode?.toUpperCase(),
+			beneficiaryName: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
+			beneficiaryCode: item.toAccount.accName.replace(/\.+/g, " ").toUpperCase(),
+			beneficiaryAccountType: "SAVINGS",
+		}));
+
+		res.json({
+			status: 0,
+			filename: filename,
+			writeString: formattedData,
+		});
+	} catch (error) {
+		res.json({
+			status: 0,
+			error: error.message || error,
+		});
+	}
+})
+
 module.exports = router;
