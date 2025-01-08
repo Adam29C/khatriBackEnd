@@ -451,7 +451,7 @@
 
     let jsonData = {
       reportType: reportType,
-      searchType: searchType == "0" || 0 ? "Approved" : "Pending",
+      searchType: searchType,
       reportDate: reportDate,
     };
 
@@ -508,11 +508,11 @@
           j++;
           excel.set(0, j, a, e.custRefnumber);
           j++;
-          excel.set(0, j, a, e.sourceAccountNumber);
+          excel.set(0, j, a, `'${e.sourceAccountNumber}`);
           j++;
           excel.set(0, j, a, e.sourceNarration);
           j++;
-          excel.set(0, j, a, `${e.DestinationAccount}`);
+          excel.set(0, j, a, `'${e.DestinationAccount}`);
           j++;
           excel.set(0, j, a, e.currency);
           j++;
