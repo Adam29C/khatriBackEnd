@@ -706,7 +706,7 @@
           let j = 0;
           excel.set(0, j, a, e.paymentDate);
           j++;
-          excel.set(0, j, a, `'${e.paymentType}`);
+          excel.set(0, j, a, `${e.paymentType}`);
           j++;
           excel.set(0, j, a, e.custRefnumber);
           j++;
@@ -714,7 +714,7 @@
           j++;
           excel.set(0, j, a, e.sourceNarration);
           j++;
-          excel.set(0, j, a, `'${e.DestinationAccount}`);
+          excel.set(0, j, a, `${e.DestinationAccount}`);
           j++;
           excel.set(0, j, a, e.currency);
           j++;
