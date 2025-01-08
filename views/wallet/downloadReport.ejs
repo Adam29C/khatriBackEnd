@@ -455,10 +455,6 @@
       reportDate: reportDate,
     };
 
-
-    console.log("jsonData" ,jsonData);
-    
-    // return;
     fetch("/debitReport/salaryBandan", {
       method: "POST",
       body: JSON.stringify(jsonData),
